@@ -1,0 +1,155 @@
+﻿@model List<NewsManagement.Models.News>
+@{
+    ViewBag.Title = "Tin tức theo danh mục";
+    var category = ViewBag.Category as NewsManagement.Models.Category;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>
+                        Tin tức trong danh mục:
+                        @if (category != null)
+                        {
+                            @category.Name
+                        }
+                        else
+                        {
+                            <span>Không xác định</span>
+                        }
+                    </h3>
+                    <div>
+                        <span class="badge badge-info mr-2">Tổng: @ViewBag.TotalCount tin</span>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">Quay lại</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Tiêu đề</th>
+                                        <th>Trích ngắn</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var news in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@news.Title</strong>
+                                                <br />
+                                                <small class="text-muted">
+                                                    Danh mục:
+                                                    @if (news.Categories != null)
+                                                    {
+                                                        @foreach (var cat in news.Categories)
+                                                        {
+                                                            <span class="badge badge-secondary mr-1">@cat.Name</span>
+                                                        }
+                                                    }
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(news.Summary))
+                                                {
+                                                    @(news.Summary.Length > 100 ? news.Summary.Substring(0, 100) + "..." : news.Summary)
+                                                }
+                                            </td>
+                                            <td>@news.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @if (news.Status)
+                                                {
+                                                    <span class="badge badge-success">Hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-secondary">Tạm dừng</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "News", new { id = news.Id })"
+                                                       class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "News", new { id = news.Id })"
+                                                       class="btn btn-sm btn-warning" title="Sửa">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @{
+                            int currentPage = 1;
+                            int totalPages = 1;
+
+                            if (ViewBag.CurrentPage != null)
+                            {
+                                currentPage = (int)ViewBag.CurrentPage;
+                            }
+
+                            if (ViewBag.TotalPages != null)
+                            {
+                                totalPages = (int)ViewBag.TotalPages;
+                            }
+                        }
+
+                        @if (totalPages > 1 && category != null)
+                        {
+                            <nav aria-label="Phân trang tin tức">
+                                <ul class="pagination justify-content-center">
+                                    @if (currentPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("NewsByCategory", new { categoryId = category.Id, page = currentPage - 1 })">Trước</a>
+                                        </li>
+                                    }
+
+                                    @{
+                                        int startPage = Math.Max(1, currentPage - 2);
+                                        int endPage = Math.Min(totalPages, currentPage + 2);
+                                    }
+
+                                    @for (int i = startPage; i <= endPage; i++)
+                                    {
+                                        <li class="page-item @(i == currentPage ? "active" : "")">
+                                            <a class="page-link" href="@Url.Action("NewsByCategory", new { categoryId = category.Id, page = i })">@i</a>
+                                        </li>
+                                    }
+
+                                    @if (currentPage < totalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("NewsByCategory", new { categoryId = category.Id, page = currentPage + 1 })">Sau</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <h4>Không có tin tức</h4>
+                            <p>Danh mục này chưa có tin tức nào.</p>
+                            <a href="@Url.Action("Create", "News")" class="btn btn-primary">Thêm tin tức mới</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

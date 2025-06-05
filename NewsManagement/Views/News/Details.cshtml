@@ -1,0 +1,90 @@
+﻿@model NewsManagement.Models.News
+@{
+    ViewBag.Title = "Chi tiết tin tức";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Chi tiết tin tức</h3>
+                    <div>
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
+                            <i class="fa fa-edit"></i> Sửa
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h1 class="mb-3">@Model.Title</h1>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Ngày tạo:</strong> @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Trạng thái:</strong>
+                                    @if (Model.Status)
+                                    {
+                                        <span class="badge badge-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Tạm dừng</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Thứ tự:</strong> @Model.Ordering
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Danh mục:</strong>
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <a href="@Url.Action("NewsByCategory", "Category", new { categoryId = category.Id })"
+                                           class="badge badge-primary mr-1">@category.Name</a>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Summary))
+                            {
+                                <div class="alert alert-info">
+                                    <h5>Trích ngắn:</h5>
+                                    <p class="mb-0">@Model.Summary</p>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(Model.Content))
+                            {
+                                <div class="mt-4">
+                                    <h5>Nội dung:</h5>
+                                    <div class="content-area">
+                                        @Html.Raw(Model.Content)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-area {
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        line-height: 1.6;
+    }
+</style>

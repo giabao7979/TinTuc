@@ -1,0 +1,63 @@
+﻿@model NewsManagement.Controllers.CategoryViewModel
+
+<tr>
+    <td>
+        @{
+            string indent = new string('-', Model.Level * 3);
+        }
+        @if (Model.Level > 0)
+        {
+            <span class="text-muted">@indent</span>
+        }
+        <strong>@Model.Category.Name</strong>
+        @if (Model.Children.Any())
+        {
+            <span class="badge badge-info ml-2">@Model.Children.Count cấp con</span>
+        }
+    </td>
+    <td>
+        @if (!string.IsNullOrEmpty(Model.Category.Description))
+        {
+            @(Model.Category.Description.Length > 50 ? Model.Category.Description.Substring(0, 50) + "..." : Model.Category.Description)
+        }
+    </td>
+    <td>
+        <span class="badge badge-primary">@Model.NewsCount tin</span>
+    </td>
+    <td>@Model.Category.Ordering</td>
+    <td>
+        @if (Model.Category.Status)
+        {
+            <span class="badge badge-success">Hoạt động</span>
+        }
+        else
+        {
+            <span class="badge badge-secondary">Tạm dừng</span>
+        }
+    </td>
+    <td>
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Create", new { parentId = Model.Category.Id })"
+               class="btn btn-sm btn-success" title="Thêm danh mục con">
+                <i class="fa fa-plus"></i>
+            </a>
+            <a href="@Url.Action("Edit", new { id = Model.Category.Id })"
+               class="btn btn-sm btn-warning" title="Sửa">
+                <i class="fa fa-edit"></i>
+            </a>
+            <a href="@Url.Action("NewsByCategory", new { categoryId = Model.Category.Id })"
+               class="btn btn-sm btn-info" title="Xem tin tức">
+                <i class="fa fa-newspaper"></i>
+            </a>
+            <a href="@Url.Action("Delete", new { id = Model.Category.Id })"
+               class="btn btn-sm btn-danger" title="Xóa">
+                <i class="fa fa-trash"></i>
+            </a>
+        </div>
+    </td>
+</tr>
+
+@foreach (var child in Model.Children)
+{
+    @Html.Partial("_CategoryRow", child)
+}

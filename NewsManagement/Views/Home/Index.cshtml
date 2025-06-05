@@ -1,33 +1,209 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Dashboard";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
-
+<div class="container-fluid">
     <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+        <div class="col-md-12">
+            <h1>Dashboard - Hệ thống quản lý tin tức</h1>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">Tổng tin tức</h4>
+                                    <h2 id="total-news">-</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fa fa-newspaper fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="@Url.Action("Index", "News")" class="text-white">
+                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">Tin đang hoạt động</h4>
+                                    <h2 id="active-news">-</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fa fa-check-circle fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="@Url.Action("Index", "News", new { status = true })" class="text-white">
+                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">Tổng danh mục</h4>
+                                    <h2 id="total-categories">-</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fa fa-folder fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="@Url.Action("Index", "Category")" class="text-white">
+                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">Tin mới hôm nay</h4>
+                                    <h2 id="today-news">-</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fa fa-calendar-day fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="@Url.Action("Index", "News")" class="text-white">
+                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Thao tác nhanh</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Create", "News")" class="btn btn-primary btn-lg btn-block">
+                                        <i class="fa fa-plus"></i><br />
+                                        Thêm tin tức mới
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Create", "Category")" class="btn btn-success btn-lg btn-block">
+                                        <i class="fa fa-folder-plus"></i><br />
+                                        Thêm danh mục mới
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Search", "News")" class="btn btn-info btn-lg btn-block">
+                                        <i class="fa fa-search"></i><br />
+                                        Tìm kiếm tin tức
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("Index", "Category")" class="btn btn-warning btn-lg btn-block">
+                                        <i class="fa fa-sitemap"></i><br />
+                                        Quản lý danh mục
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent News -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4>Tin tức mới nhất</h4>
+                            <a href="@Url.Action("Index", "News")" class="btn btn-outline-primary">Xem tất cả</a>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-news-list">
+                                <div class="text-center">
+                                    <i class="fa fa-spinner fa-spin fa-2x"></i>
+                                    <p>Đang tải...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</main>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Load dashboard statistics (you'll need to implement these API endpoints)
+    loadDashboardStats();
+    loadRecentNews();
+});
+
+function loadDashboardStats() {
+    // Load statistics via AJAX
+    $.get('@Url.Action("GetStats", "Home")', function(data) {
+        if (data.success) {
+            $('#total-news').text(data.totalNews);
+            $('#active-news').text(data.activeNews);
+            $('#total-categories').text(data.totalCategories);
+            $('#today-news').text(data.todayNews);
+        }
+    }).fail(function() {
+        // Fallback if API not implemented yet
+        $('#total-news').text('0');
+        $('#active-news').text('0');
+        $('#total-categories').text('0');
+        $('#today-news').text('0');
+    });
+}
+
+function loadRecentNews() {
+    $.get('@Url.Action("GetRecentNews", "Home")', function(data) {
+        if (data.success && data.news.length > 0) {
+            var html = '<div class="list-group">';
+            $.each(data.news, function(index, news) {
+                html += '<div class="list-group-item">';
+                html += '<div class="d-flex w-100 justify-content-between">';
+                html += '<h6 class="mb-1"><a href="/News/Details/' + news.Id + '">' + news.Title + '</a></h6>';
+                html += '<small>' + news.CreatedDate + '</small>';
+                html += '</div>';
+                if (news.Summary) {
+                    html += '<p class="mb-1">' + news.Summary.substring(0, 100) + '...</p>';
+                }
+                html += '<small>Danh mục: ' + news.Categories.join(', ') + '</small>';
+                html += '</div>';
+            });
+            html += '</div>';
+            $('#recent-news-list').html(html);
+        } else {
+            $('#recent-news-list').html('<div class="alert alert-info">Chưa có tin tức nào.</div>');
+        }
+    }).fail(function() {
+        $('#recent-news-list').html('<div class="alert alert-warning">Không thể tải tin tức mới nhất.</div>');
+    });
+}
+</script>

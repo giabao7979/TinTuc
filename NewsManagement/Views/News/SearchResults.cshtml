@@ -1,0 +1,146 @@
+﻿@model List<NewsManagement.Models.News>
+@{
+    ViewBag.Title = "Kết quả tìm kiếm";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Kết quả tìm kiếm tin tức</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Form tìm kiếm -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "form-inline justify-content-center" }))
+                            {
+                                <div class="form-group mr-3">
+                                    <input type="text" name="q" value="@ViewBag.SearchTerm"
+                                           class="form-control form-control-lg"
+                                           placeholder="Nhập từ khóa tìm kiếm..."
+                                           style="min-width: 400px;" required />
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-search"></i> Tìm kiếm
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                    {
+                        <div class="alert alert-info">
+                            <h5>Kết quả tìm kiếm cho: "<strong>@ViewBag.SearchTerm</strong>"</h5>
+                            <p class="mb-0">Tìm thấy <strong>@ViewBag.TotalCount</strong> tin tức</p>
+                        </div>
+
+                        @if (Model.Any())
+                        {
+                            <div class="row">
+                                @foreach (var news in Model)
+                                {
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <a href="@Url.Action("Details", new { id = news.Id })" class="text-decoration-none">
+                                                        @news.Title
+                                                    </a>
+                                                </h5>
+
+                                                <div class="mb-2">
+                                                    @foreach (var category in news.Categories)
+                                                    {
+                                                        <span class="badge badge-secondary mr-1">@category.Name</span>
+                                                    }
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(news.Summary))
+                                                {
+                                                    <p class="card-text">
+                                                        @(news.Summary.Length > 150 ? news.Summary.Substring(0, 150) + "..." : news.Summary)
+                                                    </p>
+                                                }
+
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">
+                                                        <i class="fa fa-calendar"></i> @news.CreatedDate.ToString("dd/MM/yyyy")
+                                                    </small>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="@Url.Action("Details", new { id = news.Id })"
+                                                           class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                                        <a href="@Url.Action("Edit", new { id = news.Id })"
+                                                           class="btn btn-sm btn-outline-warning">Sửa</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Phân trang -->
+                            @if (ViewBag.TotalPages > 1)
+                            {
+                                <nav aria-label="Phân trang kết quả tìm kiếm" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        @if (ViewBag.CurrentPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("Search", new { q = ViewBag.SearchTerm, page = ViewBag.CurrentPage - 1 })">
+                                                    <i class="fa fa-chevron-left"></i> Trước
+                                                </a>
+                                            </li>
+                                        }
+
+                                        @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                        {
+                                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                                <a class="page-link" href="@Url.Action("Search", new { q = ViewBag.SearchTerm, page = i })">@i</a>
+                                            </li>
+                                        }
+
+                                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("Search", new { q = ViewBag.SearchTerm, page = ViewBag.CurrentPage + 1 })">
+                                                    Sau <i class="fa fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <h4><i class="fa fa-search"></i> Không tìm thấy kết quả</h4>
+                                <p>Không có tin tức nào chứa từ khóa "<strong>@ViewBag.SearchTerm</strong>".</p>
+                                <hr>
+                                <p class="mb-0">
+                                    <strong>Gợi ý:</strong>
+                                    <ul class="mt-2">
+                                        <li>Kiểm tra lại chính tả từ khóa</li>
+                                        <li>Thử sử dụng từ khóa khác</li>
+                                        <li>Sử dụng từ khóa ngắn gọn hơn</li>
+                                    </ul>
+                                </p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <h4><i class="fa fa-info-circle"></i> Hướng dẫn tìm kiếm</h4>
+                            <p>Nhập từ khóa để tìm kiếm trong tiêu đề, trích ngắn và nội dung tin tức.</p>
+                            <p class="mb-0">Hệ thống sẽ tìm kiếm trong tất cả tin tức đang hoạt động.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,37 +3,195 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title - Hệ thống quản lý tin tức</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .search-widget {
+            margin: 10px 0;
+        }
+
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .btn-group .btn {
+            margin-right: 2px;
+        }
+
+        .alert {
+            border-radius: 0.375rem;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 0.75em;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background-color: #343a40;
+            min-height: calc(100vh - 56px);
+            padding-top: 20px;
+        }
+
+            .sidebar .nav-link {
+                color: #fff;
+                padding: 10px 15px;
+                border-radius: 5px;
+                margin-bottom: 5px;
+            }
+
+                .sidebar .nav-link:hover,
+                .sidebar .nav-link.active {
+                    background-color: #495057;
+                    color: #fff;
+                }
+
+        .main-content {
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
-        <div class="container">
-            @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            @Html.ActionLink("Quản lý tin tức", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        @Html.ActionLink("Trang chủ", "Index", "Home", new { area = "" }, new { @class = "nav-link" })
+                    </li>
+                    <li class="nav-item">
+                        @Html.ActionLink("Danh mục", "Index", "Category", new { area = "" }, new { @class = "nav-link" })
+                    </li>
+                    <li class="nav-item">
+                        @Html.ActionLink("Tin tức", "Index", "News", new { area = "" }, new { @class = "nav-link" })
+                    </li>
                 </ul>
+
+                <!-- Search Widget -->
+                <div class="d-flex">
+                    @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "d-flex" }))
+                    {
+                        <input type="text" name="q" class="form-control me-2" placeholder="Tìm kiếm tin tức..." style="width: 200px;" />
+                        <button type="submit" class="btn btn-outline-light">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    }
+                </div>
             </div>
         </div>
     </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Home")" class="nav-link">
+                            <i class="fa fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Category")" class="nav-link">
+                            <i class="fa fa-folder"></i> Quản lý danh mục
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Create", "Category")" class="nav-link">
+                            <i class="fa fa-plus"></i> Thêm danh mục
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "News")" class="nav-link">
+                            <i class="fa fa-newspaper"></i> Quản lý tin tức
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Create", "News")" class="nav-link">
+                            <i class="fa fa-plus"></i> Thêm tin tức
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Search", "News")" class="nav-link">
+                            <i class="fa fa-search"></i> Tìm kiếm
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                @RenderBody()
+            </div>
+        </div>
     </div>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Auto-close alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert.alert-success, .alert.alert-info').fadeOut('slow');
+            }, 5000);
+
+            // Confirm delete actions
+            $('a[href*="/Delete/"], button[type="submit"][formaction*="/Delete/"]').click(function(e) {
+                if (!confirm('Bạn có chắc chắn muốn xóa không?')) {
+                    e.preventDefault();
+                }
+            });
+
+            // Set active nav link
+            var currentUrl = window.location.pathname;
+            $('.nav-link').each(function() {
+                if ($(this).attr('href') === currentUrl) {
+                    $(this).addClass('active');
+                }
+            });
+        });
+
+        // AJAX function to load news by category
+        function loadNewsByCategory(categoryId) {
+            $.get('@Url.Action("GetNewsByCategory", "News")', { categoryId: categoryId }, function(data) {
+                if (data.success) {
+                    // Handle success - you can implement this based on your needs
+                    console.log('Loaded ' + data.totalCount + ' news items');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+﻿<div class="search-widget">
+    @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "form-inline" }))
+    {
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Tìm kiếm tin tức..." />
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+    }
+</div>
