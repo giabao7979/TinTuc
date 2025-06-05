@@ -56,9 +56,12 @@
                         <div class="col-md-12">
                             <div class="alert alert-info">
                                 Tìm thấy <strong>@ViewBag.TotalCount</strong> tin tức
-                                @if (ViewBag.SelectedCategory != null)
+                                @{
+                                    var selectedCategory = ViewBag.SelectedCategory as NewsManagement.Models.Category;
+                                }
+                                @if (selectedCategory != null)
                                 {
-                                    <span> trong danh mục <strong>@((ViewBag.SelectedCategory as NewsManagement.Models.Category).Name)</strong></span>
+                                    <span> trong danh mục <strong>@selectedCategory.Name</strong></span>
                                 }
                                 @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
                                 {
@@ -68,7 +71,7 @@
                         </div>
                     </div>
 
-                    @if (Model.Any())
+                    @if (Model != null && Model.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
@@ -91,15 +94,22 @@
                                                 <strong>@news.Title</strong>
                                             </td>
                                             <td>
-                                                @if (!string.IsNullOrEmpty(news.Summary))
-                                                {
-                                                    @(news.Summary.Length > 80 ? news.Summary.Substring(0, 80) + "..." : news.Summary)
+                                                @{
+                                                    string displaySummary = "";
+                                                    if (!string.IsNullOrEmpty(news.Summary))
+                                                    {
+                                                        displaySummary = news.Summary.Length > 80 ? news.Summary.Substring(0, 80) + "..." : news.Summary;
+                                                    }
                                                 }
+                                                @displaySummary
                                             </td>
                                             <td>
-                                                @foreach (var category in news.Categories)
+                                                @if (news.Categories != null)
                                                 {
-                                                    <span class="badge badge-secondary mr-1">@category.Name</span>
+                                                    @foreach (var category in news.Categories)
+                                                    {
+                                                        <span class="badge badge-secondary mr-1">@category.Name</span>
+                                                    }
                                                 }
                                             </td>
                                             <td>@news.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
@@ -136,25 +146,46 @@
                             </table>
                         </div>
 
-                        <!-- Phân trang -->
-                        @if ((int)ViewBag.TotalPages > 1)
+                        @{
+                            int currentPage = 1;
+                            int totalPages = 1;
+
+                            if (ViewBag.CurrentPage != null)
+                            {
+                                currentPage = (int)ViewBag.CurrentPage;
+                            }
+
+                            if (ViewBag.TotalPages != null)
+                            {
+                                totalPages = (int)ViewBag.TotalPages;
+                            }
+
+                            bool hasPagination = totalPages > 1;
+                        }
+
+                        @if (hasPagination)
                         {
                             <nav aria-label="Phân trang tin tức">
                                 <ul class="pagination justify-content-center">
-                                    @if ((int)ViewBag.CurrentPage > 1)
+                                    @if (currentPage > 1)
                                     {
                                         <li class="page-item">
                                             <a class="page-link" href="@Url.Action("Index", new {
-                                                page = (int)ViewBag.CurrentPage - 1,
+                                                page = currentPage - 1,
                                                 categoryId = Request.QueryString["categoryId"],
                                                 search = Request.QueryString["search"]
                                             })">Trước</a>
                                         </li>
                                     }
 
-                                    @for (int i = Math.Max(1, (int)ViewBag.CurrentPage - 2); i <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.CurrentPage + 2); i++)
+                                    @{
+                                        int startPage = Math.Max(1, currentPage - 2);
+                                        int endPage = Math.Min(totalPages, currentPage + 2);
+                                    }
+
+                                    @for (int i = startPage; i <= endPage; i++)
                                     {
-                                        <li class="page-item @(i == (int)ViewBag.CurrentPage ? "active" : "")">
+                                        <li class="page-item @(i == currentPage ? "active" : "")">
                                             <a class="page-link" href="@Url.Action("Index", new {
                                                 page = i,
                                                 categoryId = Request.QueryString["categoryId"],
@@ -163,11 +194,11 @@
                                         </li>
                                     }
 
-                                    @if ((int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
+                                    @if (currentPage < totalPages)
                                     {
                                         <li class="page-item">
                                             <a class="page-link" href="@Url.Action("Index", new {
-                                                page = (int)ViewBag.CurrentPage + 1,
+                                                page = currentPage + 1,
                                                 categoryId = Request.QueryString["categoryId"],
                                                 search = Request.QueryString["search"]
                                             })">Sau</a>
