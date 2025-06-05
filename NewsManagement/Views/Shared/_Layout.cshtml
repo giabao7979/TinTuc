@@ -75,7 +75,7 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             @Html.ActionLink("Quản lý tin tức", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
 
@@ -94,10 +94,10 @@
                     <li class="nav-item">
                         @Html.ActionLink("Tin tức", "Index", "News", new { area = "" }, new { @class = "nav-link" })
                     </li>
-                </ul>
+                </ul>-->
 
                 <!-- Search Widget -->
-                <div class="d-flex">
+                <!--<div class="d-flex">
                     @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "d-flex" }))
                     {
                         <input type="text" name="q" class="form-control me-2" placeholder="Tìm kiếm tin tức..." style="width: 200px;" />
@@ -108,12 +108,12 @@
                 </div>
             </div>
         </div>
-    </nav>
+    </nav>-->
 
     <div class="container-fluid">
-        <div class="row">
+        <div>
             <!-- Sidebar -->
-            <div class="col-md-2 sidebar">
+            @*<div class="col-md-2 sidebar">
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a href="@Url.Action("Index", "Home")" class="nav-link">
@@ -146,10 +146,10 @@
                         </a>
                     </li>
                 </ul>
-            </div>
+            </div>*@
 
             <!-- Main Content -->
-            <div class="col-md-10 main-content">
+            <div>
                 @RenderBody()
             </div>
         </div>
