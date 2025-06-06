@@ -18,14 +18,15 @@
 
                         <div class="form-group">
                             @Html.LabelFor(model => model.Title, "Tiêu đề", htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", required = "required" } })
+                            @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", required = "required", maxlength = "255" } })
                             @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="form-group">
                             @Html.LabelFor(model => model.Summary, "Trích ngắn", htmlAttributes: new { @class = "control-label" })
-                            @Html.TextAreaFor(model => model.Summary, new { @class = "form-control", rows = 3 })
+                            @Html.TextAreaFor(model => model.Summary, new { @class = "form-control", rows = 3, maxlength = "500" })
                             @Html.ValidationMessageFor(model => model.Summary, "", new { @class = "text-danger" })
+                            <small class="form-text text-muted">Tối đa 500 ký tự</small>
                         </div>
 
                         <div class="form-group">
@@ -34,25 +35,57 @@
                             @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
                         </div>
 
+                        <!-- Cải tiến phần chọn danh mục -->
                         <div class="form-group">
                             <label class="control-label">Danh mục</label>
-                            <div class="row">
-                                @foreach (var category in ViewBag.Categories as List<NewsManagement.Controllers.CategoryCheckboxViewModel>)
-                                {
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input type="checkbox" name="selectedCategories" value="@category.Id"
-                                                   class="form-check-input" @(category.IsSelected ? "checked" : "") />
-                                            <label class="form-check-label">@category.Name</label>
-                                        </div>
+
+                            <!-- Tìm kiếm danh mục -->
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" id="categorySearch" class="form-control"
+                                           placeholder="Tìm kiếm danh mục..." onkeyup="searchCategories()">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="clearCategorySearch()">
+                                            <i class="fa fa-times"></i>
+                                        </button>
                                     </div>
-                                }
+                                </div>
                             </div>
+
+                            <!-- Danh mục đã chọn -->
+                            <div id="selectedCategories" class="mb-3">
+                                <h6>Danh mục đã chọn:</h6>
+                                <div id="selectedCategoriesList" class="border p-2 bg-light">
+                                    <span class="text-muted">Chưa có danh mục nào được chọn</span>
+                                </div>
+                            </div>
+
+                            <!-- Kết quả tìm kiếm -->
+                            <div id="categorySearchResults" style="max-height: 300px; overflow-y: auto; display: none;">
+                                <h6>Kết quả tìm kiếm:</h6>
+                                <div id="searchResultsList" class="border p-2"></div>
+                            </div>
+
+                            <!-- Danh mục phổ biến -->
+                            <div id="popularCategories">
+                                <h6>Danh mục phổ biến:</h6>
+                                <div id="popularCategoriesList" class="border p-2">
+                                    <div class="text-center">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                        Đang tải...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs cho các danh mục đã chọn -->
+                            <div id="hiddenCategoryInputs"></div>
                         </div>
 
                         <div class="form-group">
                             @Html.LabelFor(model => model.Ordering, "Thứ tự", htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Ordering, new { htmlAttributes = new { @class = "form-control", type = "number", @value = "1" } })
+                            @Html.EditorFor(model => model.Ordering, new { htmlAttributes = new { @class = "form-control", type = "number", @value = "1", min = "0" } })
                             @Html.ValidationMessageFor(model => model.Ordering, "", new { @class = "text-danger" })
                         </div>
 
@@ -64,8 +97,12 @@
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Lưu</button>
-                            <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fa fa-save"></i> Lưu tin tức
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fa fa-times"></i> Hủy
+                            </a>
                         </div>
                     }
                 </div>
@@ -73,3 +110,198 @@
         </div>
     </div>
 </div>
+
+<script>
+var selectedCategories = [];
+var searchTimeout;
+
+$(document).ready(function() {
+    loadPopularCategories();
+
+    // Validation
+    $('form').submit(function(e) {
+        if (selectedCategories.length === 0) {
+            alert('Vui lòng chọn ít nhất một danh mục cho tin tức.');
+            e.preventDefault();
+            return false;
+        }
+
+        // Disable submit button để tránh double submit
+        $('#submitBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...');
+    });
+});
+
+function searchCategories() {
+    var term = $('#categorySearch').val().trim();
+
+    clearTimeout(searchTimeout);
+
+    if (term.length < 2) {
+        $('#categorySearchResults').hide();
+        $('#popularCategories').show();
+        return;
+    }
+
+    searchTimeout = setTimeout(function() {
+        $('#searchResultsList').html('<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Đang tìm...</div>');
+        $('#categorySearchResults').show();
+        $('#popularCategories').hide();
+
+        $.get('@Url.Action("SearchCategories", "Home")', { term: term, pageSize: 20 }, function(data) {
+            if (data.success && data.categories.length > 0) {
+                var html = '';
+                for (var i = 0; i < data.categories.length; i++) {
+                    var category = data.categories[i];
+                    var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
+
+                    html += '<div class="category-item mb-2 p-2 border rounded ' + (isSelected ? 'bg-success text-white' : 'bg-white') + '">';
+                    html += '<div class="d-flex justify-content-between align-items-center">';
+                    html += '<div>';
+                    html += '<strong>' + escapeHtml(category.Name) + '</strong><br>';
+                    html += '<small class="text-muted">' + escapeHtml(category.Path) + '</small><br>';
+                    html += '<span class="badge badge-info">' + category.NewsCount + ' tin</span>';
+                    html += '</div>';
+
+                    if (!isSelected) {
+                        html += '<button type="button" class="btn btn-sm btn-primary" onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Path) + '\')">';
+                        html += '<i class="fa fa-plus"></i> Chọn';
+                        html += '</button>';
+                    } else {
+                        html += '<button type="button" class="btn btn-sm btn-danger" onclick="unselectCategory(' + category.Id + ')">';
+                        html += '<i class="fa fa-minus"></i> Bỏ chọn';
+                        html += '</button>';
+                    }
+
+                    html += '</div></div>';
+                }
+                $('#searchResultsList').html(html);
+            } else {
+                $('#searchResultsList').html('<div class="text-muted text-center">Không tìm thấy danh mục nào</div>');
+            }
+        }).fail(function() {
+            $('#searchResultsList').html('<div class="text-danger text-center">Lỗi khi tìm kiếm</div>');
+        });
+    }, 300);
+}
+
+function loadPopularCategories() {
+    $.get('@Url.Action("GetCategoriesTree", "Home")', function(data) {
+        if (data.success && data.categories.length > 0) {
+            var html = '';
+            for (var i = 0; i < Math.min(10, data.categories.length); i++) {
+                var category = data.categories[i];
+                html += '<span class="badge badge-outline-primary mr-2 mb-2 category-tag" ';
+                html += 'onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Name) + '\')" ';
+                html += 'style="cursor: pointer; padding: 8px; border: 1px solid #007bff;">';
+                html += escapeHtml(category.Name) + ' (' + category.NewsCount + ')';
+                html += '</span>';
+            }
+            $('#popularCategoriesList').html(html);
+        } else {
+            $('#popularCategoriesList').html('<div class="text-muted">Không có danh mục nào</div>');
+        }
+    }).fail(function() {
+        $('#popularCategoriesList').html('<div class="text-danger">Lỗi khi tải danh mục</div>');
+    });
+}
+
+function selectCategory(id, name, path) {
+    // Kiểm tra xem đã chọn chưa
+    if (selectedCategories.some(function(sc) { return sc.Id === id; })) {
+        return;
+    }
+
+    selectedCategories.push({
+        Id: id,
+        Name: name,
+        Path: path
+    });
+
+    updateSelectedCategoriesDisplay();
+    updateHiddenInputs();
+
+    // Update search results if visible
+    if ($('#categorySearchResults').is(':visible')) {
+        searchCategories();
+    }
+}
+
+function unselectCategory(id) {
+    selectedCategories = selectedCategories.filter(function(sc) { return sc.Id !== id; });
+    updateSelectedCategoriesDisplay();
+    updateHiddenInputs();
+
+    // Update search results if visible
+    if ($('#categorySearchResults').is(':visible')) {
+        searchCategories();
+    }
+}
+
+function updateSelectedCategoriesDisplay() {
+    var html = '';
+    if (selectedCategories.length === 0) {
+        html = '<span class="text-muted">Chưa có danh mục nào được chọn</span>';
+    } else {
+        for (var i = 0; i < selectedCategories.length; i++) {
+            var category = selectedCategories[i];
+            html += '<span class="badge badge-success mr-2 mb-2 p-2">';
+            html += escapeHtml(category.Name);
+            html += ' <button type="button" class="btn btn-sm btn-link text-white p-0 ml-1" onclick="unselectCategory(' + category.Id + ')" title="Bỏ chọn">';
+            html += '<i class="fa fa-times"></i>';
+            html += '</button>';
+            html += '</span>';
+        }
+    }
+    $('#selectedCategoriesList').html(html);
+}
+
+function updateHiddenInputs() {
+    var html = '';
+    for (var i = 0; i < selectedCategories.length; i++) {
+        html += '<input type="hidden" name="selectedCategories" value="' + selectedCategories[i].Id + '">';
+    }
+    $('#hiddenCategoryInputs').html(html);
+}
+
+function clearCategorySearch() {
+    $('#categorySearch').val('');
+    $('#categorySearchResults').hide();
+    $('#popularCategories').show();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+</script>
+
+<style>
+    .category-tag:hover {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+
+    .category-item {
+        transition: all 0.2s ease;
+    }
+
+        .category-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+    #selectedCategoriesList .badge {
+        font-size: 0.9em;
+    }
+
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+</style>

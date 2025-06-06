@@ -11,60 +11,85 @@ namespace NewsManagement.Controllers
     {
         private TinTucEntities db = new TinTucEntities();
 
-        // GET: Category
-        public ActionResult Index()
+        // GET: Category - Với phân trang
+        public ActionResult Index(int page = 1, int pageSize = 50, int? parentId = null)
         {
-            // Lấy tất cả danh mục cấp 1 (ParentId = null)
-            var rootCategories = db.Categories
-                .Where(c => c.ParentId == null)
+            var query = db.Categories.AsQueryable();
+
+            if (parentId.HasValue)
+            {
+                query = query.Where(c => c.ParentId == parentId);
+                ViewBag.ParentCategory = db.Categories.Find(parentId.Value);
+            }
+            else
+            {
+                query = query.Where(c => c.ParentId == null);
+            }
+
+            var totalCount = query.Count();
+            var categories = query
                 .OrderBy(c => c.Ordering)
+                .ThenBy(c => c.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
-            var categoryViewModels = rootCategories.Select(c => new CategoryViewModel
+            var categoryViewModels = categories.Select(c => new CategoryViewModel
             {
                 Category = c,
-                NewsCount = GetTotalNewsCountInCategoryTree(c.Id),
-                Level = 0,
-                Children = GetChildCategories(c.Id, 1)
+                NewsCount = GetDirectNewsCount(c.Id),
+                TotalNewsCount = GetTotalNewsCountInCategoryTree(c.Id),
+                Level = GetCategoryLevel(c.Id),
+                HasChildren = db.Categories.Any(child => child.ParentId == c.Id)
             }).ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
+            ViewBag.ParentId = parentId;
 
             return View(categoryViewModels);
         }
 
-        // GET: Category/Create
         public ActionResult Create(int? parentId)
         {
-            ViewBag.ParentId = new SelectList(GetCategoriesForDropdown(), "Id", "Name", parentId);
+            var categories = GetCategoriesForDropdownOptimized();
+            ViewBag.ParentId = new SelectList(categories, "Id", "DisplayName", parentId);
             ViewBag.SelectedParentId = parentId;
             return View();
         }
 
-        // POST: Category/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Name,Description,ParentId,Ordering,Status")] Category category)
         {
             if (ModelState.IsValid)
             {
-                // Kiểm tra độ sâu không quá 8 cấp
                 if (category.ParentId.HasValue && GetCategoryDepth(category.ParentId.Value) >= 8)
                 {
                     ModelState.AddModelError("ParentId", "Không thể tạo danh mục quá 8 cấp.");
-                    ViewBag.ParentId = new SelectList(GetCategoriesForDropdown(), "Id", "Name", category.ParentId);
+                    var categories = GetCategoriesForDropdownOptimized();
+                    ViewBag.ParentId = new SelectList(categories, "Id", "DisplayName", category.ParentId);
                     return View(category);
                 }
 
                 db.Categories.Add(category);
                 db.SaveChanges();
                 TempData["Success"] = "Thêm danh mục thành công!";
+
+                if (category.ParentId.HasValue)
+                {
+                    return RedirectToAction("Index", new { parentId = category.ParentId });
+                }
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ParentId = new SelectList(GetCategoriesForDropdown(), "Id", "Name", category.ParentId);
+            var categoriesForDropdown = GetCategoriesForDropdownOptimized();
+            ViewBag.ParentId = new SelectList(categoriesForDropdown, "Id", "DisplayName", category.ParentId);
             return View(category);
         }
 
-        // GET: Category/Edit/5
         public ActionResult Edit(int id)
         {
             Category category = db.Categories.Find(id);
@@ -73,29 +98,25 @@ namespace NewsManagement.Controllers
                 return HttpNotFound();
             }
 
-            // Lấy danh sách danh mục cho dropdown, loại trừ chính nó và các danh mục con
-            var availableParents = GetCategoriesForDropdown()
+            var availableParents = GetCategoriesForDropdownOptimized()
                 .Where(c => c.Id != id && !IsDescendantOf(c.Id, id))
                 .ToList();
 
-            ViewBag.ParentId = new SelectList(availableParents, "Id", "Name", category.ParentId);
+            ViewBag.ParentId = new SelectList(availableParents, "Id", "DisplayName", category.ParentId);
             return View(category);
         }
 
-        // POST: Category/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,Name,Description,ParentId,Ordering,Status")] Category category)
         {
             if (ModelState.IsValid)
             {
-                // Kiểm tra không tạo vòng lặp
                 if (category.ParentId.HasValue &&
                     (category.ParentId == category.Id || IsDescendantOf(category.ParentId.Value, category.Id)))
                 {
                     ModelState.AddModelError("ParentId", "Không thể chọn chính nó hoặc danh mục con làm danh mục cha.");
                 }
-                // Kiểm tra độ sâu
                 else if (category.ParentId.HasValue && GetCategoryDepth(category.ParentId.Value) >= 8)
                 {
                     ModelState.AddModelError("ParentId", "Không thể tạo danh mục quá 8 cấp.");
@@ -109,15 +130,14 @@ namespace NewsManagement.Controllers
                 }
             }
 
-            var availableParents = GetCategoriesForDropdown()
+            var availableParents = GetCategoriesForDropdownOptimized()
                 .Where(c => c.Id != category.Id && !IsDescendantOf(c.Id, category.Id))
                 .ToList();
 
-            ViewBag.ParentId = new SelectList(availableParents, "Id", "Name", category.ParentId);
+            ViewBag.ParentId = new SelectList(availableParents, "Id", "DisplayName", category.ParentId);
             return View(category);
         }
 
-        // GET: Category/Delete/5
         public ActionResult Delete(int id)
         {
             Category category = db.Categories.Find(id);
@@ -126,7 +146,6 @@ namespace NewsManagement.Controllers
                 return HttpNotFound();
             }
 
-            // Kiểm tra xem có danh mục con không
             var hasChildren = db.Categories.Any(c => c.ParentId == id);
             var hasNews = db.News.Any(n => n.Categories.Any(c => c.Id == id));
 
@@ -137,14 +156,12 @@ namespace NewsManagement.Controllers
             return View(category);
         }
 
-        // POST: Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             Category category = db.Categories.Find(id);
 
-            // Kiểm tra ràng buộc
             var hasChildren = db.Categories.Any(c => c.ParentId == id);
             var hasNews = db.News.Any(n => n.Categories.Any(c => c.Id == id));
 
@@ -166,8 +183,7 @@ namespace NewsManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        // API: Lấy tin tức theo danh mục
-        public ActionResult NewsByCategory(int categoryId, int page = 1, int pageSize = 10)
+        public ActionResult NewsByCategory(int categoryId, int page = 1, int pageSize = 20)
         {
             var category = db.Categories.Find(categoryId);
             if (category == null)
@@ -175,63 +191,164 @@ namespace NewsManagement.Controllers
                 return HttpNotFound();
             }
 
-            // Lấy tất cả ID danh mục con
-            var categoryIds = GetAllCategoryIdsInTree(categoryId);
+            var categoryIds = GetAllCategoryIdsInTreeOptimized(categoryId);
 
             var newsQuery = db.News
                 .Where(n => n.Status && n.Categories.Any(c => categoryIds.Contains(c.Id)))
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
+                .OrderByDescending(n => n.CreatedDate);
 
-            var newsList = newsQuery.ToList();
-            var totalCount = db.News.Count(n => n.Status && n.Categories.Any(c => categoryIds.Contains(c.Id)));
+            var totalCount = newsQuery.Count();
+            var newsList = newsQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(n => n.Categories)
+                .ToList();
 
             ViewBag.Category = category;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
 
             return View(newsList);
         }
 
+        [HttpGet]
+        public JsonResult SearchCategories(string term, int page = 1, int pageSize = 20)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(term) || term.Length < 2)
+                {
+                    return Json(new { success = true, categories = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                var query = db.Categories
+                    .Where(c => c.Status && c.Name.Contains(term));
+
+                var totalCount = query.Count();
+                var categories = query
+                    .OrderByDescending(c => db.News.Count(n => n.Categories.Any(cat => cat.Id == c.Id)))
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList()
+                    .Select(c => new
+                    {
+                        Id = c.Id,
+                        Name = c.Name ?? "",
+                        NewsCount = GetDirectNewsCount(c.Id),
+                        Path = GetCategoryPath(c.Id)
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    categories = categories,
+                    totalCount = totalCount,
+                    currentPage = page,
+                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         #region Helper Methods
 
-        private List<CategoryViewModel> GetChildCategories(int parentId, int level)
+        private List<CategoryDropdownItem> GetCategoriesForDropdownOptimized()
         {
-            if (level >= 8) return new List<CategoryViewModel>(); // Giới hạn 8 cấp
-
-            var children = db.Categories
-                .Where(c => c.ParentId == parentId)
-                .OrderBy(c => c.Ordering)
+            var allCategories = db.Categories
+                .Where(c => c.Status)
+                .Select(c => new SimpleCategory { Id = c.Id, Name = c.Name, ParentId = c.ParentId })
+                .OrderBy(c => c.Name)
                 .ToList();
 
-            return children.Select(c => new CategoryViewModel
+            var result = new List<CategoryDropdownItem>();
+
+            foreach (var cat in allCategories)
             {
-                Category = c,
-                NewsCount = GetTotalNewsCountInCategoryTree(c.Id),
-                Level = level,
-                Children = GetChildCategories(c.Id, level + 1)
-            }).ToList();
+                var path = GetCategoryPathFromList(cat.Id, allCategories);
+                result.Add(new CategoryDropdownItem
+                {
+                    Id = cat.Id,
+                    Name = cat.Name,
+                    DisplayName = path
+                });
+            }
+
+            return result.OrderBy(c => c.DisplayName).ToList();
+        }
+
+        private string GetCategoryPathFromList(int categoryId, List<SimpleCategory> allCategories)
+        {
+            var path = new List<string>();
+            var currentId = (int?)categoryId;
+
+            while (currentId.HasValue)
+            {
+                var category = allCategories.FirstOrDefault(c => c.Id == currentId.Value);
+                if (category == null) break;
+
+                path.Insert(0, category.Name ?? "");
+                currentId = category.ParentId;
+            }
+
+            return string.Join(" > ", path);
+        }
+
+        private List<int> GetAllCategoryIdsInTreeOptimized(int categoryId)
+        {
+            var result = new List<int> { categoryId };
+            var queue = new Queue<int>();
+            queue.Enqueue(categoryId);
+
+            while (queue.Count > 0)
+            {
+                var currentId = queue.Dequeue();
+                var childIds = db.Categories
+                    .Where(c => c.ParentId == currentId)
+                    .Select(c => c.Id)
+                    .ToList();
+
+                foreach (var childId in childIds)
+                {
+                    if (!result.Contains(childId))
+                    {
+                        result.Add(childId);
+                        queue.Enqueue(childId);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private int GetDirectNewsCount(int categoryId)
+        {
+            return db.News.Count(n => n.Status && n.Categories.Any(c => c.Id == categoryId));
         }
 
         private int GetTotalNewsCountInCategoryTree(int categoryId)
         {
-            var categoryIds = GetAllCategoryIdsInTree(categoryId);
+            var categoryIds = GetAllCategoryIdsInTreeOptimized(categoryId);
             return db.News.Count(n => n.Status && n.Categories.Any(c => categoryIds.Contains(c.Id)));
         }
 
-        private List<int> GetAllCategoryIdsInTree(int categoryId)
+        private int GetCategoryLevel(int categoryId)
         {
-            var result = new List<int> { categoryId };
-            var children = db.Categories.Where(c => c.ParentId == categoryId).Select(c => c.Id).ToList();
+            var level = 1;
+            var currentId = db.Categories.Where(c => c.Id == categoryId).Select(c => c.ParentId).FirstOrDefault();
 
-            foreach (var childId in children)
+            while (currentId.HasValue)
             {
-                result.AddRange(GetAllCategoryIdsInTree(childId));
+                level++;
+                currentId = db.Categories.Where(c => c.Id == currentId.Value).Select(c => c.ParentId).FirstOrDefault();
             }
 
-            return result;
+            return level;
         }
 
         private int GetCategoryDepth(int categoryId)
@@ -255,9 +372,28 @@ namespace NewsManagement.Controllers
             return IsDescendantOf(child.ParentId.Value, ancestorId);
         }
 
-        private List<Category> GetCategoriesForDropdown()
+        private string GetCategoryPath(int categoryId)
         {
-            return db.Categories.Where(c => c.Status).OrderBy(c => c.Name).ToList();
+            try
+            {
+                var path = new List<string>();
+                var currentId = (int?)categoryId;
+
+                while (currentId.HasValue)
+                {
+                    var category = db.Categories.Find(currentId.Value);
+                    if (category == null) break;
+
+                    path.Insert(0, category.Name ?? "");
+                    currentId = category.ParentId;
+                }
+
+                return string.Join(" > ", path);
+            }
+            catch
+            {
+                return "Không xác định";
+            }
         }
 
         #endregion
@@ -272,12 +408,26 @@ namespace NewsManagement.Controllers
         }
     }
 
-    // ViewModel cho hiển thị cây danh mục
     public class CategoryViewModel
     {
         public Category Category { get; set; }
         public int NewsCount { get; set; }
+        public int TotalNewsCount { get; set; }
         public int Level { get; set; }
-        public List<CategoryViewModel> Children { get; set; } = new List<CategoryViewModel>();
+        public bool HasChildren { get; set; }
+    }
+
+    public class CategoryDropdownItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+    }
+
+    public class SimpleCategory
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int? ParentId { get; set; }
     }
 }

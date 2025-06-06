@@ -223,35 +223,48 @@ namespace NewsManagement.Controllers
         [HttpGet]
         public JsonResult GetNewsByCategory(int categoryId, int page = 1, int pageSize = 10)
         {
-            var newsQuery = db.News.Include(n => n.Categories)
-                .Where(n => n.Status && n.Categories.Any(c => c.Id == categoryId));
-
-            var totalCount = newsQuery.Count();
-            var newsList = newsQuery
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(n => new {
-                    n.Id,
-                    n.Title,
-                    n.Summary,
-                    CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
-                    Categories = n.Categories.Select(c => c.Name).ToList()
-                })
-                .ToList();
-
-            return Json(new
+            try
             {
-                success = true,
-                data = newsList,
-                totalCount = totalCount,
-                totalPages = (int)Math.Ceiling((double)totalCount / pageSize),
-                currentPage = page
-            }, JsonRequestBehavior.AllowGet);
-        }
+                System.Diagnostics.Debug.WriteLine($"NewsController.GetNewsByCategory called: categoryId={categoryId}");
 
+                var newsQuery = db.News.Include(n => n.Categories)
+                    .Where(n => n.Status && n.Categories.Any(c => c.Id == categoryId));
+
+                var totalCount = newsQuery.Count();
+                var newsList = newsQuery
+                    .OrderByDescending(n => n.CreatedDate)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList()
+                    .Select(n => new {
+                        Id = n.Id,
+                        Title = n.Title ?? "",
+                        Summary = n.Summary != null && n.Summary.Length > 150
+                                 ? n.Summary.Substring(0, 150) + "..."
+                                 : (n.Summary ?? ""),
+                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
+                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name ?? "").ToList() : new List<string>()
+                    })
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    data = newsList,
+                    totalCount = totalCount,
+                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                    currentPage = page
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"NewsController Error: {ex.Message}");
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
         #region Helper Methods
 
+        [HttpGet]
         private List<CategoryCheckboxViewModel> GetCategoriesCheckboxList(int[] selectedCategories = null)
         {
             var categories = db.Categories.Where(c => c.Status).OrderBy(c => c.Name).ToList();
