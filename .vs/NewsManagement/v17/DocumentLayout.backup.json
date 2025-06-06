@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "D:\\test_CV\\NewsManagement\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,11 +26,37 @@
       "DocumentGroups": [
         {
           "DockedHeight": 280,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Shared\\_Layout.cshtml*",
+              "RelativeToolTip": "NewsManagement\\Views\\Shared\\_Layout.cshtml*",
+              "ViewState": "AgIAAJIAAAAAAAAAAAAAAJ8AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-06T01:56:40.214Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "home-page.css",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\home-page.css",
+              "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\home-page.css",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\home-page.css",
+              "RelativeToolTip": "NewsManagement\\Content\\css\\home-page.css",
+              "ViewState": "AgIAAEACAAAAAAAAAAAAAF4CAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-06-06T01:52:43.853Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -32,7 +66,7 @@
               "RelativeDocumentMoniker": "NewsManagement\\Controllers\\HomeController.cs",
               "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\HomeController.cs",
               "RelativeToolTip": "NewsManagement\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAALoAAAAAAAAAAAAiwNEAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAABABAAAAAAAAAAAcwCABAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-05T17:43:29.376Z",
               "EditorCaption": ""
@@ -45,7 +79,7 @@
               "RelativeDocumentMoniker": "NewsManagement\\Views\\Home\\Index.cshtml",
               "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
               "RelativeToolTip": "NewsManagement\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAGsDAAAAAAAAAAAIwIMDAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAAAHIAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-06-05T17:27:28.149Z",
               "EditorCaption": ""

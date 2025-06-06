@@ -16,39 +16,202 @@ namespace NewsManagement.Controllers
             return View();
         }
 
-        public ActionResult About()
+        // API: Lấy danh mục cấp 1 + một số cấp 2 phổ biến
+        [HttpGet]
+        public JsonResult GetCategoriesTree()
         {
-            ViewBag.Message = "Hệ thống quản lý tin tức - Phiên bản 1.0";
-            return View();
+            try
+            {
+                // CHỈ lấy danh mục cấp 1 và một số cấp 2 có nhiều tin nhất
+                var rootCategories = db.Categories
+                    .Where(c => c.ParentId == null && c.Status)
+                    .OrderBy(c => c.Ordering)
+                    .Take(20) // Giới hạn chỉ 20 danh mục gốc đầu tiên
+                    .ToList();
+
+                var categoryTree = rootCategories.Select(c => new
+                {
+                    Id = (int)c.Id,
+                    Name = c.Name ?? "",
+                    NewsCount = GetTotalNewsCountInCategoryTree(c.Id),
+                    HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status),
+                    Children = GetTopSubcategories(c.Id, 5) // Chỉ lấy 5 danh mục con phổ biến nhất
+                }).ToList();
+
+                return Json(new { success = true, categories = categoryTree }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
-        public ActionResult Contact()
+        // API MỚI: Load danh mục con khi click vào toggle
+        [HttpGet]
+        public JsonResult GetSubcategories(int parentId)
         {
-            ViewBag.Message = "Thông tin liên hệ";
-            return View();
+            try
+            {
+                var subcategories = db.Categories
+                    .Where(c => c.ParentId == parentId && c.Status)
+                    .OrderBy(c => c.Ordering)
+                    .Take(50) // Giới hạn tối đa 50 con mỗi lần
+                    .ToList() // Execute query first
+                    .Select(c => new
+                    {
+                        Id = (int)c.Id,
+                        Name = c.Name ?? "",
+                        NewsCount = db.News.Count(n => n.Status && n.Categories.Any(cat => cat.Id == c.Id)),
+                        HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
+                    })
+                    .ToList();
+
+                return Json(new { success = true, subcategories = subcategories }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
-        // API: Lấy tin tức mới nhất cho Dashboard
+        // API: Tìm kiếm danh mục
+        [HttpGet]
+        public JsonResult SearchCategories(string term)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(term) || term.Length < 2)
+                {
+                    return Json(new { success = true, categories = new List<object>() }, JsonRequestBehavior.AllowGet);
+                }
+
+                var categories = db.Categories
+                    .Where(c => c.Status && c.Name.Contains(term))
+                    .OrderByDescending(c => db.News.Count(n => n.Categories.Any(cat => cat.Id == c.Id)))
+                    .Take(20)
+                    .ToList() // Execute query first
+                    .Select(c => new
+                    {
+                        Id = (int)c.Id,
+                        Name = c.Name ?? "",
+                        NewsCount = db.News.Count(n => n.Status && n.Categories.Any(cat => cat.Id == c.Id)),
+                        Path = GetCategoryPath(c.Id)
+                    })
+                    .ToList();
+
+                return Json(new { success = true, categories = categories }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #region Helper Methods - Optimized
+
+        private List<object> GetTopSubcategories(int parentId, int top = 10)
+        {
+            var children = db.Categories
+                .Where(c => c.ParentId == parentId && c.Status)
+                .OrderBy(c => c.Ordering)
+                .Take(top)
+                .ToList(); // Execute query first
+
+            return children.Select(c => new
+            {
+                Id = (int)c.Id,
+                Name = c.Name ?? "",
+                NewsCount = db.News.Count(n => n.Status && n.Categories.Any(cat => cat.Id == c.Id)),
+                HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
+            }).Cast<object>().ToList();
+        }
+
+        private int GetTotalNewsCountInCategoryTree(int categoryId)
+        {
+            try
+            {
+                // Sử dụng phương pháp đơn giản hơn để tránh lỗi SQL phức tạp
+                var categoryIds = GetAllCategoryIdsInTree(categoryId);
+                return db.News.Count(n => n.Status && n.Categories.Any(c => categoryIds.Contains(c.Id)));
+            }
+            catch
+            {
+                // Fallback: chỉ đếm tin tức trực tiếp trong danh mục này
+                return db.News.Count(n => n.Status && n.Categories.Any(c => c.Id == categoryId));
+            }
+        }
+
+        private List<int> GetAllCategoryIdsInTree(int categoryId)
+        {
+            var result = new List<int> { categoryId };
+            
+            try
+            {
+                var children = db.Categories
+                    .Where(c => c.ParentId == categoryId)
+                    .Select(c => c.Id)
+                    .ToList();
+
+                foreach (var childId in children)
+                {
+                    result.AddRange(GetAllCategoryIdsInTree(childId));
+                }
+            }
+            catch
+            {
+                // Nếu có lỗi, chỉ trả về category hiện tại
+            }
+
+            return result;
+        }
+
+        private string GetCategoryPath(int categoryId)
+        {
+            try
+            {
+                var path = new List<string>();
+                var currentId = (int?)categoryId;
+
+                while (currentId.HasValue)
+                {
+                    var category = db.Categories.Find(currentId.Value);
+                    if (category == null) break;
+
+                    path.Insert(0, category.Name ?? "");
+                    currentId = category.ParentId;
+                }
+
+                return string.Join(" > ", path);
+            }
+            catch
+            {
+                return "Không xác định";
+            }
+        }
+
+        #endregion
+
+        // Các method khác giữ nguyên
         [HttpGet]
         public JsonResult GetRecentNews(int count = 20)
         {
             try
             {
                 var recentNews = db.News
-                    .Include(n => n.Categories) // Eager loading
+                    .Include(n => n.Categories)
                     .Where(n => n.Status)
                     .OrderByDescending(n => n.CreatedDate)
                     .Take(count)
-                    .ToList() // Chuyển về memory trước khi format
+                    .ToList()
                     .Select(n => new
                     {
-                        n.Id,
-                        n.Title,
+                        Id = (int)n.Id,
+                        Title = n.Title ?? "",
                         Summary = n.Summary != null && n.Summary.Length > 150
                                  ? n.Summary.Substring(0, 150) + "..."
-                                 : n.Summary,
-                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"), // Format ở memory
-                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name).ToList() : new List<string>()
+                                 : (n.Summary ?? ""),
+                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
+                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name ?? "").ToList() : new List<string>()
                     })
                     .ToList();
 
@@ -60,7 +223,6 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // API: Tìm kiếm nhanh (cho trang chủ)
         [HttpGet]
         public JsonResult QuickSearch(string term, int maxResults = 20)
         {
@@ -79,20 +241,20 @@ namespace NewsManagement.Controllers
                         n.Content.Contains(term)))
                     .OrderByDescending(n => n.CreatedDate)
                     .Take(maxResults)
-                    .ToList() // Đưa về memory trước
+                    .ToList()
                     .Select(n => new
                     {
-                        id = n.Id,
-                        title = n.Title,
+                        id = (int)n.Id,
+                        title = n.Title ?? "",
                         summary = n.Summary != null && n.Summary.Length > 100
                                  ? n.Summary.Substring(0, 100) + "..."
-                                 : n.Summary,
+                                 : (n.Summary ?? ""),
                         url = Url.Action("Details", "News", new { id = n.Id }),
-                        Id = n.Id, // Thêm để tương thích
-                        Title = n.Title, // Thêm để tương thích
-                        Summary = n.Summary, // Thêm để tương thích
+                        Id = (int)n.Id,
+                        Title = n.Title ?? "",
+                        Summary = n.Summary ?? "",
                         CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
-                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name).ToList() : new List<string>()
+                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name ?? "").ToList() : new List<string>()
                     })
                     .ToList();
 
@@ -104,35 +266,6 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // API: Lấy danh mục dạng cây cho menu
-        [HttpGet]
-        public JsonResult GetCategoriesTree()
-        {
-            try
-            {
-                // Lấy tất cả danh mục cấp 1 (ParentId = null)
-                var rootCategories = db.Categories
-                    .Where(c => c.ParentId == null && c.Status)
-                    .OrderBy(c => c.Ordering)
-                    .ToList();
-
-                var categoryTree = rootCategories.Select(c => new
-                {
-                    c.Id,
-                    c.Name,
-                    NewsCount = GetTotalNewsCountInCategoryTree(c.Id),
-                    Children = GetChildCategoriesForApi(c.Id)
-                }).ToList();
-
-                return Json(new { success = true, categories = categoryTree }, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        // API: Lấy thống kê cho Dashboard
         [HttpGet]
         public JsonResult GetStats()
         {
@@ -158,45 +291,6 @@ namespace NewsManagement.Controllers
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
-
-        #region Helper Methods
-
-        private List<object> GetChildCategoriesForApi(int parentId)
-        {
-            var children = db.Categories
-                .Where(c => c.ParentId == parentId && c.Status)
-                .OrderBy(c => c.Ordering)
-                .ToList();
-
-            return children.Select(c => new
-            {
-                Id = c.Id,
-                Name = c.Name,
-                NewsCount = GetTotalNewsCountInCategoryTree(c.Id),
-                Children = GetChildCategoriesForApi(c.Id) // Đệ quy cho cấp con
-            }).Cast<object>().ToList();
-        }
-
-        private int GetTotalNewsCountInCategoryTree(int categoryId)
-        {
-            var categoryIds = GetAllCategoryIdsInTree(categoryId);
-            return db.News.Count(n => n.Status && n.Categories.Any(c => categoryIds.Contains(c.Id)));
-        }
-
-        private List<int> GetAllCategoryIdsInTree(int categoryId)
-        {
-            var result = new List<int> { categoryId };
-            var children = db.Categories.Where(c => c.ParentId == categoryId).Select(c => c.Id).ToList();
-
-            foreach (var childId in children)
-            {
-                result.AddRange(GetAllCategoryIdsInTree(childId));
-            }
-
-            return result;
-        }
-
-        #endregion
 
         protected override void Dispose(bool disposing)
         {

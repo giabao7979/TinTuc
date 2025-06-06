@@ -95,9 +95,8 @@
                         @Html.ActionLink("Tin tức", "Index", "News", new { area = "" }, new { @class = "nav-link" })
                     </li>
                 </ul>-->
-
-                <!-- Search Widget -->
-                <!--<div class="d-flex">
+    <!-- Search Widget -->
+    <!--<div class="d-flex">
                     @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "d-flex" }))
                     {
                         <input type="text" name="q" class="form-control me-2" placeholder="Tìm kiếm tin tức..." style="width: 200px;" />
@@ -114,39 +113,39 @@
         <div>
             <!-- Sidebar -->
             @*<div class="col-md-2 sidebar">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a href="@Url.Action("Index", "Home")" class="nav-link">
-                            <i class="fa fa-home"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="@Url.Action("Index", "Category")" class="nav-link">
-                            <i class="fa fa-folder"></i> Quản lý danh mục
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="@Url.Action("Create", "Category")" class="nav-link">
-                            <i class="fa fa-plus"></i> Thêm danh mục
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="@Url.Action("Index", "News")" class="nav-link">
-                            <i class="fa fa-newspaper"></i> Quản lý tin tức
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="@Url.Action("Create", "News")" class="nav-link">
-                            <i class="fa fa-plus"></i> Thêm tin tức
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="@Url.Action("Search", "News")" class="nav-link">
-                            <i class="fa fa-search"></i> Tìm kiếm
-                        </a>
-                    </li>
-                </ul>
-            </div>*@
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Home")" class="nav-link">
+                                <i class="fa fa-home"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Category")" class="nav-link">
+                                <i class="fa fa-folder"></i> Quản lý danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Create", "Category")" class="nav-link">
+                                <i class="fa fa-plus"></i> Thêm danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "News")" class="nav-link">
+                                <i class="fa fa-newspaper"></i> Quản lý tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Create", "News")" class="nav-link">
+                                <i class="fa fa-plus"></i> Thêm tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Search", "News")" class="nav-link">
+                                <i class="fa fa-search"></i> Tìm kiếm
+                            </a>
+                        </li>
+                    </ul>
+                </div>*@
 
             <!-- Main Content -->
             <div>
@@ -157,9 +156,8 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/modernizr")
     @RenderSection("scripts", required: false)
-
-    <!-- Custom JavaScript -->
     <script>
         $(document).ready(function() {
             // Auto-close alerts after 5 seconds
