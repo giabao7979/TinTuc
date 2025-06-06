@@ -81,3 +81,7 @@ D:\test_CV\NewsManagement\NewsManagement\obj\Debug\NewsManagement.csproj.CoreCom
 D:\test_CV\NewsManagement\NewsManagement\obj\Debug\NewsMana.62D8FC08.Up2Date
 D:\test_CV\NewsManagement\NewsManagement\obj\Debug\NewsManagement.dll
 D:\test_CV\NewsManagement\NewsManagement\obj\Debug\NewsManagement.pdb
+D:\test_CV\NewsManagement\NewsManagement\bin\PagedList.dll
+D:\test_CV\NewsManagement\NewsManagement\bin\PagedList.Mvc.dll
+D:\test_CV\NewsManagement\NewsManagement\bin\PagedList.xml
+D:\test_CV\NewsManagement\NewsManagement\bin\PagedList.Mvc.xml

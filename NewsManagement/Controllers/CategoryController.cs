@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using PagedList;
 using NewsManagement.Models;
 
 namespace NewsManagement.Controllers
@@ -12,8 +13,11 @@ namespace NewsManagement.Controllers
         private TinTucEntities db = new TinTucEntities();
 
         // GET: Category - Với phân trang
-        public ActionResult Index(int page = 1, int pageSize = 50, int? parentId = null)
+        public ActionResult Index(int? page, int? parentId)
         {
+            int pageSize = 50;
+            int pageNumber = page ?? 1;
+
             var query = db.Categories.AsQueryable();
 
             if (parentId.HasValue)
@@ -26,15 +30,11 @@ namespace NewsManagement.Controllers
                 query = query.Where(c => c.ParentId == null);
             }
 
-            var totalCount = query.Count();
-            var categories = query
-                .OrderBy(c => c.Ordering)
-                .ThenBy(c => c.Name)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            query = query.OrderBy(c => c.Ordering).ThenBy(c => c.Name);
 
-            var categoryViewModels = categories.Select(c => new CategoryViewModel
+            var pagedCategories = query.ToPagedList(pageNumber, pageSize);
+
+            var categoryViewModels = pagedCategories.Select(c => new CategoryViewModel
             {
                 Category = c,
                 NewsCount = GetDirectNewsCount(c.Id),
@@ -43,10 +43,7 @@ namespace NewsManagement.Controllers
                 HasChildren = db.Categories.Any(child => child.ParentId == c.Id)
             }).ToList();
 
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-            ViewBag.TotalCount = totalCount;
-            ViewBag.PageSize = pageSize;
+            ViewBag.PagedCategories = pagedCategories;
             ViewBag.ParentId = parentId;
 
             return View(categoryViewModels);
