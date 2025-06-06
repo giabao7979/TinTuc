@@ -3,20 +3,28 @@
   "WorkspaceRootPath": "D:\\test_CV\\NewsManagement\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\js\\home-page.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\js\\home-page.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\home-page.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,11 +34,41 @@
       "DocumentGroups": [
         {
           "DockedHeight": 280,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
+              "Title": "home-page.js",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Js\\home-page.js",
+              "RelativeDocumentMoniker": "NewsManagement\\Js\\home-page.js",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Js\\home-page.js",
+              "RelativeToolTip": "NewsManagement\\Js\\home-page.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJ4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-06-06T14:11:25.37Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAwEAAAAAAAAAAAkwBwEAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-06T13:48:45.628Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "CategoryController.cs",
               "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\CategoryController.cs",
               "RelativeDocumentMoniker": "NewsManagement\\Controllers\\CategoryController.cs",
@@ -38,12 +76,11 @@
               "RelativeToolTip": "NewsManagement\\Controllers\\CategoryController.cs",
               "ViewState": "AgIAAJ0BAAAAAAAAAAA4wK4BAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T09:46:15.978Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-06T09:46:15.978Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Category\\Index.cshtml",
               "RelativeDocumentMoniker": "NewsManagement\\Views\\Category\\Index.cshtml",
@@ -55,12 +92,8 @@
               "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
-            },
-            {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "NewsManagement\\Controllers\\HomeController.cs",
@@ -68,18 +101,17 @@
               "RelativeToolTip": "NewsManagement\\Controllers\\HomeController.cs",
               "ViewState": "AgIAAEIBAAAAAAAAAAAiwFYBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-06T09:20:56.388Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-06T09:20:56.388Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "home-page.css",
               "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\home-page.css",
               "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\home-page.css",
               "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\home-page.css",
               "RelativeToolTip": "NewsManagement\\Content\\css\\home-page.css",
-              "ViewState": "AgIAAEIBAAAAAAAAAAAUwGYBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAN0EAAAAAAAAAAAkwO4EAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
               "WhenOpened": "2025-06-06T09:00:53.655Z",
               "EditorCaption": ""
