@@ -1,0 +1,114 @@
+﻿.main-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+    .main-header h1 {
+        margin: 0;
+        font-weight: 600;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+.header-buttons {
+    margin-top: 1.5rem;
+}
+
+    .header-buttons .btn {
+        margin: 0.25rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.1);
+        color: white;
+        text-decoration: none;
+    }
+
+        .header-buttons .btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+        .header-buttons .btn.active {
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            border-color: white;
+        }
+
+.breadcrumb-nav {
+    background: rgba(255,255,255,0.1);
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+}
+
+.breadcrumb {
+    background: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+}
+
+    .breadcrumb-item a:hover {
+        color: white;
+        text-decoration: underline;
+    }
+
+.breadcrumb-item.active {
+    color: white;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255,255,255,0.6);
+}
+
+.content-wrapper {
+    min-height: calc(100vh - 200px);
+}
+
+.footer {
+    background: #343a40;
+    color: #adb5bd;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+    .footer a {
+        color: #adb5bd;
+        text-decoration: none;
+    }
+
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .main-header {
+        padding: 1.5rem 0;
+        text-align: center;
+    }
+
+        .main-header h1 {
+            font-size: 1.75rem;
+        }
+
+    .header-buttons .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}

@@ -1,194 +1,174 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Hệ thống quản lý tin tức</title>
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
-    <!-- Font Awesome -->
+
+    <!-- CSS Libraries -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
     <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-weight: bold;
-        }
-
-        .search-widget {
-            margin: 10px 0;
-        }
-
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border: 1px solid rgba(0, 0, 0, 0.125);
-        }
-
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-        }
-
-        .btn-group .btn {
-            margin-right: 2px;
-        }
-
-        .alert {
-            border-radius: 0.375rem;
-        }
-
-        .table th {
-            border-top: none;
-            font-weight: 600;
-        }
-
-        .badge {
-            font-size: 0.75em;
-        }
-
-        .pagination {
-            margin-top: 20px;
-        }
-
-        .sidebar {
-            background-color: #343a40;
-            min-height: calc(100vh - 56px);
-            padding-top: 20px;
-        }
-
-            .sidebar .nav-link {
-                color: #fff;
-                padding: 10px 15px;
-                border-radius: 5px;
-                margin-bottom: 5px;
-            }
-
-                .sidebar .nav-link:hover,
-                .sidebar .nav-link.active {
-                    background-color: #495057;
-                    color: #fff;
-                }
-
-        .main-content {
-            padding: 20px;
-        }
-    </style>
+    <link href="~/Content/css/site.css" rel="stylesheet" />
+    <link href="~/Content/css/home-page.css" rel="stylesheet" />
+    <link href="~/Content/css/layout.css" rel="stylesheet" />
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            @Html.ActionLink("Quản lý tin tức", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+    <div class="container-fluid">
+        <!-- Main Header - Giống trang home -->
+        <div class="main-header">
+            <div class="container">
+                <div class="text-center">
+                    <h1><i class="fas fa-newspaper mr-3"></i>Hệ thống quản lý tin tức</h1>
+                    <p class="lead">@(ViewBag.Subtitle ?? "Cập nhật tin tức mới nhất và quản lý nội dung hiệu quả")</p>
+                    <hr class="bg-white" style="opacity: 0.3;">
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                    <!-- Navigation Buttons -->
+                    <div class="header-buttons">
+                        <a href="@Url.Action("Index", "Home")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                            <i class="fa fa-home mr-2"></i>Trang chủ
+                        </a>
+                        <a href="@Url.Action("Create", "News")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "News" && ViewContext.RouteData.Values["action"].ToString() == "Create" ? "active" : "")">
+                            <i class="fa fa-plus mr-2"></i>Thêm tin tức
+                        </a>
+                        <a href="@Url.Action("Index", "News")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "News" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                            <i class="fa fa-list mr-2"></i>Quản lý tin tức
+                        </a>
+                        <a href="@Url.Action("Index", "Category")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "Category" ? "active" : "")">
+                            <i class="fa fa-folder mr-2"></i>Quản lý danh mục
+                        </a>
+                        @if (ViewBag.ShowRefreshButton == true)
+                        {
+                            <button onclick="location.reload()" class="btn">
+                                <i class="fa fa-refresh mr-2"></i>Tải lại trang
+                            </button>
+                        }
+                    </div>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        @Html.ActionLink("Trang chủ", "Index", "Home", new { area = "" }, new { @class = "nav-link" })
-                    </li>
-                    <li class="nav-item">
-                        @Html.ActionLink("Danh mục", "Index", "Category", new { area = "" }, new { @class = "nav-link" })
-                    </li>
-                    <li class="nav-item">
-                        @Html.ActionLink("Tin tức", "Index", "News", new { area = "" }, new { @class = "nav-link" })
-                    </li>
-                </ul>-->
-    <!-- Search Widget -->
-    <!--<div class="d-flex">
-                    @using (Html.BeginForm("Search", "News", FormMethod.Get, new { @class = "d-flex" }))
+                    <!-- Breadcrumb Navigation -->
+                    @if (ViewBag.Breadcrumbs != null)
                     {
-                        <input type="text" name="q" class="form-control me-2" placeholder="Tìm kiếm tin tức..." style="width: 200px;" />
-                        <button type="submit" class="btn btn-outline-light">
-                            <i class="fa fa-search"></i>
-                        </button>
+                        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                            <ol class="breadcrumb">
+                                @foreach (var breadcrumb in ViewBag.Breadcrumbs)
+                                {
+                                    if (breadcrumb.IsActive)
+                                    {
+                                        <li class="breadcrumb-item active" aria-current="page">
+                                            <i class="@breadcrumb.Icon mr-1"></i>@breadcrumb.Text
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="breadcrumb-item">
+                                            <a href="@breadcrumb.Url">
+                                                <i class="@breadcrumb.Icon mr-1"></i>@breadcrumb.Text
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ol>
+                        </nav>
                     }
                 </div>
             </div>
         </div>
-    </nav>-->
 
-    <div class="container-fluid">
-        <div>
-            <!-- Sidebar -->
-            @*<div class="col-md-2 sidebar">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "Home")" class="nav-link">
-                                <i class="fa fa-home"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "Category")" class="nav-link">
-                                <i class="fa fa-folder"></i> Quản lý danh mục
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Create", "Category")" class="nav-link">
-                                <i class="fa fa-plus"></i> Thêm danh mục
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "News")" class="nav-link">
-                                <i class="fa fa-newspaper"></i> Quản lý tin tức
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Create", "News")" class="nav-link">
-                                <i class="fa fa-plus"></i> Thêm tin tức
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="@Url.Action("Search", "News")" class="nav-link">
-                                <i class="fa fa-search"></i> Tìm kiếm
-                            </a>
-                        </li>
-                    </ul>
-                </div>*@
-
-            <!-- Main Content -->
-            <div>
-                @RenderBody()
-            </div>
+        <!-- Main Content Area -->
+        <div class="content-wrapper">
+            @RenderBody()
         </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-newspaper mr-2"></i>Hệ thống quản lý tin tức</h5>
+                        <p class="mb-0">Giải pháp quản lý tin tức hiện đại và hiệu quả</p>
+                    </div>
+                    <div class="col-md-6 text-md-right">
+                        <div class="footer-links">
+                            <a href="@Url.Action("Index", "Home")" class="mr-3">
+                                <i class="fa fa-home mr-1"></i>Trang chủ
+                            </a>
+                            <a href="@Url.Action("Index", "News")" class="mr-3">
+                                <i class="fa fa-newspaper mr-1"></i>Tin tức
+                            </a>
+                            <a href="@Url.Action("Index", "Category")">
+                                <i class="fa fa-folder mr-1"></i>Danh mục
+                            </a>
+                        </div>
+                        <p class="mb-0 mt-2">
+                            <small>&copy; @DateTime.Now.Year - Hệ thống quản lý tin tức</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/modernizr")
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Scripts -->
     @RenderSection("scripts", required: false)
+
     <script>
+        // Global JavaScript for all pages
         $(document).ready(function() {
-            // Auto-close alerts after 5 seconds
+            // Add fade-in animation to content
+            $('.content-wrapper').addClass('fade-in');
+
+            // Active navigation highlighting
+            var currentController = '@ViewContext.RouteData.Values["controller"]';
+            var currentAction = '@ViewContext.RouteData.Values["action"]';
+
+            // Tooltip initialization
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Alert auto-dismiss
             setTimeout(function() {
-                $('.alert.alert-success, .alert.alert-info').fadeOut('slow');
+                $('.alert:not(.alert-permanent)').fadeOut();
             }, 5000);
-
-            // Confirm delete actions
-            $('a[href*="/Delete/"], button[type="submit"][formaction*="/Delete/"]').click(function(e) {
-                if (!confirm('Bạn có chắc chắn muốn xóa không?')) {
-                    e.preventDefault();
-                }
-            });
-
-            // Set active nav link
-            var currentUrl = window.location.pathname;
-            $('.nav-link').each(function() {
-                if ($(this).attr('href') === currentUrl) {
-                    $(this).addClass('active');
-                }
-            });
         });
 
-        // AJAX function to load news by category
-        function loadNewsByCategory(categoryId) {
-            $.get('@Url.Action("GetNewsByCategory", "News")', { categoryId: categoryId }, function(data) {
-                if (data.success) {
-                    // Handle success - you can implement this based on your needs
-                    console.log('Loaded ' + data.totalCount + ' news items');
-                }
-            });
+        // Utility functions
+        function showLoading(element) {
+            if (typeof element === 'string') {
+                element = $(element);
+            }
+            element.html('<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+        }
+
+        function hideLoading() {
+            $('.spinner-border').closest('div').remove();
+        }
+
+        function showNotification(message, type = 'success') {
+            var alertClass = 'alert-' + type;
+            var iconClass = type === 'success' ? 'fa-check-circle' :
+                           type === 'danger' ? 'fa-exclamation-triangle' :
+                           type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+
+            var html = '<div class="alert ' + alertClass + ' alert-dismissible fade show notification-alert" role="alert">';
+            html += '<i class="fas ' + iconClass + ' mr-2"></i>';
+            html += message;
+            html += '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+            html += '<span aria-hidden="true">&times;</span>';
+            html += '</button>';
+            html += '</div>';
+
+            $('body').append(html);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(function() {
+                $('.notification-alert').fadeOut(function() {
+                    $(this).remove();
+                });
+            }, 5000);
         }
     </script>
 </body>

@@ -8,8 +8,12 @@
     var parentCategory = ViewBag.ParentCategory as NewsManagement.Models.Category;
     var pagedCategories = ViewBag.PagedCategories as IPagedList;
 }
-
+<link href="~/Content/css/site.css" rel="stylesheet" />
 <h2>Danh sách danh mục @(parentCategory != null ? "con của \"" + parentCategory.Name + "\"" : "")</h2>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
 
 @if (TempData["Success"] != null)
 {

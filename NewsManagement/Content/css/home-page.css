@@ -1271,3 +1271,354 @@ body {
         color: #388e3c;
     }
 
+    /* ===== MINIMAL INDENT + LAYOUT FIX CSS ===== */
+
+/* CRITICAL: Fix container positioning to prevent overlap */
+.subcategories-container {
+    position: relative !important;
+    display: block;
+    width: 100%;
+    clear: both !important;
+    margin-top: 0px;
+    margin-bottom: 4px !important; /* Đảm bảo có khoảng cách dưới */
+    margin-left: 0px !important; /* Không lùi container */
+    padding-left: 0px !important; /* Không padding container */
+    border-left: none; /* Bỏ border container */
+    
+    /* Animation */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.subcategories-container.expanded {
+    display: block !important;
+    max-height: 2000px; /* Đủ lớn cho nhiều items */
+    opacity: 1;
+}
+
+/* MINIMAL INDENT - Chỉ đủ để phân biệt */
+.subcategory-link {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+    color: #155724 !important;
+    font-weight: 500;
+    padding: 10px 14px;
+    padding-left: 12px !important; /* Siêu nhỏ - chỉ 12px */
+    margin-left: 0px !important;
+    margin-bottom: 2px;
+}
+
+.sub-subcategory-link {
+    border-left: 4px solid #fd7e14;
+    background: linear-gradient(135deg, #fff8f0 0%, #ffe8cc 100%);
+    color: #7d4419 !important;
+    font-weight: 500;
+    padding: 9px 12px;
+    padding-left: 16px !important; /* Siêu nhỏ - chỉ 16px */
+    margin-left: 0px !important;
+    margin-bottom: 2px;
+}
+
+.level-4-link {
+    border-left: 4px solid #6f42c1;
+    background: linear-gradient(135deg, #f8f5ff 0%, #ede0ff 100%);
+    color: #4a2c6a !important;
+    font-weight: 500;
+    padding: 8px 12px;
+    padding-left: 20px !important; /* Siêu nhỏ - chỉ 20px */
+    margin-left: 0px !important;
+    margin-bottom: 2px;
+}
+
+.level-5-link,
+.level-6-link,
+.level-7-link,
+.level-8-link {
+    border-left: 4px solid #20c997;
+    background: linear-gradient(135deg, #f0fffe 0%, #d4edda 100%);
+    color: #0f5132 !important;
+    font-weight: 500;
+    padding: 7px 10px;
+    padding-left: 24px !important; /* Siêu nhỏ - chỉ 24px */
+    margin-left: 0px !important;
+    margin-bottom: 2px;
+}
+
+/* CRITICAL: Category item layout fix */
+.category-item {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+    margin-bottom: 2px !important;
+    float: none !important;
+    overflow: visible !important;
+}
+
+/* Root categories */
+.category-link {
+    border-left: 5px solid #007bff;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    color: #212529 !important;
+    font-weight: 600;
+    padding: 12px 16px;
+    margin-bottom: 2px;
+    display: block !important;
+    width: 100% !important;
+    position: relative !important;
+}
+
+/* Categories menu layout */
+.categories-menu {
+    padding: 8px;
+    overflow-x: hidden !important;
+    position: relative;
+}
+
+/* Force normal document flow */
+.categories-menu .category-item,
+.categories-menu .subcategories-container,
+.categories-menu .category-link,
+.categories-menu .subcategory-link,
+.categories-menu .sub-subcategory-link,
+.categories-menu .level-4-link,
+.categories-menu .level-5-link,
+.categories-menu .level-6-link,
+.categories-menu .level-7-link,
+.categories-menu .level-8-link {
+    position: relative !important;
+    float: none !important;
+    display: block !important;
+    clear: both !important;
+}
+
+/* Visual hierarchy with minimal spacing */
+.subcategory-link::before {
+    content: "  ├─ ";
+    color: #28a745;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.sub-subcategory-link::before {
+    content: "    ├── ";
+    color: #fd7e14;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.level-4-link::before {
+    content: "      ├─── ";
+    color: #6f42c1;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+.level-5-link::before,
+.level-6-link::before,
+.level-7-link::before,
+.level-8-link::before {
+    content: "        └─── ";
+    color: #20c997;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Hover effects - giảm movement */
+.category-link:hover,
+.subcategory-link:hover,
+.sub-subcategory-link:hover,
+.level-4-link:hover,
+.level-5-link:hover,
+.level-6-link:hover,
+.level-7-link:hover,
+.level-8-link:hover {
+    transform: translateX(1px); /* Rất nhỏ */
+    text-decoration: none;
+}
+
+.subcategory-link:hover {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white !important;
+}
+
+.sub-subcategory-link:hover {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    color: white !important;
+}
+
+.level-4-link:hover {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white !important;
+}
+
+.level-5-link:hover,
+.level-6-link:hover,
+.level-7-link:hover,
+.level-8-link:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    color: white !important;
+}
+
+/* Category content layout */
+.category-content {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 32px;
+}
+
+.category-name {
+    flex: 1;
+    margin-right: 8px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    word-wrap: break-word;
+}
+
+.category-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 45px;
+}
+
+/* Toggle button */
+.category-toggle-btn {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    flex-shrink: 0;
+    margin-left: 4px;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #6c757d;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+/* News count badges */
+.news-count {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Different badge colors */
+.category-link .news-count {
+    background: #007bff;
+    color: white;
+}
+
+.subcategory-link .news-count {
+    background: #28a745;
+    color: white;
+}
+
+.sub-subcategory-link .news-count {
+    background: #fd7e14;
+    color: white;
+}
+
+.level-4-link .news-count {
+    background: #6f42c1;
+    color: white;
+}
+
+.level-5-link .news-count,
+.level-6-link .news-count,
+.level-7-link .news-count,
+.level-8-link .news-count {
+    background: #20c997;
+    color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .subcategory-link {
+        padding-left: 10px !important;
+    }
+    
+    .sub-subcategory-link {
+        padding-left: 14px !important;
+    }
+    
+    .level-4-link {
+        padding-left: 18px !important;
+    }
+    
+    .level-5-link,
+    .level-6-link,
+    .level-7-link,
+    .level-8-link {
+        padding-left: 22px !important;
+    }
+}
+.category-item {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+    margin-bottom: 3px !important;
+    z-index: 1;
+}
+
+.subcategories-container {
+    position: relative !important;
+    display: block;
+    width: 100%;
+    clear: both !important;
+    margin-top: 2px;
+    margin-bottom: 0px;
+    margin-left: 0px !important;
+    padding-left: 0px !important;
+    
+    /* Animation */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.subcategories-container.expanded {
+    display: block !important;
+    max-height: 2000px;
+    opacity: 1;
+    margin-bottom: 4px;
+}
+
+/* Ensure proper nesting visual */
+.subcategory-link {
+    margin-left: 8px !important;
+    border-left: 3px solid #28a745;
+}
+
+.sub-subcategory-link {
+    margin-left: 16px !important;
+    border-left: 3px solid #fd7e14;
+}
+
+.level-4-link {
+    margin-left: 24px !important;
+    border-left: 3px solid #6f42c1;
+}
+
+.level-5-link,
+.level-6-link,
+.level-7-link,
+.level-8-link {
+    margin-left: 32px !important;
+    border-left: 3px solid #20c997;
+}
