@@ -3,117 +3,268 @@
     ViewBag.Title = "Quản lý tin tức";
     ViewBag.Subtitle = "Danh sách tất cả tin tức";
 }
+
 <link href="~/Content/css/site.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Quản lý tin tức</h3>
-                    <a href="@Url.Action("Create")" class="btn btn-primary">Thêm tin tức</a>
-                </div>
-                <div class="card-body">
+<div class="news-management-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="management-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3><i class="fas fa-newspaper mr-3"></i>Quản lý tin tức</h3>
+                            <p class="mb-0 opacity-75">Quản lý và tổ chức nội dung tin tức</p>
+                        </div>
+                        <a href="@Url.Action("Create")" class="btn btn-light btn-lg">
+                            <i class="fas fa-plus mr-2"></i>Thêm tin tức mới
+                        </a>
+                    </div>
+
+                    <!-- Filters Section -->
+                    <div class="filters-section">
+                        @using (Html.BeginForm("Index", "News", FormMethod.Get, new { @class = "filter-form" }))
+                        {
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="filter-group">
+                                        <label for="categoryId">
+                                            <i class="fas fa-folder mr-1"></i>Danh mục
+                                        </label>
+                                        @Html.DropDownList("categoryId", ViewBag.Categories as SelectList, "-- Tất cả danh mục --", new { @class = "form-control" })
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="filter-group">
+                                        <label for="search">
+                                            <i class="fas fa-search mr-1"></i>Tìm kiếm
+                                        </label>
+                                        @Html.TextBox("search", ViewBag.SearchTerm as string, new { @class = "form-control", placeholder = "Nhập từ khóa tìm kiếm..." })
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="filter-group">
+                                        <label>&nbsp;</label>
+                                        <div class="d-flex flex-column">
+                                            <button type="submit" class="btn btn-primary-custom mb-2">
+                                                <i class="fas fa-filter mr-1"></i>Lọc
+                                            </button>
+                                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary-custom">
+                                                <i class="fas fa-times mr-1"></i>Xóa bộ lọc
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Results Info -->
                     @if (TempData["Success"] != null)
                     {
-                        <div class="alert alert-success">
-                            @TempData["Success"]
+                        <div class="alert alert-success mx-4 mt-3">
+                            <i class="fas fa-check-circle mr-2"></i>@TempData["Success"]
                         </div>
                     }
 
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            @using (Html.BeginForm("Index", "News", FormMethod.Get))
-                            {
-                                <div class="form-group">
-                                    <label>Danh mục:</label>
-                                    @Html.DropDownList("categoryId", ViewBag.Categories as SelectList, "-- Tất cả danh mục --", new { @class = "form-control" })
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Tìm kiếm:</label>
-                                    @Html.TextBox("search", ViewBag.SearchTerm as string, new { @class = "form-control", placeholder = "Nhập từ khóa..." })
-                                </div>
-
-                                <button type="submit" class="btn btn-secondary">Lọc</button>
-
-                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Xóa bộ lọc</a>
-                            }
+                    <div class="results-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Tìm thấy @ViewBag.TotalCount tin tức</strong>
+                                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                                {
+                                    <span> - Tìm kiếm: "@ViewBag.SearchTerm"</span>
+                                }
+                                @if (ViewBag.SelectedCategory != null)
+                                {
+                                    <span> - Danh mục: "@(((NewsManagement.Models.Category)ViewBag.SelectedCategory).Name)"</span>
+                                }
+                            </div>
+                            <small>
+                                <i class="fas fa-clock mr-1"></i>
+                                Cập nhật: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")
+                            </small>
                         </div>
                     </div>
 
-                    <div class="alert alert-info">
-                        Tìm thấy <strong>@ViewBag.TotalCount</strong> tin tức
-                    </div>
-
+                    <!-- News Table -->
                     @if (Model != null && Model.Count > 0)
                     {
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table news-table">
                                 <thead>
                                     <tr>
-                                        <th>Tiêu đề</th>
-                                        <th>Trích ngắn</th>
-                                        <th>Danh mục</th>
-                                        <th>Ngày tạo</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
+                                        <th style="width: 35%">Tiêu đề & Tóm tắt</th>
+                                        <th style="width: 20%">Danh mục</th>
+                                        <th style="width: 12%">Ngày tạo</th>
+                                        <th style="width: 10%">Trạng thái</th>
+                                        <th style="width: 23%">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var news in Model)
                                     {
-                                        <tr>
-                                            <td>@news.Title</td>
+                                        <tr data-news-id="@news.Id">
                                             <td>
+                                                <div class="news-title">@news.Title</div>
                                                 @if (!string.IsNullOrEmpty(news.Summary))
                                                 {
-                                                    if (news.Summary.Length > 80)
+                                                    <div class="news-summary">
+                                                        @if (news.Summary.Length > 100)
+                                                        {
+                                                            @(news.Summary.Substring(0, 100) + "...")
+                                                        }
+                                                        else
+                                                        {
+                                                            @news.Summary
+                                                        }
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="category-badges">
+                                                    @if (news.Categories != null && news.Categories.Any())
                                                     {
-                                                        @(news.Summary.Substring(0, 80) + "...")
+                                                        foreach (var category in news.Categories.Take(3))
+                                                        {
+                                                            <span class="badge category-badge">@category.Name</span>
+                                                        }
+                                                        if (news.Categories.Count() > 3)
+                                                        {
+                                                            <span class="badge badge-light">+@(news.Categories.Count() - 3)</span>
+                                                        }
                                                     }
                                                     else
                                                     {
-                                                        @news.Summary
+                                                        <span class="text-muted">Chưa phân loại</span>
                                                     }
-                                                }
+                                                </div>
                                             </td>
                                             <td>
-                                                @if (news.Categories != null)
-                                                {
-                                                    @(string.Join(", ", news.Categories.Select(c => c.Name)))
-                                                }
+                                                <div>@news.CreatedDate.ToString("dd/MM/yyyy")</div>
+                                                <small class="text-muted">@news.CreatedDate.ToString("HH:mm")</small>
                                             </td>
-                                            <td>@news.CreatedDate.ToString("dd/MM/yyyy")</td>
                                             <td>
                                                 @if (news.Status)
                                                 {
-                                                    <span class="badge badge-success">Hoạt động</span>
+                                                    <span class="badge status-badge status-active">
+                                                        <i class="fas fa-check mr-1"></i>Hoạt động
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-secondary">Tạm dừng</span>
+                                                    <span class="badge status-badge status-inactive">
+                                                        <i class="fas fa-pause mr-1"></i>Tạm dừng
+                                                    </span>
                                                 }
                                             </td>
                                             <td>
-                                                <a href="@Url.Action("Details", new { id = news.Id })" class="btn btn-sm btn-info">Xem</a>
-                                                <a href="@Url.Action("Edit", new { id = news.Id })" class="btn btn-sm btn-warning">Sửa</a>
-                                                <a href="@Url.Action("Delete", new { id = news.Id })" class="btn btn-sm btn-danger">Xóa</a>
+                                                <div class="action-buttons">
+                                                    <a href="@Url.Action("Details", new { id = news.Id })"
+                                                       class="btn btn-action btn-view"
+                                                       title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", new { id = news.Id })"
+                                                       class="btn btn-action btn-edit"
+                                                       title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button"
+                                                            class="btn btn-action btn-delete"
+                                                            title="Xóa tin tức"
+                                                            onclick="confirmDelete(@news.Id, '@news.Title')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination -->
+                        if (ViewBag.TotalPages != null && (int)ViewBag.TotalPages > 1)
+                        {
+                            <div class="pagination-container">
+                                <div class="pagination-wrapper d-flex justify-content-between align-items-center">
+                                    <div class="pagination-info">
+                                        <span class="text-muted">
+                                            Trang @(ViewBag.CurrentPage ?? 1) / @ViewBag.TotalPages
+                                            (@ViewBag.TotalCount tin tức)
+                                        </span>
+                                    </div>
+
+                                    <div class="pagination-controls">
+                                        @if (ViewBag.CurrentPage != null && (int)ViewBag.CurrentPage > 1)
+                                        {
+                                            <a href="@Url.Action("Index", new { page = 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
+                                               class="btn btn-outline-primary btn-sm me-1">
+                                                <i class="fas fa-angle-double-left"></i> Đầu
+                                            </a>
+                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.CurrentPage - 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
+                                               class="btn btn-outline-primary btn-sm me-2">
+                                                <i class="fas fa-angle-left"></i> Trước
+                                            </a>
+                                        }
+
+                                        <select class="form-control form-control-sm d-inline-block w-auto me-2"
+                                                onchange="window.location.href='@Url.Action("Index")?page=' + this.value + '&categoryId=@ViewBag.CategoryId&search=@ViewBag.SearchTerm'">
+                                            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+                                            {
+                                                <option value="@i" @(i == (ViewBag.CurrentPage ?? 1) ? "selected" : "")>
+                                                    Trang @i
+                                                </option>
+                                            }
+                                        </select>
+
+                                        @if (ViewBag.CurrentPage != null && (int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
+                                        {
+                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.CurrentPage + 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
+                                               class="btn btn-outline-primary btn-sm me-1">
+                                                Sau <i class="fas fa-angle-right"></i>
+                                            </a>
+                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.TotalPages, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
+                                               class="btn btn-outline-primary btn-sm">
+                                                Cuối <i class="fas fa-angle-double-right"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                     else
                     {
-                        <div class="alert alert-warning">
+                        <!-- No News State -->
+                        <div class="no-news-state">
+                            <div class="no-news-icon">
+                                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                                {
+                                    <i class="fas fa-search"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-newspaper"></i>
+                                }
+                            </div>
                             <h4>Không có tin tức</h4>
-                            <p>Không tìm thấy tin tức nào.</p>
+                            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
+                            {
+                                <p>Không tìm thấy tin tức phù hợp với từ khóa "<strong>@ViewBag.SearchTerm</strong>".</p>
+                                <p>Thử tìm kiếm với từ khóa khác hoặc kiểm tra chính tả.</p>
+                            }
+                            else
+                            {
+                                <p>Chưa có tin tức nào được đăng.</p>
+                                <a href="@Url.Action("Create")" class="btn btn-primary-custom">
+                                    <i class="fas fa-plus mr-2"></i>Thêm tin tức đầu tiên
+                                </a>
+                            }
                         </div>
                     }
                 </div>
@@ -121,3 +272,152 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade delete-modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Xác nhận xóa tin tức
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <h5>Bạn có chắc chắn muốn xóa tin tức này?</h5>
+                <p class="text-muted mb-4" id="newsTitle"></p>
+                <div class="alert alert-warning">
+                    <strong>Cảnh báo:</strong> Thao tác này không thể hoàn tác!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger-custom" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-2"></i>Xóa tin tức
+                </button>
+                <button type="button" class="btn btn-secondary-custom" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Đang xóa tin tức...</p>
+    </div>
+</div>
+
+<!-- Hidden form for delete -->
+<form id="deleteForm" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteNewsId" name="id" />
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+var deleteNewsId = null;
+
+function confirmDelete(newsId, newsTitle) {
+    deleteNewsId = newsId;
+    $('#newsTitle').text(newsTitle);
+    $('#deleteModal').modal('show');
+}
+
+$(document).ready(function() {
+    // Handle delete confirmation
+    $('#confirmDeleteBtn').click(function() {
+        if (deleteNewsId) {
+            performDelete(deleteNewsId);
+        }
+    });
+
+    // Auto-hide alerts
+    setTimeout(function() {
+        $('.alert:not(.alert-permanent)').fadeOut();
+    }, 5000);
+
+    // Add loading state to filter form
+    $('.filter-form').submit(function() {
+        $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Đang lọc...');
+    });
+});
+
+function performDelete(newsId) {
+    // Show loading overlay
+    $('#loadingOverlay').fadeIn();
+    $('#deleteModal').modal('hide');
+
+    // Set form data
+    $('#deleteNewsId').val(newsId);
+    $('#deleteForm').attr('action', '@Url.Action("DeleteConfirmed", "News")');
+
+    // Submit form
+    $('#deleteForm').submit();
+}
+
+// Enhanced table interactions
+$(document).ready(function() {
+    // Add hover effects
+    $('.news-table tbody tr').hover(
+        function() {
+            $(this).find('.action-buttons').addClass('show');
+        },
+        function() {
+            $(this).find('.action-buttons').removeClass('show');
+        }
+    );
+
+    // Smooth scroll to top after pagination
+    if (window.location.hash) {
+        $('html, body').animate({
+            scrollTop: 0
+        }, 300);
+    }
+});
+
+// Keyboard shortcuts
+$(document).keydown(function(e) {
+    // Ctrl + N = New news
+    if (e.ctrlKey && e.keyCode === 78) {
+        e.preventDefault();
+        window.location.href = '@Url.Action("Create")';
+    }
+
+    // Escape key = Close modals
+    if (e.keyCode === 27) {
+        $('.modal').modal('hide');
+    }
+});
+
+// Enhanced search functionality
+$('#search').on('input', function() {
+    var searchTerm = $(this).val();
+    if (searchTerm.length >= 3) {
+        // Could add live search here
+    }
+});
+
+// Status badge click to toggle (future enhancement)
+$('.status-badge').click(function() {
+    // Could add quick status toggle here
+});
+
+// Category badge click to filter
+$('.category-badge').click(function() {
+    var categoryName = $(this).text();
+    $('#categoryId option').filter(function() {
+        return $(this).text() === categoryName;
+    }).prop('selected', true);
+    $('.filter-form').submit();
+});
+</script>

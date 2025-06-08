@@ -2,78 +2,137 @@
 @{
     ViewBag.Title = "Chi tiết tin tức";
 }
+
 <link href="~/Content/css/site.css" rel="stylesheet" />
+<link href="~/Content/css/new.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3>Chi tiết tin tức</h3>
-                    <div>
-                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
-                            <i class="fa fa-edit"></i> Sửa
-                        </a>
-                        <a href="@Url.Action("Index")" class="btn btn-secondary">
-                            <i class="fa fa-arrow-left"></i> Quay lại
-                        </a>
+
+<div class="news-details-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="details-card">
+                    <div class="details-header">
+                        <div class="details-actions">
+                            <a href="@Url.Action("Edit", new { id = Model.Id })" class="action-btn">
+                                <i class="fas fa-edit mr-2"></i>Chỉnh sửa
+                            </a>
+                            <a href="@Url.Action("Index")" class="action-btn">
+                                <i class="fas fa-arrow-left mr-2"></i>Quay lại
+                            </a>
+                        </div>
+
+                        <h1 class="details-title">@Model.Title</h1>
+
+                        <div class="details-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                Chi tiết tin tức #@Model.Id
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-sort-numeric-down"></i>
+                                Thứ tự: @Model.Ordering
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h1 class="mb-3">@Model.Title</h1>
 
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <strong>Ngày tạo:</strong> @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                    <div class="details-body">
+                        <!-- Info Section -->
+                        <div class="info-section">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-calendar mr-1"></i>Ngày tạo
+                                    </div>
+                                    <div class="info-value">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <strong>Trạng thái:</strong>
-                                    @if (Model.Status)
-                                    {
-                                        <span class="badge badge-success">Hoạt động</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-secondary">Tạm dừng</span>
-                                    }
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-hashtag mr-1"></i>ID tin tức
+                                    </div>
+                                    <div class="info-value">#@Model.Id</div>
                                 </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <strong>Thứ tự:</strong> @Model.Ordering
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-sort-numeric-down mr-1"></i>Thứ tự hiển thị
+                                    </div>
+                                    <div class="info-value">@Model.Ordering</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <strong>Danh mục:</strong>
-                                    @foreach (var category in Model.Categories)
-                                    {
-                                        <a href="@Url.Action("NewsByCategory", "Category", new { categoryId = category.Id })"
-                                           class="badge badge-primary mr-1">@category.Name</a>
-                                    }
-                                </div>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(Model.Summary))
-                            {
-                                <div class="alert alert-info">
-                                    <h5>Trích ngắn:</h5>
-                                    <p class="mb-0">@Model.Summary</p>
-                                </div>
-                            }
-
-                            @if (!string.IsNullOrEmpty(Model.Content))
-                            {
-                                <div class="mt-4">
-                                    <h5>Nội dung:</h5>
-                                    <div class="content-area">
-                                        @Html.Raw(Model.Content)
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-toggle-on mr-1"></i>Trạng thái
+                                    </div>
+                                    <div class="info-value">
+                                        @if (Model.Status)
+                                        {
+                                            <span class="status-badge status-active">
+                                                <i class="fas fa-check mr-2"></i>Đang hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-inactive">
+                                                <i class="fas fa-pause mr-2"></i>Tạm dừng
+                                            </span>
+                                        }
                                     </div>
                                 </div>
-                            }
+                            </div>
+                        </div>
+
+                        <!-- Categories Section -->
+                        @if (Model.Categories != null && Model.Categories.Any())
+                        {
+                            <div class="categories-section">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-tags mr-2"></i>Danh mục
+                                </h5>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <a href="@Url.Action("NewsByCategory", "Category", new { categoryId = category.Id })"
+                                       class="category-tag">
+                                        <i class="fas fa-folder mr-1"></i>@category.Name
+                                    </a>
+                                }
+                            </div>
+                        }
+
+                        <!-- Summary Section -->
+                        @if (!string.IsNullOrEmpty(Model.Summary))
+                        {
+                            <div class="summary-section">
+                                <h5 class="summary-title">
+                                    <i class="fas fa-align-left mr-2"></i>Tóm tắt
+                                </h5>
+                                <div class="summary-content">
+                                    @Model.Summary
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Content Section -->
+                        @if (!string.IsNullOrEmpty(Model.Content))
+                        {
+                            <div class="content-section">
+                                <h5 class="content-title">
+                                    <i class="fas fa-file-alt mr-2"></i>Nội dung chi tiết
+                                </h5>
+                                <div class="content-body">
+                                    @Html.Raw(Model.Content)
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Back Button -->
+                        <div class="text-center mt-4">
+                            <a href="@Url.Action("Index")" class="back-to-list">
+                                <i class="fas fa-arrow-left mr-2"></i>Quay lại danh sách tin tức
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -82,12 +141,103 @@
     </div>
 </div>
 
-<style>
-    .content-area {
-        border: 1px solid #dee2e6;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        line-height: 1.6;
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a href="@Url.Action("Edit", new { id = Model.Id })" class="quick-action-btn quick-edit" title="Chỉnh sửa tin tức">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="@Url.Action("Index")" class="quick-action-btn quick-back" title="Quay lại danh sách">
+        <i class="fas fa-list"></i>
+    </a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Smooth scroll for internal links
+    $('a[href^="#"]').on('click', function(event) {
+        var target = $(this.getAttribute('href'));
+        if( target.length ) {
+            event.preventDefault();
+            $('html, body').stop().animate({
+                scrollTop: target.offset().top - 100
+            }, 1000);
+        }
+    });
+
+    // Print functionality
+    $(document).keydown(function(e) {
+        if (e.ctrlKey && e.keyCode === 80) { // Ctrl+P
+            window.print();
+            e.preventDefault();
+        }
+    });
+
+    // Copy content functionality
+    if (navigator.share) {
+        var shareBtn = $('<button class="quick-action-btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);" title="Chia sẻ"><i class="fas fa-share-alt"></i></button>');
+        $('.quick-actions').prepend(shareBtn);
+
+        shareBtn.click(function() {
+            navigator.share({
+                title: '@Model.Title',
+                text: '@(Model.Summary ?? "")',
+                url: window.location.href
+            });
+        });
     }
-</style>
+
+    // Reading progress indicator
+    var readingProgress = $('<div style="position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 9999; transition: width 0.3s ease;"></div>');
+    $('body').prepend(readingProgress);
+
+    $(window).scroll(function() {
+        var scrollTop = $(window).scrollTop();
+        var docHeight = $(document).height() - $(window).height();
+        var scrollPercent = (scrollTop / docHeight) * 100;
+        readingProgress.css('width', scrollPercent + '%');
+    });
+
+    // Auto-hide quick actions on scroll down, show on scroll up
+    var lastScrollTop = 0;
+    $(window).scroll(function() {
+        var st = $(this).scrollTop();
+        if (st > lastScrollTop && st > 200) {
+            $('.quick-actions').fadeOut();
+        } else {
+            $('.quick-actions').fadeIn();
+        }
+        lastScrollTop = st;
+    });
+
+    // Image zoom functionality
+    $('.content-body img').click(function() {
+        var src = $(this).attr('src');
+        var modal = $('<div class="modal fade" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-body p-0"><img src="' + src + '" class="img-fluid w-100"></div></div></div></div>');
+        $('body').append(modal);
+        modal.modal('show');
+        modal.on('hidden.bs.modal', function() {
+            modal.remove();
+        });
+    });
+
+    // Add tooltips to action buttons
+    $('[title]').tooltip();
+});
+
+// Keyboard shortcuts
+$(document).keydown(function(e) {
+    // E key = Edit
+    if (e.keyCode === 69 && !e.ctrlKey && !e.altKey) {
+        if (!$(e.target).is('input, textarea')) {
+            window.location.href = '@Url.Action("Edit", new { id = Model.Id })';
+        }
+    }
+
+    // Escape key = Back to list
+    if (e.keyCode === 27) {
+        window.location.href = '@Url.Action("Index")';
+    }
+});
+</script>

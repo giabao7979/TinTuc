@@ -2,214 +2,325 @@
 @{
     ViewBag.Title = "Thêm tin tức";
 }
+
 <link href="~/Content/css/site.css" rel="stylesheet" />
+<link href="~/Content/css/home-page.css" rel="stylesheet" />
+<link href="~/Content/css/creat.css" rel="stylesheet" />
+<link href="~/Content/css/new.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Thêm tin tức mới</h3>
-                </div>
-                <div class="card-body">
-                    @using (Html.BeginForm("Create", "News", FormMethod.Post, new { @class = "form-horizontal" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="news-form-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-card">
+                    <div class="form-header">
+                        <h1><i class="fas fa-plus-circle mr-3"></i>Tạo tin tức mới</h1>
+                        <p>Tạo và chia sẻ thông tin với cộng đồng</p>
+                    </div>
 
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Title, "Tiêu đề", htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", required = "required", maxlength = "255" } })
-                            @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
-                        </div>
+                    <div class="form-body">
+                        @using (Html.BeginForm("Create", "News", FormMethod.Post, new { @class = "news-form", id = "newsForm" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Summary, "Trích ngắn", htmlAttributes: new { @class = "control-label" })
-                            @Html.TextAreaFor(model => model.Summary, new { @class = "form-control", rows = 3, maxlength = "500" })
-                            @Html.ValidationMessageFor(model => model.Summary, "", new { @class = "text-danger" })
-                            <small class="form-text text-muted">Tối đa 500 ký tự</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="Title">
+                                    <i class="fas fa-heading mr-2"></i>Tiêu đề tin tức
+                                </label>
+                                @Html.EditorFor(model => model.Title, new
+                                {
+                                    htmlAttributes = new
+                                    {
+                                        @class = "form-control",
+                                        required = "required",
+                                        maxlength = "255",
+                                        placeholder = "Nhập tiêu đề hấp dẫn cho tin tức của bạn..."
+                                    }
+                                })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Tiêu đề nên ngắn gọn, súc tích và thu hút người đọc
+                                </small>
+                            </div>
 
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Content, "Nội dung", htmlAttributes: new { @class = "control-label" })
-                            @Html.TextAreaFor(model => model.Content, new { @class = "form-control", rows = 10, id = "content-editor" })
-                            @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
-                        </div>
+                            <div class="form-group">
+                                <label for="Summary">
+                                    <i class="fas fa-align-left mr-2"></i>Tóm tắt nội dung
+                                </label>
+                                @Html.TextAreaFor(model => model.Summary, new
+                                {
+                                    @class = "form-control",
+                                    rows = 4,
+                                    maxlength = "500",
+                                    placeholder = "Viết tóm tắt ngắn gọn về nội dung tin tức..."
+                                })
+                                @Html.ValidationMessageFor(model => model.Summary, "", new { @class = "text-danger" })
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Tóm tắt giúp người đọc hiểu nhanh nội dung chính (tối đa 500 ký tự)
+                                </small>
+                            </div>
 
-                        <!-- Cải tiến phần chọn danh mục -->
-                        <div class="form-group">
-                            <label class="control-label">Danh mục</label>
+                            <div class="form-group">
+                                <label for="Content">
+                                    <i class="fas fa-edit mr-2"></i>Nội dung chi tiết
+                                </label>
+                                @Html.TextAreaFor(model => model.Content, new
+                                {
+                                    @class = "form-control",
+                                    id = "content-editor",
+                                    placeholder = "Viết nội dung đầy đủ của tin tức tại đây..."
+                                })
+                                @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Nội dung chi tiết, đầy đủ thông tin để người đọc hiểu rõ vấn đề
+                                </small>
+                            </div>
 
-                            <!-- Tìm kiếm danh mục -->
-                            <div class="mb-3">
-                                <div class="input-group">
-                                    <input type="text" id="categorySearch" class="form-control"
-                                           placeholder="Tìm kiếm danh mục..." onkeyup="searchCategories()">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="clearCategorySearch()">
-                                            <i class="fa fa-times"></i>
-                                        </button>
+                            <!-- Enhanced Category Selector -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-tags mr-2"></i>Chọn danh mục
+                                </label>
+
+                                <div class="category-selector-section">
+                                    <!-- Search Categories -->
+                                    <div class="category-search-container">
+                                        <i class="fas fa-search category-search-icon"></i>
+                                        <input type="text"
+                                               id="categorySearch"
+                                               class="form-control category-search-input"
+                                               placeholder="Tìm kiếm danh mục..."
+                                               autocomplete="off">
                                     </div>
-                                </div>
-                            </div>
 
-                            <!-- Danh mục đã chọn -->
-                            <div id="selectedCategories" class="mb-3">
-                                <h6>Danh mục đã chọn:</h6>
-                                <div id="selectedCategoriesList" class="border p-2 bg-light">
-                                    <span class="text-muted">Chưa có danh mục nào được chọn</span>
-                                </div>
-                            </div>
-
-                            <!-- Kết quả tìm kiếm -->
-                            <div id="categorySearchResults" style="max-height: 300px; overflow-y: auto; display: none;">
-                                <h6>Kết quả tìm kiếm:</h6>
-                                <div id="searchResultsList" class="border p-2"></div>
-                            </div>
-
-                            <!-- Danh mục phổ biến -->
-                            <div id="popularCategories">
-                                <h6>Danh mục phổ biến:</h6>
-                                <div id="popularCategoriesList" class="border p-2">
-                                    <div class="text-center">
-                                        <div class="spinner-border spinner-border-sm" role="status">
-                                            <span class="sr-only">Loading...</span>
+                                    <!-- Selected Categories Display -->
+                                    <div class="selected-categories-display">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong><i class="fas fa-bookmark mr-2"></i>Danh mục đã chọn:</strong>
+                                            <button type="button" id="clearAllCategories" class="btn btn-sm btn-outline-danger" style="display: none;">
+                                                <i class="fas fa-times mr-1"></i>Xóa tất cả
+                                            </button>
                                         </div>
-                                        Đang tải...
+                                        <div id="selectedCategoriesList">
+                                            <span class="text-muted">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Chưa có danh mục nào được chọn
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Search Results -->
+                                    <div id="categorySearchResults" class="search-results-container" style="display: none;">
+                                        <div id="searchResultsList"></div>
+                                    </div>
+
+                                    <!-- Popular Categories -->
+                                    <div class="popular-categories-section">
+                                        <h6><i class="fas fa-star mr-2"></i>Danh mục phổ biến:</h6>
+                                        <div class="popular-categories" id="popularCategoriesList">
+                                            <div class="text-center py-3">
+                                                <div class="spinner"></div>
+                                                <p>Đang tải danh mục...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden inputs for selected categories -->
+                                    <div id="hiddenCategoryInputs"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Ordering">
+                                            <i class="fas fa-sort-numeric-down mr-2"></i>Thứ tự hiển thị
+                                        </label>
+                                        @Html.EditorFor(model => model.Ordering, new
+                                        {
+                                            htmlAttributes = new
+                                            {
+                                                @class = "form-control",
+                                                type = "number",
+                                                @value = "1",
+                                                min = "0",
+                                                placeholder = "1"
+                                            }
+                                        })
+                                        @Html.ValidationMessageFor(model => model.Ordering, "", new { @class = "text-danger" })
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Số nhỏ hơn sẽ hiển thị trước
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-toggle-on mr-2"></i>Trạng thái
+                                        </label>
+                                        <div class="status-toggle">
+                                            <div>
+                                                <strong>Kích hoạt tin tức</strong>
+                                                <br><small class="text-muted">Tin tức sẽ hiển thị công khai</small>
+                                            </div>
+                                            <div class="status-switch">
+                                                @Html.CheckBoxFor(model => model.Status, new { @checked = "checked", style = "display: none;" })
+                                                <span class="status-slider"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Hidden inputs cho các danh mục đã chọn -->
-                            <div id="hiddenCategoryInputs"></div>
-                        </div>
-
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Ordering, "Thứ tự", htmlAttributes: new { @class = "control-label" })
-                            @Html.EditorFor(model => model.Ordering, new { htmlAttributes = new { @class = "form-control", type = "number", @value = "1", min = "0" } })
-                            @Html.ValidationMessageFor(model => model.Ordering, "", new { @class = "text-danger" })
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-check">
-                                @Html.CheckBoxFor(model => model.Status, new { @class = "form-check-input", @checked = "checked" })
-                                @Html.LabelFor(model => model.Status, "Hoạt động", htmlAttributes: new { @class = "form-check-label" })
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary-custom" id="submitBtn">
+                                    <i class="fas fa-save mr-2"></i>Xuất bản tin tức
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary-custom">
+                                    <i class="fas fa-times mr-2"></i>Hủy bỏ
+                                </a>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <i class="fa fa-save"></i> Lưu tin tức
-                            </button>
-                            <a href="@Url.Action("Index")" class="btn btn-secondary">
-                                <i class="fa fa-times"></i> Hủy
-                            </a>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Đang lưu tin tức...</p>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
+// Global variables
 var selectedCategories = [];
 var searchTimeout;
 
 $(document).ready(function() {
+    initializeForm();
     loadPopularCategories();
 
-    // Validation
-    $('form').submit(function(e) {
-        if (selectedCategories.length === 0) {
-            alert('Vui lòng chọn ít nhất một danh mục cho tin tức.');
+    // Form validation
+    $('#newsForm').submit(function(e) {
+        if (!validateForm()) {
             e.preventDefault();
             return false;
         }
 
-        // Disable submit button để tránh double submit
-        $('#submitBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Đang lưu...');
+        showLoadingOverlay();
     });
 });
 
-function searchCategories() {
-    var term = $('#categorySearch').val().trim();
+function initializeForm() {
+    // Category search
+    $('#categorySearch').on('input', function() {
+        clearTimeout(searchTimeout);
+        var term = $(this).val().trim();
 
-    clearTimeout(searchTimeout);
+        if (term.length < 2) {
+            hideSearchResults();
+            return;
+        }
 
-    if (term.length < 2) {
-        $('#categorySearchResults').hide();
-        $('#popularCategories').show();
-        return;
+        searchTimeout = setTimeout(function() {
+            searchCategories(term);
+        }, 300);
+    });
+
+    // Clear all categories
+    $('#clearAllCategories').click(function() {
+        selectedCategories = [];
+        updateSelectedCategoriesDisplay();
+        updateHiddenInputs();
+    });
+
+    // Status toggle
+    $('.status-switch input').change(function() {
+        // Handle status change if needed
+    });
+}
+
+function searchCategories(term) {
+    showSearchLoading();
+
+    $.get('@Url.Action("SearchCategories", "Category")', { term: term, pageSize: 20 }, function(data) {
+        if (data.success && data.categories.length > 0) {
+            displaySearchResults(data.categories);
+        } else {
+            showNoSearchResults();
+        }
+    }).fail(function() {
+        showSearchError();
+    });
+}
+
+function displaySearchResults(categories) {
+    var html = '';
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
+
+        html += '<div class="search-result-item" data-category-id="' + category.Id + '">';
+        html += '<div class="d-flex justify-content-between align-items-center">';
+        html += '<div>';
+        html += '<strong>' + escapeHtml(category.Name) + '</strong><br>';
+        html += '<small class="text-muted">' + escapeHtml(category.Path) + '</small><br>';
+        html += '<span class="badge badge-info">' + category.NewsCount + ' tin</span>';
+        html += '</div>';
+
+        if (!isSelected) {
+            html += '<button type="button" class="btn btn-sm btn-primary" onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Path) + '\')">';
+            html += '<i class="fas fa-plus mr-1"></i>Chọn';
+            html += '</button>';
+        } else {
+            html += '<span class="badge badge-success"><i class="fas fa-check mr-1"></i>Đã chọn</span>';
+        }
+
+        html += '</div></div>';
     }
 
-    searchTimeout = setTimeout(function() {
-        $('#searchResultsList').html('<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Đang tìm...</div>');
-        $('#categorySearchResults').show();
-        $('#popularCategories').hide();
-
-        $.get('@Url.Action("SearchCategories", "Home")', { term: term, pageSize: 20 }, function(data) {
-            if (data.success && data.categories.length > 0) {
-                var html = '';
-                for (var i = 0; i < data.categories.length; i++) {
-                    var category = data.categories[i];
-                    var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
-
-                    html += '<div class="category-item mb-2 p-2 border rounded ' + (isSelected ? 'bg-success text-white' : 'bg-white') + '">';
-                    html += '<div class="d-flex justify-content-between align-items-center">';
-                    html += '<div>';
-                    html += '<strong>' + escapeHtml(category.Name) + '</strong><br>';
-                    html += '<small class="text-muted">' + escapeHtml(category.Path) + '</small><br>';
-                    html += '<span class="badge badge-info">' + category.NewsCount + ' tin</span>';
-                    html += '</div>';
-
-                    if (!isSelected) {
-                        html += '<button type="button" class="btn btn-sm btn-primary" onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Path) + '\')">';
-                        html += '<i class="fa fa-plus"></i> Chọn';
-                        html += '</button>';
-                    } else {
-                        html += '<button type="button" class="btn btn-sm btn-danger" onclick="unselectCategory(' + category.Id + ')">';
-                        html += '<i class="fa fa-minus"></i> Bỏ chọn';
-                        html += '</button>';
-                    }
-
-                    html += '</div></div>';
-                }
-                $('#searchResultsList').html(html);
-            } else {
-                $('#searchResultsList').html('<div class="text-muted text-center">Không tìm thấy danh mục nào</div>');
-            }
-        }).fail(function() {
-            $('#searchResultsList').html('<div class="text-danger text-center">Lỗi khi tìm kiếm</div>');
-        });
-    }, 300);
+    $('#searchResultsList').html(html);
+    showSearchResults();
 }
 
 function loadPopularCategories() {
     $.get('@Url.Action("GetCategoriesTree", "Home")', function(data) {
         if (data.success && data.categories.length > 0) {
             var html = '';
-            for (var i = 0; i < Math.min(10, data.categories.length); i++) {
+            for (var i = 0; i < Math.min(8, data.categories.length); i++) {
                 var category = data.categories[i];
-                html += '<span class="badge badge-outline-primary mr-2 mb-2 category-tag" ';
-                html += 'onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Name) + '\')" ';
-                html += 'style="cursor: pointer; padding: 8px; border: 1px solid #007bff;">';
-                html += escapeHtml(category.Name) + ' (' + category.NewsCount + ')';
-                html += '</span>';
+                html += '<button type="button" class="popular-category-btn" ';
+                html += 'onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Name) + '\')">';
+                html += escapeHtml(category.Name);
+                if (category.NewsCount > 0) {
+                    html += ' <span class="badge badge-light ml-1">' + category.NewsCount + '</span>';
+                }
+                html += '</button>';
             }
             $('#popularCategoriesList').html(html);
         } else {
-            $('#popularCategoriesList').html('<div class="text-muted">Không có danh mục nào</div>');
+            $('#popularCategoriesList').html('<p class="text-muted">Không có danh mục nào</p>');
         }
     }).fail(function() {
-        $('#popularCategoriesList').html('<div class="text-danger">Lỗi khi tải danh mục</div>');
+        $('#popularCategoriesList').html('<p class="text-danger">Lỗi khi tải danh mục</p>');
     });
 }
 
 function selectCategory(id, name, path) {
-    // Kiểm tra xem đã chọn chưa
+    // Check if already selected
     if (selectedCategories.some(function(sc) { return sc.Id === id; })) {
         return;
     }
@@ -223,9 +334,12 @@ function selectCategory(id, name, path) {
     updateSelectedCategoriesDisplay();
     updateHiddenInputs();
 
-    // Update search results if visible
+    // Refresh search results if visible
     if ($('#categorySearchResults').is(':visible')) {
-        searchCategories();
+        var term = $('#categorySearch').val().trim();
+        if (term.length >= 2) {
+            searchCategories(term);
+        }
     }
 }
 
@@ -234,26 +348,31 @@ function unselectCategory(id) {
     updateSelectedCategoriesDisplay();
     updateHiddenInputs();
 
-    // Update search results if visible
+    // Refresh search results if visible
     if ($('#categorySearchResults').is(':visible')) {
-        searchCategories();
+        var term = $('#categorySearch').val().trim();
+        if (term.length >= 2) {
+            searchCategories(term);
+        }
     }
 }
 
 function updateSelectedCategoriesDisplay() {
     var html = '';
     if (selectedCategories.length === 0) {
-        html = '<span class="text-muted">Chưa có danh mục nào được chọn</span>';
+        html = '<span class="text-muted"><i class="fas fa-info-circle mr-1"></i>Chưa có danh mục nào được chọn</span>';
+        $('#clearAllCategories').hide();
     } else {
         for (var i = 0; i < selectedCategories.length; i++) {
             var category = selectedCategories[i];
-            html += '<span class="badge badge-success mr-2 mb-2 p-2">';
-            html += escapeHtml(category.Name);
-            html += ' <button type="button" class="btn btn-sm btn-link text-white p-0 ml-1" onclick="unselectCategory(' + category.Id + ')" title="Bỏ chọn">';
-            html += '<i class="fa fa-times"></i>';
+            html += '<span class="category-tag">';
+            html += '<i class="fas fa-tag mr-1"></i>' + escapeHtml(category.Name);
+            html += '<button type="button" class="remove-btn" onclick="unselectCategory(' + category.Id + ')" title="Bỏ chọn">';
+            html += '<i class="fas fa-times"></i>';
             html += '</button>';
             html += '</span>';
         }
+        $('#clearAllCategories').show();
     }
     $('#selectedCategoriesList').html(html);
 }
@@ -266,10 +385,54 @@ function updateHiddenInputs() {
     $('#hiddenCategoryInputs').html(html);
 }
 
-function clearCategorySearch() {
-    $('#categorySearch').val('');
+function showSearchResults() {
+    $('#categorySearchResults').show();
+}
+
+function hideSearchResults() {
     $('#categorySearchResults').hide();
-    $('#popularCategories').show();
+}
+
+function showSearchLoading() {
+    $('#searchResultsList').html('<div class="text-center py-3"><div class="spinner"></div><p>Đang tìm kiếm...</p></div>');
+    showSearchResults();
+}
+
+function showNoSearchResults() {
+    $('#searchResultsList').html('<div class="text-center py-3"><i class="fas fa-search fa-2x text-muted mb-2"></i><p class="text-muted">Không tìm thấy danh mục phù hợp</p></div>');
+}
+
+function showSearchError() {
+    $('#searchResultsList').html('<div class="text-center py-3"><i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i><p class="text-danger">Lỗi khi tìm kiếm</p></div>');
+}
+
+function validateForm() {
+    var isValid = true;
+    var errors = [];
+
+    // Check title
+    var title = $('#Title').val().trim();
+    if (!title) {
+        errors.push('Vui lòng nhập tiêu đề tin tức');
+        isValid = false;
+    }
+
+    // Check categories
+    if (selectedCategories.length === 0) {
+        errors.push('Vui lòng chọn ít nhất một danh mục');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        alert('Vui lòng kiểm tra lại:\n' + errors.join('\n'));
+    }
+
+    return isValid;
+}
+
+function showLoadingOverlay() {
+    $('#loadingOverlay').fadeIn();
+    $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang lưu...');
 }
 
 function escapeHtml(text) {
@@ -284,27 +447,3 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 </script>
-
-<style>
-    .category-tag:hover {
-        background-color: #007bff !important;
-        color: white !important;
-    }
-
-    .category-item {
-        transition: all 0.2s ease;
-    }
-
-        .category-item:hover {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-    #selectedCategoriesList .badge {
-        font-size: 0.9em;
-    }
-
-    .spinner-border-sm {
-        width: 1rem;
-        height: 1rem;
-    }
-</style>
