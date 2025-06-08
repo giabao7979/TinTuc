@@ -1,90 +1,394 @@
-﻿@model List<NewsManagement.Models.News>
+﻿@model NewsManagement.Models.HomeViewModel
 @{
     ViewBag.Title = "Trang chủ";
-    var categories = ViewBag.Categories as List<NewsManagement.Models.Category>;
-    var selectedCategory = ViewBag.SelectedCategory as NewsManagement.Models.Category;
-    var searchTerm = ViewBag.SearchTerm as string;
 }
-<link rel="stylesheet" href="~/Content/site.css" />
-<link rel="stylesheet" href="~/Content/layout.css" />
-<link rel="stylesheet" href="~/Content/home-page.css" />
-<link rel="stylesheet" href="~/Content/creat.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 
-<div class="container">
+<link rel="stylesheet" href="~/Content/css/site.css" />
+<link rel="stylesheet" href="~/Content/css/layout.css" />
+<link rel="stylesheet" href="~/Content/css/home-page.css" />
+<link rel="stylesheet" href="~/Content/css/creat.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+<div class="container-fluid">
     <div class="row">
         <!-- Cột danh mục -->
         <div class="col-md-4">
             <div class="card categories-card">
-                <div class="card-header">
-                    <h4>Danh sách danh mục</h4>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-folder-tree mr-2"></i>Danh mục</h4>
+                    <div class="header-controls">
+                        <button type="button" id="expandAllBtn" class="btn btn-sm btn-outline-primary" title="Mở rộng tất cả">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                        <button type="button" id="collapseAllBtn" class="btn btn-sm btn-outline-secondary" title="Thu gọn tất cả">
+                            <i class="fas fa-compress-alt"></i>
+                        </button>
+                        <button type="button" id="refreshCategoriesBtn" class="btn btn-sm btn-outline-success" title="Tải lại">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body categories-menu">
-                    @foreach (var cat in categories)
-                    {
-                        <div class="category-item">
-                            <a href="@Url.Action("Index", new { categoryId = cat.Id })" class="category-link">
-                                <div class="category-content">
-                                    <div class="category-name">
-                                        <span class="category-icon">📁</span> @cat.Name
-                                    </div>
-                                    <span class="news-count">@cat.News.Count</span>
-                                </div>
-                            </a>
+
+                <div class="card-body p-2">
+                    <!-- Tìm kiếm danh mục -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" id="categorySearchInput" class="form-control form-control-sm"
+                                   placeholder="Tìm kiếm danh mục..." autocomplete="off"
+                                   value="@Model.CategorySearchTerm">
+                            <div class="input-group-append">
+                                <button type="button" id="clearCategorySearch" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button type="button" id="searchCategoryBtn" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
                         </div>
-                    }
+                    </div>
+
+                    <!-- Category Tree Container -->
+                    <div id="categoryTreeContainer" class="category-tree-content">
+                        @Html.Partial("_CategoryTree", Model)
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Cột nội dung chính -->
         <div class="col-md-8">
+            <!-- Tìm kiếm tin tức -->
             <div class="search-card card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-search mr-2"></i>Tìm kiếm tin tức</h5>
+                </div>
                 <div class="card-body">
-                    <form method="get" action="@Url.Action("Index")" class="search-input-group d-flex">
-                        <input type="text" name="term" placeholder="Tìm kiếm..." class="form-control me-2" />
-                        <button type="submit" class="btn btn-primary">Tìm</button>
-                    </form>
+                    <div class="input-group">
+                        <input type="text" id="newsSearchInput" class="form-control"
+                               placeholder="Nhập từ khóa tìm kiếm tin tức..." autocomplete="off"
+                               value="@Model.SearchTerm">
+                        <div class="input-group-append">
+                            <button type="button" id="clearNewsSearch" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button type="button" id="searchNewsBtn" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Content display area -->
             <div class="content-card card">
-                <div class="card-header">
-                    @if (!string.IsNullOrEmpty(searchTerm))
-                    {
-                        <h4>Kết quả tìm kiếm cho: "@searchTerm"</h4>
-                    }
-                    else if (selectedCategory != null)
-                    {
-                        <h4>Tin tức trong danh mục: @selectedCategory.Name</h4>
-                    }
-                    else
-                    {
-                        <h4>Tin tức mới nhất</h4>
-                    }
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 id="contentTitle">
+                            <i class="fas fa-newspaper mr-2"></i>
+                            <span id="contentTitleText">
+                                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                                {
+                                    <span>Kết quả tìm kiếm</span>
+                                }
+                                else if (Model.SelectedCategory != null)
+                                {
+                                    <span>@Model.SelectedCategory.Name</span>
+                                }
+                                else
+                                {
+                                    <span>Tin tức mới nhất</span>
+                                }
+                            </span>
+                        </h4>
+                        <small id="contentSubtitle" class="text-muted">
+                            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                            {
+                                <span>Tìm kiếm: "@Model.SearchTerm" - </span>
+                            }
+                            <span>Tổng: <span id="totalNewsCount">@Model.TotalNewsCount</span> tin tức</span>
+                        </small>
+                    </div>
+                    <div class="content-controls">
+                        <select id="sortBySelect" class="form-control form-control-sm" style="width: auto;">
+                            <option value="newest" @(Model.SortBy == "newest" ? "selected" : "")>Mới nhất</option>
+                            <option value="oldest" @(Model.SortBy == "oldest" ? "selected" : "")>Cũ nhất</option>
+                            <option value="title" @(Model.SortBy == "title" ? "selected" : "")>Theo tiêu đề</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="card-body">
-                    @if (Model.Any())
-                    {
-                        foreach (var news in Model)
-                        {
-                            <div class="news-card p-3 mb-3">
-                                <a href="@Url.Action("Details", "News", new { id = news.Id })" class="news-title">@news.Title</a>
-                                <p class="news-summary">
-                                    @(news.Summary?.Substring(0, Math.Min(200, news.Summary.Length)))
-                                </p>
-                                <div class="news-meta">
-                                    <span><i class="bi bi-clock"></i> @news.CreatedDate.ToString("dd/MM/yyyy")</span>
-                                </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p>Không có tin tức nào được tìm thấy.</p>
-                    }
+
+                <div class="card-body p-0">
+                    <div id="newsContainer" class="news-container">
+                        @Html.Partial("_NewsList", Model)
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Hidden form for maintaining state -->
+<form id="hiddenStateForm" style="display: none;">
+    <input type="hidden" id="currentCategoryId" value="@Model.SelectedCategoryId" />
+    <input type="hidden" id="currentSearchTerm" value="@Model.SearchTerm" />
+    <input type="hidden" id="currentCategorySearch" value="@Model.CategorySearchTerm" />
+    <input type="hidden" id="currentPage" value="@Model.CurrentPage" />
+    <input type="hidden" id="currentSortBy" value="@Model.SortBy" />
+    @foreach (var expandedId in Model.ExpandedCategoryIds)
+    {
+        <input type="hidden" class="expanded-category" value="@expandedId" />
+    }
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+// === GLOBAL STATE ===
+let currentState = {
+    categoryId: @(Model.SelectedCategoryId?.ToString() ?? "null"),
+    searchTerm: '@(Model.SearchTerm ?? "")',
+    categorySearch: '@(Model.CategorySearchTerm ?? "")',
+    page: @Model.CurrentPage,
+    sortBy: '@Model.SortBy',
+    expandedIds: [@string.Join(",", Model.ExpandedCategoryIds)]
+};
+
+let searchTimeouts = {};
+
+// === DOCUMENT READY ===
+$(document).ready(function() {
+    console.log('🚀 Initializing Hybrid Home Page...');
+    initializeEventHandlers();
+    updateUrl();
+});
+
+// === EVENT HANDLERS ===
+function initializeEventHandlers() {
+    // Category tree controls
+    $('#expandAllBtn').click(expandAllCategories);
+    $('#collapseAllBtn').click(collapseAllCategories);
+    $('#refreshCategoriesBtn').click(refreshCategories);
+
+    // Search handlers
+    $('#categorySearchInput').on('input', handleCategorySearch);
+    $('#clearCategorySearch').click(clearCategorySearch);
+    $('#searchCategoryBtn').click(performCategorySearch);
+
+    $('#newsSearchInput').on('input', handleNewsSearch);
+    $('#clearNewsSearch').click(clearNewsSearch);
+    $('#searchNewsBtn').click(performNewsSearch);
+
+    // Sort change
+    $('#sortBySelect').change(function() {
+        currentState.sortBy = $(this).val();
+        currentState.page = 1;
+        loadNews();
+    });
+
+    // Enter key handlers
+    $('#newsSearchInput').keypress(function(e) {
+        if (e.which === 13) performNewsSearch();
+    });
+
+    $('#categorySearchInput').keypress(function(e) {
+        if (e.which === 13) performCategorySearch();
+    });
+
+    // Dynamic event delegation for category tree
+    $(document).on('click', '.category-toggle-btn', handleCategoryToggle);
+    $(document).on('click', '.category-selection', handleCategorySelection);
+    $(document).on('click', '.pagination-link', handlePaginationClick);
+}
+
+// === CATEGORY TREE FUNCTIONS ===
+function handleCategoryToggle(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $btn = $(this);
+    const categoryId = parseInt($btn.data('category-id'));
+
+    if (currentState.expandedIds.includes(categoryId)) {
+        // Collapse
+        currentState.expandedIds = currentState.expandedIds.filter(id => id !== categoryId);
+    } else {
+        // Expand
+        currentState.expandedIds.push(categoryId);
+    }
+
+    loadCategoryTree();
+}
+
+function handleCategorySelection(e) {
+    e.preventDefault();
+
+    const categoryId = $(this).data('category-id');
+    const categoryName = $(this).data('category-name');
+
+    currentState.categoryId = categoryId || null;
+    currentState.searchTerm = '';
+    currentState.page = 1;
+
+    $('#newsSearchInput').val('');
+    updateContentTitle(categoryName || 'Tin tức mới nhất');
+
+    loadNews();
+    loadCategoryTree(); // Update selection state
+    updateUrl();
+}
+
+function expandAllCategories() {
+    showLoading('#categoryTreeContainer');
+
+    $.get('@Url.Action("GetAllCategoryIds", "Home")', function(data) {
+        if (data.success) {
+            currentState.expandedIds = data.categoryIds;
+            loadCategoryTree();
+        }
+    });
+}
+
+function collapseAllCategories() {
+    currentState.expandedIds = [];
+    loadCategoryTree();
+}
+
+function refreshCategories() {
+    loadCategoryTree();
+}
+
+function loadCategoryTree() {
+    showLoading('#categoryTreeContainer');
+
+    $.post('@Url.Action("GetCategoryTreePartial", "Home")', {
+        selectedCategoryId: currentState.categoryId,
+        expandedIds: currentState.expandedIds,
+        searchTerm: currentState.searchTerm,
+        categorySearch: currentState.categorySearch
+    }, function(html) {
+        $('#categoryTreeContainer').html(html);
+    }).fail(function() {
+        $('#categoryTreeContainer').html('<div class="alert alert-danger">Lỗi tải danh mục</div>');
+    });
+}
+
+// === SEARCH FUNCTIONS ===
+function handleCategorySearch() {
+    const term = $('#categorySearchInput').val().trim();
+
+    clearTimeout(searchTimeouts.category);
+    searchTimeouts.category = setTimeout(function() {
+        currentState.categorySearch = term;
+        loadCategoryTree();
+    }, 500);
+}
+
+function performCategorySearch() {
+    const term = $('#categorySearchInput').val().trim();
+    currentState.categorySearch = term;
+    loadCategoryTree();
+}
+
+function clearCategorySearch() {
+    $('#categorySearchInput').val('');
+    currentState.categorySearch = '';
+    loadCategoryTree();
+}
+
+function handleNewsSearch() {
+    const term = $('#newsSearchInput').val().trim();
+
+    clearTimeout(searchTimeouts.news);
+    searchTimeouts.news = setTimeout(function() {
+        if (term !== currentState.searchTerm) {
+            performNewsSearch();
+        }
+    }, 800);
+}
+
+function performNewsSearch() {
+    const term = $('#newsSearchInput').val().trim();
+    currentState.searchTerm = term;
+    currentState.categoryId = null; // Clear category when searching
+    currentState.page = 1;
+
+    updateContentTitle(term ? `Kết quả tìm kiếm: "${term}"` : 'Tin tức mới nhất');
+    loadNews();
+    loadCategoryTree(); // Update category selection
+    updateUrl();
+}
+
+function clearNewsSearch() {
+    $('#newsSearchInput').val('');
+    currentState.searchTerm = '';
+    currentState.page = 1;
+
+    updateContentTitle('Tin tức mới nhất');
+    loadNews();
+    updateUrl();
+}
+
+// === NEWS FUNCTIONS ===
+function loadNews() {
+    showLoading('#newsContainer');
+
+    $.post('@Url.Action("GetNewsPartial", "Home")', {
+        categoryId: currentState.categoryId,
+        searchTerm: currentState.searchTerm,
+        page: currentState.page,
+        sortBy: currentState.sortBy,
+        pageSize: 12
+    }, function(html) {
+        $('#newsContainer').html(html);
+        updateUrl();
+    }).fail(function() {
+        $('#newsContainer').html('<div class="alert alert-danger">Lỗi tải tin tức</div>');
+    });
+}
+
+function handlePaginationClick(e) {
+    e.preventDefault();
+    const page = parseInt($(this).data('page'));
+    currentState.page = page;
+    loadNews();
+}
+
+// === UTILITY FUNCTIONS ===
+function updateContentTitle(title) {
+    $('#contentTitleText').text(title);
+}
+
+function showLoading(selector) {
+    $(selector).html(`
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang tải...</span>
+            </div>
+            <p class="mt-2 mb-0">Đang tải...</p>
+        </div>
+    `);
+}
+
+function updateUrl() {
+    const params = new URLSearchParams();
+
+    if (currentState.categoryId) params.set('categoryId', currentState.categoryId);
+    if (currentState.searchTerm) params.set('searchTerm', currentState.searchTerm);
+    if (currentState.categorySearch) params.set('categorySearch', currentState.categorySearch);
+    if (currentState.page > 1) params.set('page', currentState.page);
+    if (currentState.sortBy !== 'newest') params.set('sortBy', currentState.sortBy);
+
+    currentState.expandedIds.forEach(id => {
+        params.append('expanded', id);
+    });
+
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    history.replaceState(null, null, newUrl);
+}
+
+// === BROWSER BACK/FORWARD SUPPORT ===
+window.addEventListener('popstate', function(e) {
+    location.reload(); // Simple approach for back/forward
+});
+</script>
+

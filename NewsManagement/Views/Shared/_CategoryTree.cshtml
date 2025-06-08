@@ -1,0 +1,156 @@
+﻿@model NewsManagement.Models.HomeViewModel
+
+@if (!string.IsNullOrEmpty(Model.CategorySearchTerm))
+{
+    <!-- Kết quả tìm kiếm danh mục -->
+    <div class="search-results">
+        <small class="text-muted d-block mb-2">
+            <i class="fas fa-search mr-1"></i>
+            Kết quả tìm kiếm: <strong>@Model.CategorySearchResults.Count</strong> danh mục
+        </small>
+        @if (Model.CategorySearchResults.Any())
+        {
+            foreach (var category in Model.CategorySearchResults)
+            {
+                <div class="search-result-item p-2 border-bottom hover-item">
+                    <a href="#" class="category-selection d-block text-decoration-none text-dark"
+                       data-category-id="@category.Id" data-category-name="@category.Name">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>@category.Name</strong>
+                                <br><small class="text-muted">📁 @category.Path</small>
+                            </div>
+                            <span class="badge badge-primary">@category.NewsCount</span>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Không tìm thấy danh mục nào phù hợp</p>
+                <small class="text-muted">Thử tìm kiếm với từ khóa khác</small>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <!-- Category Tree Structure -->
+    <div class="categories-menu">
+        <!-- Tất cả tin tức option -->
+        <div class="category-item">
+            <div class="root-category-option @(Model.SelectedCategoryId == null ? "active" : "")">
+                <a href="#" class="category-selection text-decoration-none text-dark d-block"
+                   data-category-id="" data-category-name="Tất cả tin tức">
+                    <div class="category-content">
+                        <div class="d-flex align-items-center">
+                            <div class="category-icon text-primary mr-2">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="category-name">
+                                <strong>🏠 Tất cả tin tức</strong>
+                            </div>
+                        </div>
+                        <div class="category-meta">
+                            <span class="badge badge-primary">Tất cả</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        @if (Model.Categories.Any())
+        {
+            <hr class="my-2" style="border-color: #dee2e6;">
+
+            foreach (var category in Model.Categories)
+            {
+                @Html.Partial("_CategoryTreeItem", category, new ViewDataDictionary {
+                    { "SelectedCategoryId", Model.SelectedCategoryId },
+                    { "ExpandedCategoryIds", Model.ExpandedCategoryIds },
+                    { "SearchTerm", Model.SearchTerm },
+                    { "Level", 0 }
+                })
+            }
+        }
+        else
+        {
+            <hr class="my-2" style="border-color: #dee2e6;">
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Chưa có danh mục nào</p>
+                <small class="text-muted">Hệ thống chưa thiết lập danh mục</small>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .search-result-item {
+        transition: all 0.2s ease;
+        border-radius: 4px;
+    }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(2px);
+        }
+
+    .hover-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .root-category-option {
+        padding: 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 2px solid #2196f3;
+    }
+
+        .root-category-option:hover {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .root-category-option.active {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+
+            .root-category-option.active a,
+            .root-category-option:hover a {
+                color: white !important;
+            }
+
+    .categories-menu {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+        /* Custom scrollbar */
+        .categories-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .categories-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .categories-menu::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+            .categories-menu::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+</style>

@@ -1,0 +1,82 @@
+﻿@model NewsManagement.Models.CategoryTreeNode
+@{
+    var selectedCategoryId = ViewData["SelectedCategoryId"] as int?;
+    var expandedIds = ViewData["ExpandedCategoryIds"] as List<int> ?? new List<int>();
+    var searchTerm = ViewData["SearchTerm"] as string ?? "";
+    var level = (int)(ViewData["Level"] ?? 0);
+
+    var isSelected = selectedCategoryId == Model.Id;
+    var isExpanded = expandedIds.Contains(Model.Id);
+
+    var linkClass = GetCategoryLinkClass(level);
+    var iconClass = GetCategoryIconClass(level);
+
+    string GetCategoryLinkClass(int lvl)
+    {
+        switch (lvl)
+        {
+            case 0: return "category-link";
+            case 1: return "subcategory-link";
+            case 2: return "sub-subcategory-link";
+            case 3: return "level-4-link";
+            default: return "level-5-link";
+        }
+    }
+
+    string GetCategoryIconClass(int lvl)
+    {
+        switch (lvl)
+        {
+            case 0: return "fas fa-folder";
+            case 1: return "fas fa-folder-open";
+            case 2: return "far fa-folder";
+            case 3: return "fas fa-file-alt";
+            default: return "fas fa-circle";
+        }
+    }
+}
+<link href="~/Content/css/item.css" rel="stylesheet" />
+<div class="category-item" data-category-id="@Model.Id" data-level="@level">
+    <div class="@linkClass @(isSelected ? "active" : "")" data-category-id="@Model.Id">
+        <div class="category-content">
+            <div class="d-flex align-items-center flex-grow-1">
+                <div class="category-icon mr-2">
+                    <i class="@iconClass"></i>
+                </div>
+                <div class="category-name">
+                    <a href="#" class="category-selection text-decoration-none text-dark"
+                       data-category-id="@Model.Id" data-category-name="@Model.Name">
+                        @Model.Name
+                    </a>
+                </div>
+            </div>
+            <div class="category-meta">
+                <span class="news-count">@Model.NewsCount</span>
+                @if (Model.HasChildren)
+                {
+                    <button type="button" class="category-toggle-btn ml-2 @(isExpanded ? "expanded" : "")"
+                            data-category-id="@Model.Id"
+                            title="@(isExpanded ? "Thu gọn" : "Mở rộng") danh mục con">
+                        <i class="fas fa-chevron-@(isExpanded ? "down" : "right")"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (Model.HasChildren && isExpanded && Model.Children.Any())
+    {
+        <div class="subcategories-container expanded" style="display: block;">
+            @foreach (var child in Model.Children)
+            {
+                @Html.Partial("_CategoryTreeItem", child, new ViewDataDictionary {
+                    { "SelectedCategoryId", selectedCategoryId },
+                    { "ExpandedCategoryIds", expandedIds },
+                    { "SearchTerm", searchTerm },
+                    { "Level", level + 1 }
+                })
+            }
+        </div>
+    }
+</div>
+

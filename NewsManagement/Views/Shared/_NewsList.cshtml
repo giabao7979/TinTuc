@@ -1,0 +1,286 @@
+﻿@model NewsManagement.Models.HomeViewModel
+
+<link href="~/Content/css/item.css" rel="stylesheet" />
+
+@if (Model.News != null && Model.News.Any())
+{
+    <div class="news-list p-3">
+        <!-- Results header -->
+        <div class="results-header mb-3 pb-2 border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Hiển thị <strong>@((Model.CurrentPage - 1) * Model.PageSize + 1)</strong>-<strong>@Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalNewsCount)</strong>
+                        của <strong>@Model.TotalNewsCount</strong> tin tức
+                    </small>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <small class="text-muted">
+                        <i class="fas fa-clock mr-1"></i>
+                        Cập nhật lúc: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Items -->
+        @foreach (var news in Model.News)
+        {
+            <div class="news-item mb-4 p-3 border rounded">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- News Title -->
+                        <h5 class="news-title mb-2">
+                            @Html.ActionLink(news.Title, "Details", "News", new { id = news.Id }, new
+                            {
+                                @class = "text-decoration-none news-title-link"
+                            })
+                        </h5>
+
+                        <!-- News Summary -->
+                        @if (!string.IsNullOrEmpty(news.Summary))
+                        {
+                            <p class="news-summary text-muted mb-3">
+                                @if (news.Summary.Length > 200)
+                                {
+                                    @(news.Summary.Substring(0, 200) + "...")
+                                }
+                                else
+                                {
+                                    @news.Summary
+                                }
+                            </p>
+                        }
+
+                        <!-- News Meta Information -->
+                        <div class="news-meta d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="meta-left mb-2 mb-md-0">
+                                <!-- Date -->
+                                <small class="text-muted mr-3">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    @news.CreatedDate.ToString("dd/MM/yyyy")
+                                </small>
+
+                                <!-- Time ago -->
+                                <small class="text-muted mr-3">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    @{
+                                        var timeSpan = DateTime.Now - news.CreatedDate;
+                                        string timeAgoDisplay = "";
+
+                                        if (timeSpan.Days > 0)
+                                        {
+                                            timeAgoDisplay = timeSpan.Days + " ngày trước";
+                                        }
+                                        else if (timeSpan.Hours > 0)
+                                        {
+                                            timeAgoDisplay = timeSpan.Hours + " giờ trước";
+                                        }
+                                        else if (timeSpan.Minutes > 0)
+                                        {
+                                            timeAgoDisplay = timeSpan.Minutes + " phút trước";
+                                        }
+                                        else
+                                        {
+                                            timeAgoDisplay = "Vừa xong";
+                                        }
+                                    }
+                                    @timeAgoDisplay
+                                </small>
+
+                                <!-- Categories -->
+                                @if (news.Categories != null && news.Categories.Any())
+                                {
+                                    <div class="category-badges mt-1">
+                                        @foreach (var category in news.Categories.Take(3))
+                                        {
+                                            <a href="#" class="category-selection badge badge-secondary mr-1 mb-1"
+                                               data-category-id="@category.Id" data-category-name="@category.Name"
+                                               title="Xem tin tức trong danh mục @category.Name">
+                                                <i class="fas fa-tag mr-1"></i>@category.Name
+                                            </a>
+                                        }
+                                        @if (news.Categories.Count() > 3)
+                                        {
+                                            <span class="badge badge-light">+@(news.Categories.Count() - 3) khác</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="meta-right">
+                                <div class="btn-group" role="group">
+                                    @Html.ActionLink("Xem chi tiết", "Details", "News", new { id = news.Id }, new
+                                    {
+                                        @class = "btn btn-sm btn-outline-primary",
+                                        title = "Xem chi tiết tin tức"
+                                    })
+                                    @Html.ActionLink("Sửa", "Edit", "News", new { id = news.Id }, new
+                                    {
+                                        @class = "btn btn-sm btn-outline-warning",
+                                        title = "Chỉnh sửa tin tức này"
+                                    })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    if (Model.TotalPages > 1)
+    {
+        <div class="pagination-container p-3 border-top bg-light">
+            <nav aria-label="Phân trang tin tức">
+                <ul class="pagination justify-content-center mb-3">
+                    <!-- Previous button -->
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@(Model.CurrentPage - 1)" title="Trang trước">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    <!-- Page numbers -->
+                    @{
+                        int startPage = Math.Max(1, Model.CurrentPage - 2);
+                        int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                    }
+
+                    <!-- First page -->
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="1">1</a>
+                        </li>
+                        if (startPage > 2)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                    }
+
+                    <!-- Current page range -->
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            @if (i == Model.CurrentPage)
+                            {
+                                <span class="page-link">
+                                    @i
+                                    <span class="sr-only">(hiện tại)</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="#" class="page-link pagination-link" data-page="@i">@i</a>
+                            }
+                        </li>
+                    }
+
+                    <!-- Last page -->
+                    @if (endPage < Model.TotalPages)
+                    {
+                        if (endPage < Model.TotalPages - 1)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@Model.TotalPages">@Model.TotalPages</a>
+                        </li>
+                    }
+
+                    <!-- Next button -->
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a href="#" class="page-link pagination-link" data-page="@(Model.CurrentPage + 1)" title="Trang sau">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+            <!-- Pagination Info -->
+            <div class="text-center">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Trang <strong>@Model.CurrentPage</strong> / <strong>@Model.TotalPages</strong>
+                    (Tổng <strong>@Model.TotalNewsCount</strong> tin tức)
+                </small>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <!-- No News State -->
+    <div class="no-news text-center py-5">
+        <div class="no-news-icon mb-4">
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <i class="fas fa-search fa-4x text-muted"></i>
+            }
+            else if (Model.SelectedCategory != null)
+            {
+                <i class="fas fa-folder-open fa-4x text-muted"></i>
+            }
+            else
+            {
+                <i class="fas fa-newspaper fa-4x text-muted"></i>
+            }
+        </div>
+
+        <h5 class="text-muted mb-3">Không có tin tức</h5>
+
+        <p class="text-muted mb-4">
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <span>Không tìm thấy tin tức phù hợp với từ khóa <strong>"@Model.SearchTerm"</strong>.</span>
+                <br /><small>Thử tìm kiếm với từ khóa khác hoặc kiểm tra chính tả.</small>
+            }
+            else if (Model.SelectedCategory != null)
+            {
+                <span>Danh mục <strong>"@Model.SelectedCategory.Name"</strong> chưa có tin tức nào.</span>
+                <br /><small>Hãy thêm tin tức mới cho danh mục này.</small>
+            }
+            else
+            {
+                <span>Hệ thống chưa có tin tức nào được đăng.</span>
+                <br /><small>Hãy bắt đầu bằng cách thêm tin tức đầu tiên.</small>
+            }
+        </p>
+
+        <div class="no-news-actions">
+            @Html.ActionLink("Thêm tin tức mới", "Create", "News", null, new
+            {
+                @class = "btn btn-primary mr-2",
+                title = "Tạo tin tức mới"
+            })
+
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <button type="button" class="btn btn-outline-secondary" onclick="clearNewsSearch()">
+                    <i class="fas fa-times mr-1"></i>Xóa tìm kiếm
+                </button>
+            }
+            else if (Model.SelectedCategory != null)
+            {
+                <a href="#" class="btn btn-outline-secondary category-selection" data-category-id="" data-category-name="Tất cả tin tức">
+                    <i class="fas fa-home mr-1"></i>Xem tất cả tin tức
+                </a>
+            }
+        </div>
+    </div>
+}
+

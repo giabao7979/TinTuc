@@ -144,6 +144,7 @@
     <Compile Include="Models\Category.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\Model1.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -171,6 +172,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\css\creat.css" />
     <Content Include="Content\css\home-page.css" />
+    <Content Include="Content\css\item.css" />
     <Content Include="Content\css\layout.css" />
     <Content Include="Content\css\site.css" />
     <Content Include="Content\PagedList.css" />
@@ -244,6 +246,9 @@
     <Content Include="Views\News\Details.cshtml" />
     <Content Include="Views\Shared\_SearchWidget.cshtml" />
     <Content Include="Views\News\Index.cshtml" />
+    <Content Include="Views\Shared\_CategoryTreeItem.cshtml" />
+    <Content Include="Views\Shared\_CategoryTree.cshtml" />
+    <Content Include="Views\Shared\_NewsList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
