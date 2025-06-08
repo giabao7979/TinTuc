@@ -11,10 +11,53 @@ namespace NewsManagement.Controllers
     {
         private TinTucEntities db = new TinTucEntities();
 
-        public ActionResult Index()
+        public ActionResult Index(int? categoryId, string term)
         {
-            return View();
+            var categories = db.Categories
+                .Where(c => c.ParentId == null && c.Status)
+                .OrderBy(c => c.Ordering)
+                .ThenBy(c => c.Name)
+                .Take(100)
+                .ToList();
+
+            ViewBag.Categories = categories;
+
+            if (!string.IsNullOrEmpty(term))
+            {
+                var results = db.News
+                    .Where(n => n.Status && (
+                        n.Title.Contains(term) ||
+                        n.Summary.Contains(term) ||
+                        n.Content.Contains(term)))
+                    .OrderByDescending(n => n.CreatedDate)
+                    .Take(50)
+                    .ToList();
+
+                ViewBag.SearchTerm = term;
+                return View(results);
+            }
+
+            if (categoryId.HasValue)
+            {
+                var newsList = db.News
+                    .Where(n => n.Status && n.Categories.Any(c => c.Id == categoryId.Value))
+                    .OrderByDescending(n => n.CreatedDate)
+                    .Take(20)
+                    .ToList();
+
+                ViewBag.SelectedCategory = db.Categories.Find(categoryId.Value);
+                return View(newsList);
+            }
+
+            var recentNews = db.News
+                .Where(n => n.Status)
+                .OrderByDescending(n => n.CreatedDate)
+                .Take(20)
+                .ToList();
+
+            return View(recentNews);
         }
+
 
         // API: Lấy danh mục cấp 1 - Tối ưu cho 5000 danh mục
         [HttpGet]
