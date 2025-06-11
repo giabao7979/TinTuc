@@ -1636,3 +1636,99 @@ input:checked + .status-slider {
     animation-delay: 0.6s;
     opacity: 0;
 }
+/* Category Tree Enhancements */
+.category-tree-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.category-checkbox input[type="checkbox"] {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+.category-link.selected,
+.subcategory-link.selected,
+.sub-subcategory-link.selected,
+.level-4-link.selected,
+.level-5-link.selected {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    color: white !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+    .category-link.selected .news-count,
+    .subcategory-link.selected .news-count,
+    .sub-subcategory-link.selected .news-count,
+    .level-4-link.selected .news-count,
+    .level-5-link.selected .news-count {
+        background: rgba(255,255,255,0.3);
+        color: white;
+    }
+
+.category-tree-controls .btn {
+    transition: all 0.3s ease;
+}
+
+    .category-tree-controls .btn:hover {
+        transform: translateY(-2px);
+    }
+
+.search-result-item {
+    transition: all 0.2s ease;
+}
+
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(2px);
+    }
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.loading-subcategories {
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 4px;
+    margin: 2px 0;
+}
+
+/* Category tree scrollbar */
+.category-tree-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.category-tree-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.category-tree-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+    .category-tree-content::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+/* Search results scrollbar */
+#searchResultsList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#searchResultsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#searchResultsList::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+    #searchResultsList::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }

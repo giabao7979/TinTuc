@@ -171,6 +171,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\css\category.css" />
     <Content Include="Content\css\creat.css" />
     <Content Include="Content\css\home-page.css" />
     <Content Include="Content\css\item.css" />
@@ -244,7 +245,6 @@
     <Content Include="Views\Category\NewsByCategory.cshtml" />
     <Content Include="Views\News\SearchResults.cshtml" />
     <Content Include="Views\News\Create.cshtml" />
-    <Content Include="Views\News\Delete.cshtml" />
     <Content Include="Views\News\Edit.cshtml" />
     <Content Include="Views\News\Details.cshtml" />
     <Content Include="Views\Shared\_SearchWidget.cshtml" />

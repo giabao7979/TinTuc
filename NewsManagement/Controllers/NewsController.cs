@@ -222,24 +222,57 @@ namespace NewsManagement.Controllers
         {
             try
             {
+                // Log để debug
+                System.Diagnostics.Debug.WriteLine($"DeleteNews called with ID: {id}");
+
+                // Kiểm tra ID hợp lệ
+                if (id <= 0)
+                {
+                    return Json(new { success = false, message = "ID tin tức không hợp lệ." });
+                }
+
+                // Tìm tin tức
                 News news = db.News.Include(n => n.Categories).FirstOrDefault(n => n.Id == id);
                 if (news == null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"News not found with ID: {id}");
                     return Json(new { success = false, message = "Không tìm thấy tin tức cần xóa." });
                 }
 
+                System.Diagnostics.Debug.WriteLine($"Found news: {news.Title}");
+
                 // Xóa quan hệ với danh mục
-                news.Categories.Clear();
+                if (news.Categories != null && news.Categories.Count > 0)
+                {
+                    news.Categories.Clear();
+                    System.Diagnostics.Debug.WriteLine("Cleared categories");
+                }
 
                 // Xóa tin tức
                 db.News.Remove(news);
-                db.SaveChanges();
+                int rowsAffected = db.SaveChanges();
+
+                System.Diagnostics.Debug.WriteLine($"Rows affected: {rowsAffected}");
 
                 return Json(new { success = true, message = "Xóa tin tức thành công!" });
             }
+            catch (System.Data.Entity.Infrastructure.DbUpdateException dbEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"Database error: {dbEx.Message}");
+                if (dbEx.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inner exception: {dbEx.InnerException.Message}");
+                }
+                return Json(new { success = false, message = "Lỗi cơ sở dữ liệu khi xóa tin tức." });
+            }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa tin tức: " + ex.Message });
+                System.Diagnostics.Debug.WriteLine($"General error: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
 

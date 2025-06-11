@@ -984,3 +984,56 @@ body {
         background: white;
     }
 }
+/* Enhanced notification styles */
+.notification-alert {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading overlay improvements */
+.loading-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: none !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 999999 !important;
+}
+
+    .loading-overlay.show {
+        display: flex !important;
+    }
+
+/* Table row delete animation */
+.table-danger {
+    background-color: #f8d7da !important;
+    transition: background-color 0.5s ease;
+}
+
+/* No news state improvements */
+.no-news-state {
+    padding: 4rem 2rem;
+}
+
+.no-news-icon {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    opacity: 0.6;
+}

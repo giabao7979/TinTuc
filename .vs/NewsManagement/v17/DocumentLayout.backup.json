@@ -3,28 +3,20 @@
   "WorkspaceRootPath": "D:\\test_CV\\NewsManagement\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\news\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\views\\category\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\category\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\content\\css\\new.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\new.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\news\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\news\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\content\\css\\category.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\category.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 280,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,81 +34,52 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Details.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Details.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Details.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Details.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\News\\Details.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-08T07:46:51.215Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "NewsController.cs",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\NewsController.cs",
-              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\NewsController.cs",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\NewsController.cs",
-              "RelativeToolTip": "NewsManagement\\Controllers\\NewsController.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAAAA0AAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T07:46:03.191Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Index.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Index.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Index.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\News\\Index.cshtml",
-              "ViewState": "AgIAALgAAAAAAAAAAAAswL4AAAAYAAAAAAAAAA==",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-08T07:43:53.04Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Edit.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Edit.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Edit.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Edit.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\News\\Edit.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-08T07:42:50.438Z",
+              "WhenOpened": "2025-06-10T04:05:19.665Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "new.css",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\new.css",
-              "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\new.css",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\new.css",
-              "RelativeToolTip": "NewsManagement\\Content\\css\\new.css",
-              "ViewState": "AgIAAMcEAAAAAAAAAAAAANAEAAAAAAAAAAAAAA==",
+              "Title": "category.css",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\category.css",
+              "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\category.css",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\category.css",
+              "RelativeToolTip": "NewsManagement\\Content\\css\\category.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-06-08T07:35:28.244Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-08T17:50:08.18Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Create.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Create.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Create.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\News\\Create.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\News\\Create.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Category\\Edit.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Category\\Edit.cshtml",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Category\\Edit.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\Category\\Edit.cshtml",
+              "ViewState": "AgIAACMBAAAAAAAAAAAAAAcAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-08T07:35:01.643Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-08T17:49:22.593Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\CategoryController.cs",
+              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAANkAAAAAAAAAAAAmwO0AAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-08T17:02:40.111Z"
             }
           ]
         }

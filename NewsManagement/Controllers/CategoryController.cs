@@ -95,12 +95,124 @@ namespace NewsManagement.Controllers
                 return HttpNotFound();
             }
 
-            var availableParents = GetCategoriesForDropdownOptimized()
-                .Where(c => c.Id != id && !IsDescendantOf(c.Id, id))
+            // SỬ DỤNG PHƯƠNG PHÁP TỐI ƯU - LOAD TẤT CẢ CATEGORIES MỘT LẦN
+            var availableParents = GetAvailableParentsOptimized(id);
+            ViewBag.ParentId = new SelectList(availableParents, "Id", "DisplayName", category.ParentId);
+
+            return View(category);
+        }
+
+        // ===== THÊM METHODS TỐI ƯU MỚI =====
+
+        /// <summary>
+        /// Tối ưu hóa việc lấy danh sách danh mục cha có thể chọn
+        /// Chỉ 1 lần truy cập database thay vì N lần
+        /// </summary>
+        private List<CategoryDropdownItem> GetAvailableParentsOptimized(int editingCategoryId)
+        {
+            // 1. Load TẤT CẢ categories một lần duy nhất
+            var allCategories = db.Categories
+                .Where(c => c.Status && c.Id != editingCategoryId) // Loại trừ chính nó
+                .Select(c => new SimpleCategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ParentId = c.ParentId
+                })
                 .ToList();
 
-            ViewBag.ParentId = new SelectList(availableParents, "Id", "DisplayName", category.ParentId);
-            return View(category);
+            // 2. Tạo dictionary để lookup nhanh
+            var categoryDict = allCategories.ToDictionary(c => c.Id);
+
+            // 3. Tìm tất cả descendants của category đang edit (không cho chọn)
+            var descendantIds = GetAllDescendantsOptimized(editingCategoryId, allCategories);
+
+            // 4. Lọc ra những categories có thể chọn làm parent
+            var availableCategories = allCategories
+                .Where(c => !descendantIds.Contains(c.Id)) // Không phải descendant
+                .ToList();
+
+            // 5. Tạo display names với hierarchy path
+            var result = new List<CategoryDropdownItem>();
+            foreach (var cat in availableCategories)
+            {
+                var path = BuildCategoryPathOptimized(cat.Id, categoryDict);
+                result.Add(new CategoryDropdownItem
+                {
+                    Id = cat.Id,
+                    Name = cat.Name,
+                    DisplayName = path
+                });
+            }
+
+            return result.OrderBy(c => c.DisplayName).ToList();
+        }
+
+        /// <summary>
+        /// Tìm tất cả descendants của một category mà KHÔNG cần truy cập database nhiều lần
+        /// </summary>
+        private HashSet<int> GetAllDescendantsOptimized(int categoryId, List<SimpleCategoryDto> allCategories)
+        {
+            var descendants = new HashSet<int>();
+            var queue = new Queue<int>();
+            queue.Enqueue(categoryId);
+
+            while (queue.Count > 0)
+            {
+                var currentId = queue.Dequeue();
+
+                // Tìm tất cả children của currentId trong memory
+                var children = allCategories.Where(c => c.ParentId == currentId);
+
+                foreach (var child in children)
+                {
+                    if (!descendants.Contains(child.Id))
+                    {
+                        descendants.Add(child.Id);
+                        queue.Enqueue(child.Id); // Tiếp tục tìm descendants của child
+                    }
+                }
+            }
+
+            return descendants;
+        }
+
+        /// <summary>
+        /// Xây dựng đường dẫn category path mà không cần truy cập database
+        /// </summary>
+        private string BuildCategoryPathOptimized(int categoryId, Dictionary<int, SimpleCategoryDto> categoryDict)
+        {
+            var path = new List<string>();
+            var currentId = (int?)categoryId;
+            var visited = new HashSet<int>(); // Tránh infinite loop
+
+            while (currentId.HasValue && !visited.Contains(currentId.Value))
+            {
+                visited.Add(currentId.Value);
+
+                if (categoryDict.TryGetValue(currentId.Value, out var category))
+                {
+                    path.Insert(0, category.Name ?? "");
+                    currentId = category.ParentId;
+                }
+                else
+                {
+                    break;
+                }
+
+                // Bảo vệ tránh infinite loop
+                if (path.Count > 10) break;
+            }
+
+            return string.Join(" > ", path);
+        }
+
+        // ===== DTO CLASS CHO TỐI ƯU =====
+        public class SimpleCategoryDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int? ParentId { get; set; }
         }
 
         [HttpPost]

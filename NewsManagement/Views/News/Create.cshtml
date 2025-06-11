@@ -88,16 +88,6 @@
                                 </label>
 
                                 <div class="category-selector-section">
-                                    <!-- Search Categories -->
-                                    <div class="category-search-container">
-                                        <i class="fas fa-search category-search-icon"></i>
-                                        <input type="text"
-                                               id="categorySearch"
-                                               class="form-control category-search-input"
-                                               placeholder="Tìm kiếm danh mục..."
-                                               autocomplete="off">
-                                    </div>
-
                                     <!-- Selected Categories Display -->
                                     <div class="selected-categories-display">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -114,18 +104,75 @@
                                         </div>
                                     </div>
 
-                                    <!-- Search Results -->
-                                    <div id="categorySearchResults" class="search-results-container" style="display: none;">
-                                        <div id="searchResultsList"></div>
+                                    <!-- Category Tree Controls -->
+                                    <div class="category-tree-controls mb-3">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" id="categorySearchInput" class="form-control"
+                                                           placeholder="Tìm kiếm danh mục..." autocomplete="off">
+                                                    <div class="input-group-append">
+                                                        <button type="button" id="clearCategorySearch" class="btn btn-outline-secondary">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="btn-group w-100" role="group">
+                                                    <button type="button" id="expandAllBtn" class="btn btn-outline-primary btn-sm" title="Mở rộng tất cả">
+                                                        <i class="fas fa-expand-alt"></i>
+                                                    </button>
+                                                    <button type="button" id="collapseAllBtn" class="btn btn-outline-secondary btn-sm" title="Thu gọn tất cả">
+                                                        <i class="fas fa-compress-alt"></i>
+                                                    </button>
+                                                    <button type="button" id="refreshCategoriesBtn" class="btn btn-outline-success btn-sm" title="Tải lại">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <!-- Popular Categories -->
-                                    <div class="popular-categories-section">
-                                        <h6><i class="fas fa-star mr-2"></i>Danh mục phổ biến:</h6>
-                                        <div class="popular-categories" id="popularCategoriesList">
-                                            <div class="text-center py-3">
-                                                <div class="spinner"></div>
-                                                <p>Đang tải danh mục...</p>
+                                    <!-- Category Tree Container -->
+                                    <div class="category-tree-wrapper">
+                                        <div class="card">
+                                            <div class="card-header py-2 bg-light">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-folder-tree mr-2"></i>Chọn danh mục
+                                                    </h6>
+                                                    <span class="badge badge-info" id="categoryCount">Đang tải...</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                                                <div id="categoryTreeContainer" class="category-tree-content">
+                                                    <div class="loading-spinner text-center py-4">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div>
+                                                        <p class="mt-2 mb-0">Đang tải danh mục...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Search Results (khi search) -->
+                                    <div id="categorySearchResults" class="search-results-container mt-3" style="display: none;">
+                                        <div class="card">
+                                            <div class="card-header py-2">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-search mr-2"></i>Kết quả tìm kiếm
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                                                <div id="searchResultsList"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -207,11 +254,13 @@
 <script>
 // Global variables
 var selectedCategories = [];
+var categoriesData = [];
+var expandedCategoryIds = [];
 var searchTimeout;
 
 $(document).ready(function() {
     initializeForm();
-    loadPopularCategories();
+    initializeCategoryTree();
 
     // Form validation
     $('#newsForm').submit(function(e) {
@@ -219,32 +268,17 @@ $(document).ready(function() {
             e.preventDefault();
             return false;
         }
-
         showLoadingOverlay();
     });
 });
 
 function initializeForm() {
-    // Category search
-    $('#categorySearch').on('input', function() {
-        clearTimeout(searchTimeout);
-        var term = $(this).val().trim();
-
-        if (term.length < 2) {
-            hideSearchResults();
-            return;
-        }
-
-        searchTimeout = setTimeout(function() {
-            searchCategories(term);
-        }, 300);
-    });
-
     // Clear all categories
     $('#clearAllCategories').click(function() {
         selectedCategories = [];
         updateSelectedCategoriesDisplay();
         updateHiddenInputs();
+        updateCategoryTreeSelection();
     });
 
     // Status toggle
@@ -253,108 +287,304 @@ function initializeForm() {
     });
 }
 
-function searchCategories(term) {
-    showSearchLoading();
+function initializeCategoryTree() {
+    // Search functionality
+    $('#categorySearchInput').on('input', function() {
+        clearTimeout(searchTimeout);
+        var term = $(this).val().trim();
 
-    $.get('@Url.Action("SearchCategories", "Category")', { term: term, pageSize: 20 }, function(data) {
-        if (data.success && data.categories.length > 0) {
-            displaySearchResults(data.categories);
-        } else {
-            showNoSearchResults();
+        if (term.length < 2) {
+            hideSearchResults();
+            showCategoryTree();
+            return;
         }
-    }).fail(function() {
-        showSearchError();
+
+        searchTimeout = setTimeout(function() {
+            searchCategories(term);
+        }, 300);
+    });
+
+    // Clear search
+    $('#clearCategorySearch').click(function() {
+        $('#categorySearchInput').val('');
+        hideSearchResults();
+        showCategoryTree();
+    });
+
+    // Tree controls
+    $('#expandAllBtn').click(function() {
+        expandAllCategories();
+    });
+
+    $('#collapseAllBtn').click(function() {
+        collapseAllCategories();
+    });
+
+    $('#refreshCategoriesBtn').click(function() {
+        loadRootCategories();
+    });
+
+    // Load initial data
+    loadRootCategories();
+}
+
+function loadRootCategories() {
+    console.log('🌳 Loading root categories...');
+
+    $('#categoryTreeContainer').html(`
+        <div class="loading-spinner text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0">Đang tải danh mục...</p>
+        </div>
+    `);
+
+    $.ajax({
+        url: '@Url.Action("GetCategoriesTree", "Home")',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 15000,
+        success: function(data) {
+            console.log('📦 Root categories loaded:', data);
+
+            if (data.success && data.categories) {
+                categoriesData = data.categories;
+                renderCategoryTree(data.categories);
+                $('#categoryCount').text(data.categories.length + ' danh mục');
+            } else {
+                showCategoryError('Không thể tải danh mục');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Failed to load categories:', error);
+            showCategoryError('Lỗi kết nối đến server');
+        }
     });
 }
 
-function displaySearchResults(categories) {
-    var html = '';
-    for (var i = 0; i < categories.length; i++) {
-        var category = categories[i];
-        var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
-
-        html += '<div class="search-result-item" data-category-id="' + category.Id + '">';
-        html += '<div class="d-flex justify-content-between align-items-center">';
-        html += '<div>';
-        html += '<strong>' + escapeHtml(category.Name) + '</strong><br>';
-        html += '<small class="text-muted">' + escapeHtml(category.Path) + '</small><br>';
-        html += '<span class="badge badge-info">' + category.NewsCount + ' tin</span>';
-        html += '</div>';
-
-        if (!isSelected) {
-            html += '<button type="button" class="btn btn-sm btn-primary" onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Path) + '\')">';
-            html += '<i class="fas fa-plus mr-1"></i>Chọn';
-            html += '</button>';
-        } else {
-            html += '<span class="badge badge-success"><i class="fas fa-check mr-1"></i>Đã chọn</span>';
-        }
-
-        html += '</div></div>';
+function renderCategoryTree(categories) {
+    if (!categories || categories.length === 0) {
+        $('#categoryTreeContainer').html(`
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Chưa có danh mục nào</p>
+            </div>
+        `);
+        return;
     }
 
-    $('#searchResultsList').html(html);
-    showSearchResults();
+    var html = '<div class="categories-menu p-2">';
+
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        html += renderCategoryItem(category, 0);
+    }
+
+    html += '</div>';
+    $('#categoryTreeContainer').html(html);
+
+    // Attach event listeners
+    attachCategoryEventListeners();
+
+    console.log('✅ Category tree rendered');
 }
 
-function loadPopularCategories() {
-    $.get('@Url.Action("GetCategoriesTree", "Home")', function(data) {
-        if (data.success && data.categories.length > 0) {
-            var html = '';
-            for (var i = 0; i < Math.min(8, data.categories.length); i++) {
-                var category = data.categories[i];
-                html += '<button type="button" class="popular-category-btn" ';
-                html += 'onclick="selectCategory(' + category.Id + ', \'' + escapeHtml(category.Name) + '\', \'' + escapeHtml(category.Name) + '\')">';
-                html += escapeHtml(category.Name);
-                if (category.NewsCount > 0) {
-                    html += ' <span class="badge badge-light ml-1">' + category.NewsCount + '</span>';
-                }
-                html += '</button>';
-            }
-            $('#popularCategoriesList').html(html);
-        } else {
-            $('#popularCategoriesList').html('<p class="text-muted">Không có danh mục nào</p>');
+function renderCategoryItem(category, level) {
+    var linkClass = getCategoryLinkClass(level);
+    var iconClass = getCategoryIconClass(level);
+    var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
+    var isExpanded = expandedCategoryIds.includes(category.Id);
+
+    var html = `
+        <div class="category-item" data-category-level="${level}" data-category-id="${category.Id}">
+            <div class="${linkClass} ${isSelected ? 'selected' : ''}"
+                 data-category-id="${category.Id}"
+                 data-category-name="${escapeHtml(category.Name)}"
+                 data-level="${level}">
+                <div class="category-content">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <!-- Selection Checkbox -->
+                        <div class="category-checkbox mr-2">
+                            <input type="checkbox"
+                                   class="category-check"
+                                   data-category-id="${category.Id}"
+                                   data-category-name="${escapeHtml(category.Name)}"
+                                   ${isSelected ? 'checked' : ''}>
+                        </div>
+                        <div class="category-icon mr-2">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="category-name">
+                            ${escapeHtml(category.Name)}
+                        </div>
+                    </div>
+                    <div class="category-meta">
+                        <span class="news-count">${category.NewsCount || 0}</span>
+                        ${category.HasChildren ? `
+                            <button type="button" class="category-toggle-btn ml-2 ${isExpanded ? 'expanded' : ''}"
+                                    data-parent-id="${category.Id}"
+                                    data-level="${level}"
+                                    title="${isExpanded ? 'Thu gọn' : 'Mở rộng'} danh mục con">
+                                <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>`;
+
+    // Subcategories container
+    if (category.HasChildren) {
+        html += `<div id="subcategories-${category.Id}" class="subcategories-container ${isExpanded ? 'expanded' : ''}"
+                      style="display: ${isExpanded ? 'block' : 'none'};">`;
+
+        if (isExpanded) {
+            // Will be loaded by AJAX
+            html += `<div class="loading-subcategories text-center py-2">
+                        <div class="spinner-border spinner-border-sm text-primary mr-2"></div>
+                        <small class="text-muted">Đang tải...</small>
+                     </div>`;
         }
-    }).fail(function() {
-        $('#popularCategoriesList').html('<p class="text-danger">Lỗi khi tải danh mục</p>');
+
+        html += `</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+}
+
+function attachCategoryEventListeners() {
+    // Checkbox selection
+    $(document).off('change', '.category-check');
+    $(document).on('change', '.category-check', function() {
+        var categoryId = parseInt($(this).attr('data-category-id'));
+        var categoryName = $(this).attr('data-category-name');
+
+        if ($(this).is(':checked')) {
+            selectCategory(categoryId, categoryName);
+        } else {
+            unselectCategory(categoryId);
+        }
+    });
+
+    // Toggle subcategories
+    $(document).off('click', '.category-toggle-btn');
+    $(document).on('click', '.category-toggle-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var parentId = parseInt($(this).attr('data-parent-id'));
+        var level = parseInt($(this).attr('data-level')) || 0;
+
+        toggleSubcategories(parentId, level + 1);
+    });
+
+    // Load expanded subcategories
+    loadExpandedSubcategories();
+}
+
+function toggleSubcategories(parentId, level) {
+    var container = $('#subcategories-' + parentId);
+    var toggleBtn = $(`[data-parent-id="${parentId}"]`);
+    var icon = toggleBtn.find('i');
+
+    if (container.hasClass('expanded')) {
+        // Collapse
+        container.removeClass('expanded').slideUp(300);
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+        toggleBtn.removeClass('expanded');
+
+        // Remove from expanded list
+        expandedCategoryIds = expandedCategoryIds.filter(id => id !== parentId);
+    } else {
+        // Expand
+        container.addClass('expanded').slideDown(300);
+        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+        toggleBtn.addClass('expanded');
+
+        // Add to expanded list
+        if (!expandedCategoryIds.includes(parentId)) {
+            expandedCategoryIds.push(parentId);
+        }
+
+        // Load subcategories
+        loadSubcategories(parentId, level, container);
+    }
+}
+
+function loadSubcategories(parentId, level, container) {
+    container.html(`
+        <div class="loading-subcategories text-center py-2">
+            <div class="spinner-border spinner-border-sm text-primary mr-2"></div>
+            <small class="text-muted">Đang tải danh mục con...</small>
+        </div>
+    `);
+
+    $.ajax({
+        url: '@Url.Action("GetSubcategories", "Home")',
+        type: 'GET',
+        data: { parentId: parentId },
+        dataType: 'json',
+        timeout: 10000,
+        success: function(data) {
+            if (data.success && data.subcategories && data.subcategories.length > 0) {
+                var html = '';
+                for (var i = 0; i < data.subcategories.length; i++) {
+                    html += renderCategoryItem(data.subcategories[i], level);
+                }
+                container.html(html);
+            } else {
+                container.html(`
+                    <div class="text-center py-2">
+                        <small class="text-muted">Không có danh mục con</small>
+                    </div>
+                `);
+            }
+        },
+        error: function() {
+            container.html(`
+                <div class="text-center py-2">
+                    <small class="text-danger">Lỗi tải danh mục con</small>
+                    <button type="button" class="btn btn-sm btn-outline-primary ml-2"
+                            onclick="loadSubcategories(${parentId}, ${level}, $('#subcategories-${parentId}'))">
+                        Thử lại
+                    </button>
+                </div>
+            `);
+        }
     });
 }
 
-function selectCategory(id, name, path) {
-    // Check if already selected
-    if (selectedCategories.some(function(sc) { return sc.Id === id; })) {
+function loadExpandedSubcategories() {
+    expandedCategoryIds.forEach(function(parentId) {
+        var container = $('#subcategories-' + parentId);
+        if (container.length && container.hasClass('expanded')) {
+            var level = parseInt(container.closest('[data-category-level]').attr('data-category-level')) + 1;
+            loadSubcategories(parentId, level, container);
+        }
+    });
+}
+
+function selectCategory(categoryId, categoryName) {
+    if (selectedCategories.some(function(sc) { return sc.Id === categoryId; })) {
         return;
     }
 
     selectedCategories.push({
-        Id: id,
-        Name: name,
-        Path: path
+        Id: categoryId,
+        Name: categoryName
     });
 
     updateSelectedCategoriesDisplay();
     updateHiddenInputs();
-
-    // Refresh search results if visible
-    if ($('#categorySearchResults').is(':visible')) {
-        var term = $('#categorySearch').val().trim();
-        if (term.length >= 2) {
-            searchCategories(term);
-        }
-    }
+    updateCategoryTreeSelection();
 }
 
-function unselectCategory(id) {
-    selectedCategories = selectedCategories.filter(function(sc) { return sc.Id !== id; });
+function unselectCategory(categoryId) {
+    selectedCategories = selectedCategories.filter(function(sc) { return sc.Id !== categoryId; });
     updateSelectedCategoriesDisplay();
     updateHiddenInputs();
-
-    // Refresh search results if visible
-    if ($('#categorySearchResults').is(':visible')) {
-        var term = $('#categorySearch').val().trim();
-        if (term.length >= 2) {
-            searchCategories(term);
-        }
-    }
+    updateCategoryTreeSelection();
 }
 
 function updateSelectedCategoriesDisplay() {
@@ -385,16 +615,109 @@ function updateHiddenInputs() {
     $('#hiddenCategoryInputs').html(html);
 }
 
+function updateCategoryTreeSelection() {
+    // Update checkboxes in tree
+    $('.category-check').each(function() {
+        var categoryId = parseInt($(this).attr('data-category-id'));
+        var isSelected = selectedCategories.some(function(sc) { return sc.Id === categoryId; });
+        $(this).prop('checked', isSelected);
+
+        // Update visual selection
+        var categoryItem = $(this).closest('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link');
+        if (isSelected) {
+            categoryItem.addClass('selected');
+        } else {
+            categoryItem.removeClass('selected');
+        }
+    });
+}
+
+function expandAllCategories() {
+    $('.category-toggle-btn').each(function() {
+        var parentId = parseInt($(this).attr('data-parent-id'));
+        var container = $('#subcategories-' + parentId);
+
+        if (!container.hasClass('expanded')) {
+            $(this).click();
+        }
+    });
+}
+
+function collapseAllCategories() {
+    $('.category-toggle-btn.expanded').each(function() {
+        $(this).click();
+    });
+}
+
+function searchCategories(term) {
+    showSearchLoading();
+
+    $.get('@Url.Action("SearchCategories", "Category")', { term: term, pageSize: 20 }, function(data) {
+        if (data.success && data.categories.length > 0) {
+            displaySearchResults(data.categories);
+        } else {
+            showNoSearchResults();
+        }
+    }).fail(function() {
+        showSearchError();
+    });
+}
+
+function displaySearchResults(categories) {
+    var html = '';
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        var isSelected = selectedCategories.some(function(sc) { return sc.Id === category.Id; });
+
+        html += '<div class="search-result-item p-3 border-bottom" data-category-id="' + category.Id + '">';
+        html += '<div class="d-flex justify-content-between align-items-center">';
+        html += '<div class="flex-grow-1">';
+        html += '<div class="form-check">';
+        html += '<input type="checkbox" class="form-check-input category-search-check" ';
+        html += 'data-category-id="' + category.Id + '" data-category-name="' + escapeHtml(category.Name) + '" ';
+        html += (isSelected ? 'checked' : '') + '>';
+        html += '<label class="form-check-label">';
+        html += '<strong>' + escapeHtml(category.Name) + '</strong><br>';
+        html += '<small class="text-muted">' + escapeHtml(category.Path) + '</small>';
+        html += '</label>';
+        html += '</div>';
+        html += '</div>';
+        html += '<span class="badge badge-info ml-2">' + category.NewsCount + ' tin</span>';
+        html += '</div></div>';
+    }
+
+    $('#searchResultsList').html(html);
+    showSearchResults();
+
+    // Attach search checkbox events
+    $('.category-search-check').on('change', function() {
+        var categoryId = parseInt($(this).attr('data-category-id'));
+        var categoryName = $(this).attr('data-category-name');
+
+        if ($(this).is(':checked')) {
+            selectCategory(categoryId, categoryName);
+        } else {
+            unselectCategory(categoryId);
+        }
+    });
+}
+
 function showSearchResults() {
     $('#categorySearchResults').show();
+    $('.category-tree-wrapper').hide();
 }
 
 function hideSearchResults() {
     $('#categorySearchResults').hide();
+    $('.category-tree-wrapper').show();
+}
+
+function showCategoryTree() {
+    hideSearchResults();
 }
 
 function showSearchLoading() {
-    $('#searchResultsList').html('<div class="text-center py-3"><div class="spinner"></div><p>Đang tìm kiếm...</p></div>');
+    $('#searchResultsList').html('<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div><p class="mt-2">Đang tìm kiếm...</p></div>');
     showSearchResults();
 }
 
@@ -404,6 +727,18 @@ function showNoSearchResults() {
 
 function showSearchError() {
     $('#searchResultsList').html('<div class="text-center py-3"><i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i><p class="text-danger">Lỗi khi tìm kiếm</p></div>');
+}
+
+function showCategoryError(message) {
+    $('#categoryTreeContainer').html(`
+        <div class="text-center py-4">
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <p class="text-danger">${message}</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadRootCategories()">
+                <i class="fas fa-redo mr-1"></i>Thử lại
+            </button>
+        </div>
+    `);
 }
 
 function validateForm() {
@@ -433,6 +768,27 @@ function validateForm() {
 function showLoadingOverlay() {
     $('#loadingOverlay').fadeIn();
     $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang lưu...');
+}
+
+// Utility functions
+function getCategoryLinkClass(level) {
+    switch (level) {
+        case 0: return 'category-link';
+        case 1: return 'subcategory-link';
+        case 2: return 'sub-subcategory-link';
+        case 3: return 'level-4-link';
+        default: return 'level-5-link';
+    }
+}
+
+function getCategoryIconClass(level) {
+    switch (level) {
+        case 0: return 'fas fa-folder';
+        case 1: return 'fas fa-folder-open';
+        case 2: return 'fas fa-file-alt';
+        case 3: return 'fas fa-file';
+        default: return 'fas fa-circle';
+    }
 }
 
 function escapeHtml(text) {

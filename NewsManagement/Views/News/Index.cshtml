@@ -8,6 +8,9 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
+@* ADD THIS LINE *@
+@Html.AntiForgeryToken()
+
 <div class="news-management-container">
     <div class="container-fluid">
         <div class="row">
@@ -315,11 +318,6 @@
     </div>
 </div>
 
-<!-- Hidden form for delete -->
-<form id="deleteForm" method="post" style="display: none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" id="deleteNewsId" name="id" />
-</form>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
@@ -328,16 +326,20 @@
 var deleteNewsId = null;
 
 function confirmDelete(newsId, newsTitle) {
+    console.log('Confirm delete called:', newsId, newsTitle);
     deleteNewsId = newsId;
     $('#newsTitle').text(newsTitle);
     $('#deleteModal').modal('show');
 }
 
 $(document).ready(function() {
+    // Hide loading overlay on page load
+    $('#loadingOverlay').hide();
+
     // Handle delete confirmation
     $('#confirmDeleteBtn').click(function() {
         if (deleteNewsId) {
-            performDelete(deleteNewsId);
+            performDeleteAjax(deleteNewsId);
         }
     });
 
@@ -350,24 +352,8 @@ $(document).ready(function() {
     $('.filter-form').submit(function() {
         $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Đang lọc...');
     });
-});
 
-function performDelete(newsId) {
-    // Show loading overlay
-    $('#loadingOverlay').fadeIn();
-    $('#deleteModal').modal('hide');
-
-    // Set form data
-    $('#deleteNewsId').val(newsId);
-    $('#deleteForm').attr('action', '@Url.Action("DeleteConfirmed", "News")');
-
-    // Submit form
-    $('#deleteForm').submit();
-}
-
-// Enhanced table interactions
-$(document).ready(function() {
-    // Add hover effects
+    // Enhanced table interactions
     $('.news-table tbody tr').hover(
         function() {
             $(this).find('.action-buttons').addClass('show');
@@ -376,14 +362,150 @@ $(document).ready(function() {
             $(this).find('.action-buttons').removeClass('show');
         }
     );
-
-    // Smooth scroll to top after pagination
-    if (window.location.hash) {
-        $('html, body').animate({
-            scrollTop: 0
-        }, 300);
-    }
 });
+
+function performDeleteAjax(newsId) {
+    console.log('Starting AJAX delete for news ID:', newsId);
+
+    // Show loading overlay
+    $('#loadingOverlay').fadeIn();
+    $('#deleteModal').modal('hide');
+
+    // Disable delete button to prevent double-click
+    $('#confirmDeleteBtn').prop('disabled', true);
+
+    // Get anti-forgery token
+    var token = $('input[name="__RequestVerificationToken"]').val();
+
+    $.ajax({
+        url: '@Url.Action("DeleteNews", "News")',
+        type: 'POST',
+        data: {
+            id: newsId,
+            __RequestVerificationToken: token
+        },
+        timeout: 30000, // 30 seconds timeout
+        success: function(response) {
+            console.log('AJAX response:', response);
+            $('#loadingOverlay').fadeOut();
+            $('#confirmDeleteBtn').prop('disabled', false);
+
+            if (response.success) {
+                // Show success message
+                showNotification(response.message, 'success');
+
+                // Remove the row from table with animation
+                var $row = $('tr[data-news-id="' + newsId + '"]');
+                $row.addClass('table-danger');
+
+                setTimeout(function() {
+                    $row.fadeOut(500, function() {
+                        $(this).remove();
+                        updateUIAfterDelete();
+                    });
+                }, 1000);
+
+            } else {
+                showNotification(response.message || 'Có lỗi xảy ra khi xóa tin tức', 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Delete error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText
+            });
+
+            $('#loadingOverlay').fadeOut();
+            $('#confirmDeleteBtn').prop('disabled', false);
+
+            var errorMessage = 'Có lỗi xảy ra khi xóa tin tức';
+
+            if (status === 'timeout') {
+                errorMessage = 'Yêu cầu xóa quá thời gian chờ. Vui lòng thử lại.';
+            } else if (xhr.status === 404) {
+                errorMessage = 'Không tìm thấy tin tức cần xóa.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+            } else if (error) {
+                errorMessage += ': ' + error;
+            }
+
+            showNotification(errorMessage, 'danger');
+        }
+    });
+}
+
+function updateUIAfterDelete() {
+    // Update total count
+    var $totalCountElement = $('.results-info strong').first();
+    if ($totalCountElement.length) {
+        var currentCount = parseInt($totalCountElement.text());
+        var newCount = currentCount - 1;
+        $totalCountElement.text(newCount);
+
+        // Update all count displays
+        $('.results-info').html($('.results-info').html().replace(/Tìm thấy \d+/, 'Tìm thấy ' + newCount));
+    }
+
+    // Check if no news left
+    var remainingRows = $('.news-table tbody tr').length;
+    if (remainingRows === 0) {
+        showNoNewsState();
+    }
+
+    console.log('UI updated after delete. Remaining rows:', remainingRows);
+}
+
+function showNoNewsState() {
+    $('.news-table').closest('.table-responsive').html(`
+        <div class="no-news-state text-center py-5">
+            <div class="no-news-icon mb-4">
+                <i class="fas fa-newspaper fa-4x text-muted"></i>
+            </div>
+            <h5 class="text-muted mb-3">Không có tin tức</h5>
+            <p class="text-muted mb-4">
+                Không còn tin tức nào trong danh sách hiện tại.
+            </p>
+            <div class="no-news-actions">
+                <a href="@Url.Action("Create", "News")" class="btn btn-primary mr-2">
+                    <i class="fas fa-plus mr-1"></i>Thêm tin tức mới
+                </a>
+                <a href="@Url.Action("Index", "News")" class="btn btn-outline-secondary">
+                    <i class="fas fa-refresh mr-1"></i>Tải lại danh sách
+                </a>
+            </div>
+        </div>
+    `);
+}
+
+// Enhanced notification function
+function showNotification(message, type = 'success') {
+    var alertClass = 'alert-' + type;
+    var iconClass = type === 'success' ? 'fa-check-circle' :
+                   type === 'danger' ? 'fa-exclamation-triangle' :
+                   type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+
+    // Remove existing notifications
+    $('.notification-alert').remove();
+
+    var html = '<div class="alert ' + alertClass + ' alert-dismissible fade show notification-alert position-fixed" role="alert" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">';
+    html += '<i class="fas ' + iconClass + ' mr-2"></i>';
+    html += message;
+    html += '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+    html += '<span aria-hidden="true">&times;</span>';
+    html += '</button>';
+    html += '</div>';
+
+    $('body').append(html);
+
+    // Auto dismiss after 5 seconds
+    setTimeout(function() {
+        $('.notification-alert').fadeOut(function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
 
 // Keyboard shortcuts
 $(document).keydown(function(e) {
@@ -396,7 +518,17 @@ $(document).keydown(function(e) {
     // Escape key = Close modals
     if (e.keyCode === 27) {
         $('.modal').modal('hide');
+        $('#loadingOverlay').fadeOut();
     }
+});
+
+// Category badge click to filter
+$(document).on('click', '.category-badge', function() {
+    var categoryName = $(this).text().trim();
+    $('#categoryId option').filter(function() {
+        return $(this).text().trim() === categoryName;
+    }).prop('selected', true);
+    $('.filter-form').submit();
 });
 
 // Enhanced search functionality
@@ -406,18 +538,91 @@ $('#search').on('input', function() {
         // Could add live search here
     }
 });
+function performDeleteAjax(newsId) {
+    console.log('Starting AJAX delete for news ID:', newsId);
 
-// Status badge click to toggle (future enhancement)
-$('.status-badge').click(function() {
-    // Could add quick status toggle here
-});
+    // Show loading overlay
+    $('#loadingOverlay').fadeIn();
+    $('#deleteModal').modal('hide');
 
-// Category badge click to filter
-$('.category-badge').click(function() {
-    var categoryName = $(this).text();
-    $('#categoryId option').filter(function() {
-        return $(this).text() === categoryName;
-    }).prop('selected', true);
-    $('.filter-form').submit();
-});
+    // Disable delete button to prevent double-click
+    $('#confirmDeleteBtn').prop('disabled', true);
+
+    // Get anti-forgery token - TRY MULTIPLE SELECTORS
+    var token = $('input[name="__RequestVerificationToken"]').val() ||
+                $('input[type="hidden"][name="__RequestVerificationToken"]').val() ||
+                $('[name="__RequestVerificationToken"]').val();
+
+    console.log('AntiForgery Token:', token ? 'Found: ' + token.substring(0, 20) + '...' : 'NOT FOUND');
+    console.log('All hidden inputs:', $('input[type="hidden"]').length);
+
+    // Debug: list all hidden inputs
+    $('input[type="hidden"]').each(function(index) {
+        console.log('Hidden input ' + index + ':', $(this).attr('name'), '=', $(this).val() ? $(this).val().substring(0, 20) + '...' : 'empty');
+    });
+
+    if (!token) {
+        $('#loadingOverlay').fadeOut();
+        $('#confirmDeleteBtn').prop('disabled', false);
+        showNotification('Lỗi: Không tìm thấy Anti-Forgery Token. Vui lòng tải lại trang.', 'danger');
+        return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("DeleteNews", "News")',
+        type: 'POST',
+        data: {
+            id: newsId,
+            __RequestVerificationToken: token
+        },
+        timeout: 30000,
+        success: function(response) {
+            console.log('AJAX response:', response);
+            $('#loadingOverlay').fadeOut();
+            $('#confirmDeleteBtn').prop('disabled', false);
+
+            if (response.success) {
+                showNotification(response.message, 'success');
+
+                var $row = $('tr[data-news-id="' + newsId + '"]');
+                $row.addClass('table-danger');
+
+                setTimeout(function() {
+                    $row.fadeOut(500, function() {
+                        $(this).remove();
+                        updateUIAfterDelete();
+                    });
+                }, 1000);
+
+            } else {
+                showNotification(response.message || 'Có lỗi xảy ra khi xóa tin tức', 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Delete error:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText.substring(0, 500),
+                statusCode: xhr.status
+            });
+
+            $('#loadingOverlay').fadeOut();
+            $('#confirmDeleteBtn').prop('disabled', false);
+
+            var errorMessage = 'Có lỗi xảy ra khi xóa tin tức';
+
+            if (xhr.status === 500 && xhr.responseText.includes('anti-forgery')) {
+                errorMessage = 'Lỗi bảo mật: Anti-Forgery Token không hợp lệ. Vui lòng tải lại trang.';
+            } else if (status === 'timeout') {
+                errorMessage = 'Yêu cầu xóa quá thời gian chờ. Vui lòng thử lại.';
+            } else if (xhr.status === 404) {
+                errorMessage = 'Không tìm thấy action DeleteNews trong Controller.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Lỗi server (500). Vui lòng kiểm tra server logs.';
+            }
+
+            showNotification(errorMessage, 'danger');
+        }
+    });
+}
 </script>
