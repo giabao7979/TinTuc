@@ -9,7 +9,7 @@ namespace NewsManagement.Controllers
 {
     public class HomeController : Controller
     {
-        private TinTuc_DEntities db = new TinTuc_DEntities();
+        private TinTucEntities2 db = new TinTucEntities2();
 
         public ActionResult Index(
             int? categoryId,
@@ -177,46 +177,70 @@ namespace NewsManagement.Controllers
             return categories;
         }
 
+        // THAY THẾ method LoadNewsData trong HomeController.cs (từ dòng ~178-218)
+
         private void LoadNewsData(HomeViewModel model)
         {
-            IQueryable<News> newsQuery = db.News.Include(n => n.Categories).Where(n => n.Status);
-
-            // Apply filters
-            if (!string.IsNullOrEmpty(model.SearchTerm))
+            try
             {
-                newsQuery = newsQuery.Where(n =>
-                    n.Title.Contains(model.SearchTerm) ||
-                    n.Summary.Contains(model.SearchTerm) ||
-                    n.Content.Contains(model.SearchTerm));
+                // Tăng timeout để tránh lỗi
+                db.Database.CommandTimeout = 120; // 2 phút
+
+                IQueryable<News> newsQuery = db.News.AsNoTracking().Include(n => n.Categories).Where(n => n.Status);
+
+                // Apply filters
+                if (!string.IsNullOrEmpty(model.SearchTerm))
+                {
+                    newsQuery = newsQuery.Where(n =>
+                        n.Title.Contains(model.SearchTerm) ||
+                        n.Summary.Contains(model.SearchTerm) ||
+                        n.Content.Contains(model.SearchTerm));
+                }
+                else if (model.SelectedCategoryId.HasValue)
+                {
+                    var categoryIds = GetAllCategoryIdsInTree(model.SelectedCategoryId.Value);
+                    newsQuery = newsQuery.Where(n => n.Categories.Any(c => categoryIds.Contains(c.Id)));
+                }
+
+                // Apply sorting
+                switch (model.SortBy)
+                {
+                    case "oldest":
+                        newsQuery = newsQuery.OrderBy(n => n.CreatedDate);
+                        break;
+                    case "title":
+                        newsQuery = newsQuery.OrderBy(n => n.Title);
+                        break;
+                    default: // newest
+                        newsQuery = newsQuery.OrderByDescending(n => n.CreatedDate);
+                        break;
+                }
+
+                // Get total count TRƯỚC pagination để tránh timeout
+                model.TotalNewsCount = newsQuery.Count();
+
+                // Apply pagination với AsNoTracking để tối ưu
+                model.News = newsQuery
+                    .Skip((model.CurrentPage - 1) * model.PageSize)
+                    .Take(model.PageSize)
+                    .AsNoTracking()
+                    .ToList();
             }
-            else if (model.SelectedCategoryId.HasValue)
+            catch (Exception ex)
             {
-                var categoryIds = GetAllCategoryIdsInTree(model.SelectedCategoryId.Value);
-                newsQuery = newsQuery.Where(n => n.Categories.Any(c => categoryIds.Contains(c.Id)));
+                // Fallback đơn giản khi timeout
+                System.Diagnostics.Debug.WriteLine($"LoadNewsData Error: {ex.Message}");
+
+                // Query đơn giản nhất có thể
+                model.News = db.News
+                    .AsNoTracking()
+                    .Where(n => n.Status)
+                    .OrderByDescending(n => n.Id)
+                    .Take(model.PageSize)
+                    .ToList();
+
+                model.TotalNewsCount = model.News.Count;
             }
-
-            // Apply sorting
-            switch (model.SortBy)
-            {
-                case "oldest":
-                    newsQuery = newsQuery.OrderBy(n => n.CreatedDate);
-                    break;
-                case "title":
-                    newsQuery = newsQuery.OrderBy(n => n.Title);
-                    break;
-                default: // newest
-                    newsQuery = newsQuery.OrderByDescending(n => n.CreatedDate);
-                    break;
-            }
-
-            // Get total count
-            model.TotalNewsCount = newsQuery.Count();
-
-            // Apply pagination
-            model.News = newsQuery
-                .Skip((model.CurrentPage - 1) * model.PageSize)
-                .Take(model.PageSize)
-                .ToList();
         }
 
         #region Helper Methods

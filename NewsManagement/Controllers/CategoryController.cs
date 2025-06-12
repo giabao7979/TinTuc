@@ -10,7 +10,7 @@ namespace NewsManagement.Controllers
 {
     public class CategoryController : Controller
     {
-        private TinTuc_DEntities db = new TinTuc_DEntities();
+        private TinTucEntities2 db = new TinTucEntities2();
 
         // GET: Category - Với phân trang
         public ActionResult Index(int? page, int? parentId)

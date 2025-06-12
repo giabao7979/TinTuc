@@ -4,11 +4,11 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="c2a07eb37c91469ab49685c5169c24a8" Name="Diagram1">
-        <EntityTypeShape EntityType="TinTuc_DModel.Category" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="TinTuc_DModel.News" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <AssociationConnector Association="TinTuc_DModel.FK_Category_Parent" ManuallyRouted="false" />
-        <AssociationConnector Association="TinTuc_DModel.NewsCategory" ManuallyRouted="false" />
+      <Diagram DiagramId="b6137cb2d24948ba8699ba2cdac94f02" Name="Diagram1">
+        <EntityTypeShape EntityType="TinTucModel.Category" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="TinTucModel.News" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <AssociationConnector Association="TinTucModel.FK_Category_Parent" ManuallyRouted="false" />
+        <AssociationConnector Association="TinTucModel.NewsCategory" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

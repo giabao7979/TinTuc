@@ -137,7 +137,6 @@
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NewsController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -174,6 +173,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\css\category.css" />
     <Content Include="Content\css\creat.css" />
+    <Content Include="Content\css\Error.css" />
     <Content Include="Content\css\home-page.css" />
     <Content Include="Content\css\item.css" />
     <Content Include="Content\css\layout.css" />

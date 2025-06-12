@@ -13,10 +13,10 @@ namespace NewsManagement.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class TinTuc_DEntities : DbContext
+    public partial class TinTucEntities2 : DbContext
     {
-        public TinTuc_DEntities()
-            : base("name=TinTuc_DEntities")
+        public TinTucEntities2()
+            : base("name=TinTucEntities2")
         {
         }
     

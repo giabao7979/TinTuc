@@ -9,7 +9,7 @@ namespace NewsManagement.Controllers
 {
     public class NewsController : Controller
     {
-        private TinTuc_DEntities db = new TinTuc_DEntities();
+        private TinTucEntities2 db = new TinTucEntities2();
 
         // GET: News
         // THAY THẾ method Index cũ bằng code này

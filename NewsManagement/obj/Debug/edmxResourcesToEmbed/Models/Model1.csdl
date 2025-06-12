@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Schema Namespace="TinTuc_DModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+<Schema Namespace="TinTucModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
   <EntityType Name="Category">
     <Key>
       <PropertyRef Name="Id" />
@@ -43,7 +43,7 @@
     <End Role="Category" Type="Self.Category" Multiplicity="*" />
     <End Role="News" Type="Self.News" Multiplicity="*" />
   </Association>
-  <EntityContainer Name="TinTuc_DEntities" annotation:LazyLoadingEnabled="true">
+  <EntityContainer Name="TinTucEntities2" annotation:LazyLoadingEnabled="true">
     <EntitySet Name="Categories" EntityType="Self.Category" />
     <EntitySet Name="News" EntityType="Self.News" />
     <AssociationSet Name="FK_Category_Parent" Association="Self.FK_Category_Parent">
