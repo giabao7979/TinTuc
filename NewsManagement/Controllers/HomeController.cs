@@ -9,7 +9,7 @@ namespace NewsManagement.Controllers
 {
     public class HomeController : Controller
     {
-        private TinTucEntities db = new TinTucEntities();
+        private TinTuc_DEntities db = new TinTuc_DEntities();
 
         public ActionResult Index(
             int? categoryId,
@@ -436,37 +436,38 @@ namespace NewsManagement.Controllers
                     return Json(new { success = true, results = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
-                var query = db.News
-                    .Where(n => n.Status && (
-                        n.Title.Contains(term) ||
-                        n.Summary.Contains(term) ||
-                        n.Content.Contains(term)));
+                // RAW SQL cho trang chủ
+                var sql = @"
+            SELECT TOP (@maxResults) 
+                n.Id, n.Title, n.Summary, n.CreatedDate
+            FROM News n
+            WHERE n.Status = 1 
+            AND n.Title LIKE @term
+            ORDER BY n.CreatedDate DESC";
 
-                var totalCount = query.Count();
-                var results = query
-                    .OrderByDescending(n => n.CreatedDate)
-                    .Skip((page - 1) * maxResults)
-                    .Take(maxResults)
-                    .ToList()
-                    .Select(n => new
-                    {
-                        Id = n.Id,
-                        Title = n.Title ?? "",
-                        Summary = n.Summary != null && n.Summary.Length > 150
-                                 ? n.Summary.Substring(0, 150) + "..."
-                                 : (n.Summary ?? ""),
-                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
-                        Categories = n.Categories != null ? n.Categories.Select(c => c.Name ?? "").ToList() : new List<string>()
-                    })
-                    .ToList();
+                var results = db.Database.SqlQuery<SimpleNewsItem>(sql,
+                    new System.Data.SqlClient.SqlParameter("@maxResults", maxResults),
+                    new System.Data.SqlClient.SqlParameter("@term", "%" + term + "%")
+                ).ToList()
+                .Select(n => new
+                {
+                    Id = n.Id,
+                    Title = n.Title ?? "",
+                    Summary = n.Summary != null && n.Summary.Length > 150
+                             ? n.Summary.Substring(0, 150) + "..."
+                             : (n.Summary ?? ""),
+                    CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
+                    Categories = new List<string>() // Tạm thời empty cho nhanh
+                })
+                .ToList();
 
                 return Json(new
                 {
                     success = true,
                     results = results,
-                    totalCount = totalCount,
+                    totalCount = results.Count,
                     currentPage = page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / maxResults)
+                    totalPages = 1
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

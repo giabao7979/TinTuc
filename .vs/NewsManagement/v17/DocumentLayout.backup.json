@@ -1,22 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\test_CV\\NewsManagement\\",
+  "WorkspaceRootPath": "D:\\TinTuc\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\test_cv\\newsmanagement\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\models\\homeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\models\\homeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\views\\category\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\category\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\test_CV\\NewsManagement\\newsmanagement\\content\\css\\category.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\category.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -35,51 +39,67 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\Home\\Index.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-10T04:05:19.665Z",
+              "Title": "HomeViewModel.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Models\\HomeViewModel.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Models\\HomeViewModel.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Models\\HomeViewModel.cs",
+              "RelativeToolTip": "NewsManagement\\Models\\HomeViewModel.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAywAcAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T10:32:12.86Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAKsAAAAAAAAAAAAAANsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T08:25:58.294Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "category.css",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\category.css",
-              "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\category.css",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Content\\css\\category.css",
-              "RelativeToolTip": "NewsManagement\\Content\\css\\category.css",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-06-08T17:50:08.18Z"
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAFEAAAAAAAAAAAAAAGoAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-12T10:27:25.937Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Edit.cshtml",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Category\\Edit.cshtml",
-              "RelativeDocumentMoniker": "NewsManagement\\Views\\Category\\Edit.cshtml",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Views\\Category\\Edit.cshtml",
-              "RelativeToolTip": "NewsManagement\\Views\\Category\\Edit.cshtml",
-              "ViewState": "AgIAACMBAAAAAAAAAAAAAAcAAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-08T17:49:22.593Z"
+              "DocumentIndex": 4,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\CategoryController.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T09:35:55.55Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "CategoryController.cs",
-              "DocumentMoniker": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\CategoryController.cs",
-              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\CategoryController.cs",
-              "ToolTip": "D:\\test_CV\\NewsManagement\\NewsManagement\\Controllers\\CategoryController.cs",
-              "RelativeToolTip": "NewsManagement\\Controllers\\CategoryController.cs",
-              "ViewState": "AgIAANkAAAAAAAAAAAAmwO0AAAA1AAAAAAAAAA==",
+              "Title": "NewsController.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\NewsController.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\NewsController.cs",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAgwAsAAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T17:02:40.111Z"
+              "WhenOpened": "2025-06-12T08:26:12.074Z",
+              "EditorCaption": ""
             }
           ]
         }

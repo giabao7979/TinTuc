@@ -3,26 +3,28 @@
     ViewBag.Title = "Sửa danh mục";
 }
 
-<!-- TỐI ƯU CSS - CHỈ LOAD NHỮNG GÌ CẦN THIẾT -->
+<!-- CSS - CHỈ LOAD NHỮNG GÌ CẦN THIẾT -->
 <link href="~/Content/css/site.css" rel="stylesheet" />
+<link href="~/Content/css/home-page.css" rel="stylesheet" />
+<link href="~/Content/css/creat.css" rel="stylesheet" />
 <link href="~/Content/css/category.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card">
-                <div class="card-header bg-warning text-white">
+                <div class="card-header">
                     <h3><i class="fas fa-edit mr-2"></i>Chỉnh sửa danh mục</h3>
-                    <small class="d-block mt-1">Cập nhật thông tin danh mục</small>
+                    <small class="d-block mt-1 text-muted">Cập nhật thông tin danh mục</small>
                 </div>
                 <div class="card-body">
-                    @using (Html.BeginForm("Edit", "Category", FormMethod.Post, new { @class = "form-horizontal", id = "editForm" }))
+                    @using (Html.BeginForm("Edit", "Category", FormMethod.Post, new { @class = "form-horizontal" }))
                     {
                         @Html.AntiForgeryToken()
                         @Html.HiddenFor(model => model.Id)
-                        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                         <!-- Thông tin hiện tại -->
                         <div class="alert alert-info">
@@ -34,87 +36,121 @@
 
                         <div class="form-group">
                             @Html.LabelFor(model => model.Name, "Tên danh mục", htmlAttributes: new { @class = "control-label font-weight-bold" })
-                            @Html.EditorFor(model => model.Name, new
-                            {
-                                htmlAttributes = new
-                                {
-                                    @class = "form-control",
-                                    required = "required",
-                                    maxlength = "255",
-                                    placeholder = "Nhập tên danh mục..."
-                                }
-                            })
+                            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", required = "required", placeholder = "Nhập tên danh mục..." } })
                             @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            <small class="form-text text-muted">Tên danh mục phải rõ ràng và dễ hiểu</small>
                         </div>
 
                         <div class="form-group">
                             @Html.LabelFor(model => model.Description, "Mô tả", htmlAttributes: new { @class = "control-label font-weight-bold" })
-                            @Html.TextAreaFor(model => model.Description, new
-                            {
-                                @class = "form-control",
-                                rows = 3,
-                                maxlength = "1000",
-                                placeholder = "Mô tả ngắn gọn về danh mục..."
-                            })
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = 4, placeholder = "Mô tả chi tiết về danh mục này..." })
                             @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            <small class="form-text text-muted">Mô tả ngắn gọn về nội dung của danh mục</small>
                         </div>
 
-                        <!-- DROPDOWN TỐI ƯU - SỬ DỤNG SELECT2 CHO HIỆU SUẤT TỐT -->
+                        <!-- ENHANCED CATEGORY TREE SELECTOR - Giống như trang Create -->
                         <div class="form-group">
-                            @Html.LabelFor(model => model.ParentId, "Danh mục cha", htmlAttributes: new { @class = "control-label font-weight-bold" })
-                            <div class="position-relative">
-                                @Html.DropDownList("ParentId", ViewBag.ParentId as SelectList, "-- Chọn danh mục cha (để trống = danh mục gốc) --", new
-                                {
-                                    @class = "form-control custom-select",
-                                    id = "parentSelect"
-                                })
-                                <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Để trống để tạo danh mục gốc. Không thể chọn chính nó hoặc danh mục con.
-                                </small>
-                            </div>
-                            @Html.ValidationMessageFor(model => model.ParentId, "", new { @class = "text-danger" })
-                        </div>
+                            <label class="control-label font-weight-bold">
+                                <i class="fas fa-sitemap mr-2"></i>Danh mục cha
+                            </label>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.Ordering, "Thứ tự", htmlAttributes: new { @class = "control-label font-weight-bold" })
-                                    @Html.EditorFor(model => model.Ordering, new
-                                    {
-                                        htmlAttributes = new
-                                        {
-                                            @class = "form-control",
-                                            type = "number",
-                                            min = "0",
-                                            max = "9999"
-                                        }
-                                    })
-                                    @Html.ValidationMessageFor(model => model.Ordering, "", new { @class = "text-danger" })
-                                    <small class="form-text text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="control-label font-weight-bold">Trạng thái</label>
-                                    <div class="custom-control custom-switch mt-2">
-                                        @Html.CheckBoxFor(model => model.Status, new { @class = "custom-control-input", id = "statusSwitch" })
-                                        <label class="custom-control-label" for="statusSwitch">
-                                            <span id="statusText">@(Model.Status ? "Hoạt động" : "Tạm dừng")</span>
-                                        </label>
+                            <!-- Selected Category Display -->
+                            <div class="selected-category-display mb-3">
+                                <div class="card border-primary">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Danh mục được chọn:</strong>
+                                                <span id="selectedCategoryName" class="text-primary ml-2">
+                                                    @if (Model.ParentId.HasValue)
+                                                    {
+                                                        <i class="fas fa-folder mr-1"></i><span>Đang tải thông tin danh mục cha...</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-home mr-1"></i><span>Danh mục gốc (không có danh mục cha)</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            <button type="button" id="clearSelection" class="btn btn-sm btn-outline-secondary" style="@(Model.ParentId.HasValue ? "" : "display: none;")">
+                                                <i class="fas fa-times mr-1"></i>Bỏ chọn
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Search and Toggle -->
+                            <div class="category-selector-controls mb-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button type="button" id="toggleCategoryTree" class="btn btn-outline-primary">
+                                            <i class="fas fa-chevron-down" id="toggleIcon"></i>
+                                            <span id="toggleText">Hiển thị danh mục</span>
+                                        </button>
+                                    </div>
+                                    <input type="text" id="categorySearch" class="form-control"
+                                           placeholder="Tìm kiếm danh mục..." autocomplete="off" disabled>
+                                    <div class="input-group-append">
+                                        <button type="button" id="clearSearch" class="btn btn-outline-secondary">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Click vào nút để mở danh sách danh mục. Không thể chọn chính danh mục này hoặc danh mục con của nó.
+                                </small>
+                            </div>
+
+                            <!-- Category Tree Container -->
+                            <div id="categoryTreeContainer" class="category-tree-container" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header py-2">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-folder mr-2"></i>Chọn danh mục cha
+                                            <span class="badge badge-info ml-2" id="categoryCount">Đang tải...</span>
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="categoryTree" class="category-tree-content">
+                                            <div class="loading-spinner text-center py-4">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="sr-only">Loading...</span>
+                                                </div>
+                                                <p class="mt-2 mb-0">Đang tải danh mục...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Input for Selected Parent ID -->
+                            <input type="hidden" id="selectedParentId" name="ParentId" value="@Model.ParentId" />
+                            @Html.ValidationMessageFor(model => model.ParentId, "", new { @class = "text-danger" })
                         </div>
 
-                        <!-- Buttons với loading state -->
-                        <div class="form-group mt-4">
-                            <div class="btn-group w-100" role="group">
-                                <button type="submit" class="btn btn-warning btn-lg" id="submitBtn">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Ordering, "Thứ tự", htmlAttributes: new { @class = "control-label font-weight-bold" })
+                            @Html.EditorFor(model => model.Ordering, new { htmlAttributes = new { @class = "form-control", type = "number", min = "0" } })
+                            @Html.ValidationMessageFor(model => model.Ordering, "", new { @class = "text-danger" })
+                            <small class="form-text text-muted">Số thứ tự để sắp xếp danh mục (số nhỏ hơn sẽ hiển thị trước)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                @Html.CheckBoxFor(model => model.Status, new { @class = "form-check-input" })
+                                @Html.LabelFor(model => model.Status, "Hoạt động", htmlAttributes: new { @class = "form-check-label font-weight-bold" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="btn-group" role="group">
+                                <button type="submit" class="btn btn-warning btn-lg">
                                     <i class="fas fa-save mr-2"></i>Cập nhật danh mục
                                 </button>
                                 <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-arrow-left mr-2"></i>Quay lại
+                                    <i class="fas fa-times mr-2"></i>Hủy
                                 </a>
                             </div>
                         </div>
@@ -125,183 +161,498 @@
     </div>
 </div>
 
-<!-- TỐI ƯU JAVASCRIPT - CHỈ NHỮNG TÍNH NĂNG CẦN THIẾT -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script>
+// Global variables
+var categoryTreeVisible = false;
+var selectedParentId = @Html.Raw(Model.ParentId?.ToString() ?? "null");
+var currentCategoryId = @Model.Id; // ID của danh mục đang sửa
+var categoriesData = [];
+var searchTimeout;
+var selectedCategoryName = '';
+
 $(document).ready(function() {
-    // 1. FORM VALIDATION TỐI ƯU
-    $('#editForm').on('submit', function(e) {
-        var isValid = true;
-        var errors = [];
+    initializeCategorySelector();
 
-        // Validate name
-        var name = $('#Name').val().trim();
-        if (!name) {
-            errors.push('Tên danh mục không được để trống');
-            isValid = false;
-        } else if (name.length > 255) {
-            errors.push('Tên danh mục không được quá 255 ký tự');
-            isValid = false;
-        }
+    // Load initial parent category name if exists
+    if (selectedParentId) {
+        loadParentCategoryName(selectedParentId);
+    }
 
-        // Validate description length
-        var description = $('#Description').val().trim();
-        if (description.length > 1000) {
-            errors.push('Mô tả không được quá 1000 ký tự');
-            isValid = false;
-        }
+    // Debug form submission
+    $('form').on('submit', function(e) {
+        var parentIdValue = $('#selectedParentId').val();
+        console.log('Form submitting with ParentId:', parentIdValue);
 
-        // Validate ordering
-        var ordering = parseInt($('#Ordering').val());
-        if (isNaN(ordering) || ordering < 0 || ordering > 9999) {
-            errors.push('Thứ tự phải là số từ 0 đến 9999');
-            isValid = false;
-        }
-
-        if (!isValid) {
+        // Validation: Prevent self-selection
+        if (parentIdValue && parseInt(parentIdValue) === currentCategoryId) {
             e.preventDefault();
-            alert('Vui lòng kiểm tra lại:\n' + errors.join('\n'));
+            alert('Không thể chọn chính danh mục này làm danh mục cha!');
             return false;
         }
+    });
+});
 
-        // Show loading state
-        $('#submitBtn')
-            .prop('disabled', true)
-            .html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang cập nhật...');
-
-        return true;
+function initializeCategorySelector() {
+    // Toggle tree visibility
+    $('#toggleCategoryTree').click(function() {
+        toggleCategoryTree();
     });
 
-    // 2. DYNAMIC STATUS TEXT UPDATE
-    $('#statusSwitch').change(function() {
-        var isChecked = $(this).is(':checked');
-        $('#statusText').text(isChecked ? 'Hoạt động' : 'Tạm dừng');
+    // Clear selection
+    $('#clearSelection').click(function() {
+        clearCategorySelection();
     });
 
-    // 3. PARENT SELECT ENHANCEMENT - TỐI ƯU CHO DROPDOWN LỚN
-    var $parentSelect = $('#parentSelect');
+    // Search functionality
+    $('#categorySearch').on('keyup', function() {
+        var searchTerm = $(this).val().trim();
+        clearTimeout(searchTimeout);
 
-    // Thêm search functionality cho dropdown nếu có nhiều options
-    if ($parentSelect.find('option').length > 10) {
-        // Tạo search box đơn giản
-        var searchHtml = '<input type="text" id="parentSearch" class="form-control form-control-sm mb-2" placeholder="Tìm kiếm danh mục cha..." autocomplete="off">';
-        $parentSelect.before(searchHtml);
+        searchTimeout = setTimeout(function() {
+            filterCategories(searchTerm);
+        }, 300);
+    });
 
-        $('#parentSearch').on('input', function() {
-            var searchTerm = $(this).val().toLowerCase();
-            $parentSelect.find('option').each(function() {
-                var optionText = $(this).text().toLowerCase();
-                var shouldShow = optionText.includes(searchTerm) || $(this).val() === '';
-                $(this).toggle(shouldShow);
-            });
-        });
-    }
+    // Clear search
+    $('#clearSearch').click(function() {
+        $('#categorySearch').val('');
+        filterCategories('');
+    });
+}
 
-    // 4. AUTO-SAVE DRAFT (OPTIONAL)
-    var formData = {};
-    function saveFormDraft() {
-        formData = {
-            name: $('#Name').val(),
-            description: $('#Description').val(),
-            parentId: $('#parentSelect').val(),
-            ordering: $('#Ordering').val(),
-            status: $('#statusSwitch').is(':checked')
-        };
-        localStorage.setItem('categoryEditDraft_' + @Model.Id, JSON.stringify(formData));
-    }
-
-    function loadFormDraft() {
-        var draft = localStorage.getItem('categoryEditDraft_' + @Model.Id);
-        if (draft) {
-            try {
-                var data = JSON.parse(draft);
-                if (confirm('Bạn có muốn khôi phục dữ liệu đã soạn dở không?')) {
-                    $('#Name').val(data.name || '');
-                    $('#Description').val(data.description || '');
-                    $('#parentSelect').val(data.parentId || '');
-                    $('#Ordering').val(data.ordering || '');
-                    $('#statusSwitch').prop('checked', data.status || false).trigger('change');
+function loadParentCategoryName(parentId) {
+    // Load current parent category name
+    $.ajax({
+        url: '/Home/GetCategoriesTree',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if (data.success && data.categories) {
+                var parentCategory = findCategoryInTree(data.categories, parentId);
+                if (parentCategory) {
+                    selectedCategoryName = parentCategory.Name;
+                    updateSelectedCategory(parentId, selectedCategoryName);
                 }
-                localStorage.removeItem('categoryEditDraft_' + @Model.Id);
-            } catch(e) {
-                console.log('Could not restore draft');
-            }
-        }
-    }
-
-    // Load draft on page load
-    loadFormDraft();
-
-    // Save draft every 30 seconds
-    setInterval(saveFormDraft, 30000);
-
-    // Save draft before page unload
-    $(window).on('beforeunload', function() {
-        saveFormDraft();
-    });
-
-    // 5. KEYBOARD SHORTCUTS
-    $(document).keydown(function(e) {
-        // Ctrl+S = Save
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            $('#editForm').submit();
-        }
-
-        // Escape = Cancel
-        if (e.keyCode === 27) {
-            if (confirm('Bạn có chắc muốn thoát mà không lưu?')) {
-                window.location.href = '@Url.Action("Index")';
             }
         }
     });
-
-    // 6. ENHANCED UX
-    // Focus vào tên khi load trang
-    $('#Name').focus().select();
-
-    // Hiệu ứng hover cho buttons
-    $('.btn').hover(
-        function() { $(this).addClass('shadow'); },
-        function() { $(this).removeClass('shadow'); }
-    );
-});
-
-// 7. UTILITY FUNCTIONS
-function resetForm() {
-    if (confirm('Bạn có chắc muốn reset form về trạng thái ban đầu?')) {
-        location.reload();
-    }
 }
 
-function validateField(fieldName) {
-    var field = $('#' + fieldName);
-    var value = field.val().trim();
-
-    field.removeClass('is-invalid is-valid');
-
-    if (fieldName === 'Name' && (!value || value.length > 255)) {
-        field.addClass('is-invalid');
-        return false;
-    } else if (fieldName === 'Description' && value.length > 1000) {
-        field.addClass('is-invalid');
-        return false;
-    } else if (fieldName === 'Ordering') {
-        var num = parseInt(value);
-        if (isNaN(num) || num < 0 || num > 9999) {
-            field.addClass('is-invalid');
-            return false;
+function findCategoryInTree(categories, targetId) {
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        if (category.Id === targetId) {
+            return category;
         }
+        // Could also search in subcategories if needed
     }
-
-    field.addClass('is-valid');
-    return true;
+    return null;
 }
 
-// Real-time validation
-$('#Name, #Description, #Ordering').on('blur', function() {
-    validateField(this.id);
-});
+function toggleCategoryTree() {
+    if (!categoryTreeVisible) {
+        showCategoryTree();
+    } else {
+        hideCategoryTree();
+    }
+}
+
+function showCategoryTree() {
+    categoryTreeVisible = true;
+    $('#categoryTreeContainer').slideDown(300);
+    $('#toggleIcon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    $('#toggleText').text('Ẩn danh mục');
+    $('#categorySearch').prop('disabled', false);
+
+    if (categoriesData.length === 0) {
+        loadAvailableCategories();
+    }
+}
+
+function hideCategoryTree() {
+    categoryTreeVisible = false;
+    $('#categoryTreeContainer').slideUp(300);
+    $('#toggleIcon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    $('#toggleText').text('Hiển thị danh mục');
+    $('#categorySearch').prop('disabled', true);
+}
+
+function loadAvailableCategories() {
+    console.log('🌳 Loading available categories for edit...');
+
+    $('#categoryTree').html(`
+        <div class="loading-spinner text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0">Đang tải danh mục...</p>
+        </div>
+    `);
+
+    $.ajax({
+        url: '/Home/GetCategoriesTree',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 15000,
+        success: function(data) {
+            console.log('📦 Categories API response:', data);
+
+            if (data.success && data.categories) {
+                console.log('✅ Found', data.categories.length, 'categories');
+
+                // Filter out current category and its descendants
+                var availableCategories = filterAvailableCategories(data.categories);
+
+                categoriesData = availableCategories;
+                renderCategoryTree(availableCategories);
+                $('#categoryCount').text(availableCategories.length + ' danh mục');
+            } else {
+                console.log('⚠️ No categories found or API returned error');
+                showCategoryError('Không thể tải danh mục: ' + (data.message || 'Unknown error'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Failed to load categories:', {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                statusCode: xhr.status
+            });
+            showCategoryError('Lỗi kết nối đến server: ' + error);
+        }
+    });
+}
+
+function filterAvailableCategories(categories) {
+    // Remove current category and its descendants
+    var availableCategories = [];
+
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+
+        // Skip current category
+        if (category.Id === currentCategoryId) {
+            console.log('Skipping current category:', category.Name);
+            continue;
+        }
+
+        // Skip descendants (this is simplified - in real app might need recursive check)
+        // For now, just exclude the current category
+        availableCategories.push(category);
+    }
+
+    return availableCategories;
+}
+
+function renderCategoryTree(categories) {
+    if (!categories || categories.length === 0) {
+        $('#categoryTree').html(`
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Không có danh mục cha khả dụng</p>
+                <small>Danh mục này sẽ trở thành danh mục gốc</small>
+            </div>
+        `);
+        return;
+    }
+
+    var html = '<div class="categories-menu p-2">';
+
+    // Add option for root category
+    html += `
+        <div class="category-item mb-3" data-category-level="root">
+            <div class="root-category-option" data-category-id="" data-category-name="Danh mục gốc">
+                <div class="category-content">
+                    <div class="d-flex align-items-center">
+                        <div class="category-icon text-info mr-2">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="category-name">
+                            <strong>🏠 Danh mục gốc</strong>
+                            <small class="d-block text-muted">Không có danh mục cha</small>
+                        </div>
+                    </div>
+                    <div class="category-meta">
+                        <span class="badge badge-info">Gốc</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr style="margin: 10px 0; border-color: #dee2e6;">
+    `;
+
+    // Add actual categories
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        html += renderCategoryItem(category, 0);
+    }
+
+    html += '</div>';
+    $('#categoryTree').html(html);
+
+    // Attach event listeners
+    attachCategoryEventListeners();
+
+    // Highlight selected category if any
+    if (selectedParentId) {
+        highlightSelectedCategory();
+    } else {
+        $('.root-category-option').addClass('active');
+    }
+
+    console.log('✅ Category tree rendered for edit. Available categories:', categories.length);
+}
+
+function renderCategoryItem(category, level) {
+    var linkClass = getCategoryLinkClass(level);
+    var iconClass = getCategoryIconClass(level);
+
+    var html = `
+        <div class="category-item" data-category-level="${level}" data-category-id="${category.Id}">
+            <div class="${linkClass}"
+                 data-category-id="${category.Id}"
+                 data-category-name="${escapeHtml(category.Name)}"
+                 data-level="${level}">
+                <div class="category-content">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <div class="category-icon mr-2">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="category-name">
+                            ${escapeHtml(category.Name)}
+                        </div>
+                    </div>
+                    <div class="category-meta">
+                        <span class="news-count">${category.NewsCount || 0}</span>
+                        ${category.HasChildren ? `
+                            <button type="button" class="category-toggle-btn ml-2"
+                                    data-parent-id="${category.Id}"
+                                    data-level="${level}"
+                                    title="Mở rộng danh mục con">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>`;
+
+    if (category.HasChildren) {
+        html += `<div id="subcategories-${category.Id}" class="subcategories-container"></div>`;
+    }
+
+    html += `</div>`;
+    return html;
+}
+
+function attachCategoryEventListeners() {
+    // Category selection
+    $(document).off('click', '.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option');
+    $(document).on('click', '.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option', function(e) {
+        if ($(e.target).closest('.category-toggle-btn').length) {
+            return;
+        }
+
+        var categoryId = $(this).attr('data-category-id');
+        var categoryName = $(this).attr('data-category-name');
+
+        // Prevent selecting current category
+        if (categoryId && parseInt(categoryId) === currentCategoryId) {
+            alert('Không thể chọn chính danh mục này làm danh mục cha!');
+            return;
+        }
+
+        selectCategory(categoryId, categoryName);
+    });
+
+    // Toggle subcategories
+    $(document).off('click', '.category-toggle-btn');
+    $(document).on('click', '.category-toggle-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var parentId = $(this).attr('data-parent-id');
+        var level = parseInt($(this).attr('data-level')) || 0;
+
+        toggleSubcategories(parentId, level + 1);
+    });
+}
+
+function selectCategory(categoryId, categoryName) {
+    // Remove previous selection
+    $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option').removeClass('active');
+
+    // Highlight selected
+    if (categoryId) {
+        $(`[data-category-id="${categoryId}"]`).addClass('active');
+    } else {
+        $('.root-category-option').addClass('active');
+    }
+
+    // Update display and hidden input
+    updateSelectedCategory(categoryId, categoryName);
+}
+
+function updateSelectedCategory(categoryId, categoryName) {
+    selectedParentId = categoryId || null;
+    $('#selectedParentId').val(selectedParentId || '');
+
+    if (selectedParentId) {
+        $('#selectedCategoryName').html(`
+            <i class="fas fa-folder mr-1"></i>${escapeHtml(categoryName)}
+        `);
+        $('#clearSelection').show();
+    } else {
+        $('#selectedCategoryName').html(`
+            <i class="fas fa-home mr-1"></i>Danh mục gốc (không có danh mục cha)
+        `);
+        $('#clearSelection').hide();
+    }
+}
+
+function clearCategorySelection() {
+    selectedParentId = null;
+    $('#selectedParentId').val('');
+    $('.category-link, .root-category-option').removeClass('active');
+    $('.root-category-option').addClass('active');
+    updateSelectedCategory(null, '');
+}
+
+function toggleSubcategories(parentId, level) {
+    var container = $('#subcategories-' + parentId);
+    var toggleBtn = $(`[data-parent-id="${parentId}"]`);
+    var icon = toggleBtn.find('i');
+
+    if (container.hasClass('expanded')) {
+        container.removeClass('expanded').slideUp(300, function() {
+            container.empty();
+        });
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+    } else {
+        container.show().html(`
+            <div class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                <small class="d-block mt-2 text-muted">Đang tải danh mục con...</small>
+            </div>
+        `);
+
+        container.addClass('expanded');
+        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+
+        loadSubcategoriesForEdit(parentId, level, container, toggleBtn);
+    }
+}
+
+function loadSubcategoriesForEdit(parentId, level, container, toggleBtn) {
+    $.ajax({
+        url: '/Home/GetSubcategories',
+        type: 'GET',
+        data: { parentId: parentId },
+        dataType: 'json',
+        timeout: 10000,
+        success: function(data) {
+            if (data.success && data.subcategories && data.subcategories.length > 0) {
+                // Filter out current category from subcategories too
+                var availableSubcategories = data.subcategories.filter(function(sub) {
+                    return sub.Id !== currentCategoryId;
+                });
+
+                var html = '';
+                for (var i = 0; i < availableSubcategories.length; i++) {
+                    html += renderCategoryItem(availableSubcategories[i], level);
+                }
+
+                container.html(html);
+            } else {
+                container.html(`
+                    <div class="text-center py-3">
+                        <small class="text-muted">Không có danh mục con khả dụng</small>
+                    </div>
+                `);
+            }
+        },
+        error: function() {
+            showSubcategoryError(container, parentId, level, 'Lỗi khi tải danh mục con');
+        }
+    });
+}
+
+function filterCategories(searchTerm) {
+    if (!searchTerm) {
+        $('.category-item').show();
+        return;
+    }
+
+    searchTerm = searchTerm.toLowerCase();
+    $('.category-item').each(function() {
+        var categoryName = $(this).find('.category-name').text().toLowerCase();
+        if (categoryName.includes(searchTerm)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
+function highlightSelectedCategory() {
+    if (selectedParentId) {
+        $(`[data-category-id="${selectedParentId}"]`).addClass('active');
+    } else {
+        $('.root-category-option').addClass('active');
+    }
+}
+
+function showCategoryError(message) {
+    $('#categoryTree').html(`
+        <div class="text-center py-4">
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <p class="text-danger">${message}</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadAvailableCategories()">
+                <i class="fas fa-redo mr-1"></i>Thử lại
+            </button>
+        </div>
+    `);
+}
+
+function showSubcategoryError(container, parentId, level, errorMsg) {
+    container.html(`
+        <div class="text-center py-3">
+            <small class="text-danger">${errorMsg}</small>
+            <br>
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2"
+                    onclick="loadSubcategoriesForEdit(${parentId}, ${level}, $('#subcategories-${parentId}'), $('[data-parent-id=${parentId}]'))">
+                <i class="fas fa-redo mr-1"></i>Thử lại
+            </button>
+        </div>
+    `);
+}
+
+// Utility functions
+function getCategoryLinkClass(level) {
+    switch (level) {
+        case 0: return 'category-link';
+        case 1: return 'subcategory-link';
+        case 2: return 'sub-subcategory-link';
+        case 3: return 'level-4-link';
+        default: return 'level-5-link';
+    }
+}
+
+function getCategoryIconClass(level) {
+    switch (level) {
+        case 0: return 'fas fa-folder';
+        case 1: return 'fas fa-folder-open';
+        case 2: return 'fas fa-file-alt';
+        case 3: return 'fas fa-file';
+        default: return 'fas fa-circle';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
-

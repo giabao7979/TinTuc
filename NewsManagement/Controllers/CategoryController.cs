@@ -10,7 +10,7 @@ namespace NewsManagement.Controllers
 {
     public class CategoryController : Controller
     {
-        private TinTucEntities db = new TinTucEntities();
+        private TinTuc_DEntities db = new TinTuc_DEntities();
 
         // GET: Category - Với phân trang
         public ActionResult Index(int? page, int? parentId)
@@ -332,31 +332,39 @@ namespace NewsManagement.Controllers
                     return Json(new { success = true, categories = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
-                var query = db.Categories
-                    .Where(c => c.Status && c.Name.Contains(term));
+                // RAW SQL cho search categories
+                var sql = @"
+            SELECT TOP (@pageSize) 
+                c.Id, c.Name,
+                (SELECT COUNT(*) FROM NewsCategory nc WHERE nc.CategoryId = c.Id) as NewsCount,
+                CASE WHEN c.ParentId IS NULL THEN c.Name
+                     ELSE (SELECT p.Name FROM Category p WHERE p.Id = c.ParentId) + ' > ' + c.Name
+                END as Path
+            FROM Category c
+            WHERE c.Status = 1 
+            AND c.Name LIKE @term
+            ORDER BY NewsCount DESC";
 
-                var totalCount = query.Count();
-                var categories = query
-                    .OrderByDescending(c => db.News.Count(n => n.Categories.Any(cat => cat.Id == c.Id)))
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList()
-                    .Select(c => new
-                    {
-                        Id = c.Id,
-                        Name = c.Name ?? "",
-                        NewsCount = GetDirectNewsCount(c.Id),
-                        Path = GetCategoryPath(c.Id)
-                    })
-                    .ToList();
+                var categories = db.Database.SqlQuery<dynamic>(sql,
+                    new System.Data.SqlClient.SqlParameter("@pageSize", pageSize),
+                    new System.Data.SqlClient.SqlParameter("@term", "%" + term + "%")
+                ).ToList()
+                .Select(c => new
+                {
+                    Id = (int)c.Id,
+                    Name = (string)c.Name ?? "",
+                    NewsCount = (int)c.NewsCount,
+                    Path = (string)c.Path ?? ""
+                })
+                .ToList();
 
                 return Json(new
                 {
                     success = true,
                     categories = categories,
-                    totalCount = totalCount,
+                    totalCount = categories.Count,
                     currentPage = page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    totalPages = 1
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)

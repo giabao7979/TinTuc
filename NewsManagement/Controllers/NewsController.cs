@@ -9,47 +9,159 @@ namespace NewsManagement.Controllers
 {
     public class NewsController : Controller
     {
-        private TinTucEntities db = new TinTucEntities();
+        private TinTuc_DEntities db = new TinTuc_DEntities();
 
         // GET: News
-        public ActionResult Index(int? categoryId, string search, int page = 1, int pageSize = 20)
+        // THAY THẾ method Index cũ bằng code này
+        public ActionResult Index(int? categoryId, string search, int? lastId = null, int pageSize = 20)
         {
-            var newsQuery = db.News.Include(n => n.Categories).AsQueryable();
-
-            // Lọc theo danh mục nếu có
-            if (categoryId.HasValue)
+            try
             {
-                newsQuery = newsQuery.Where(n => n.Categories.Any(c => c.Id == categoryId.Value));
-                ViewBag.SelectedCategory = db.Categories.Find(categoryId.Value);
+                List<NewsListItem> newsList;
+                bool hasNextPage = false;
+                int? nextLastId = null;
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    // Search với Raw SQL
+                    var searchSql = @"
+                SELECT TOP (@pageSize) 
+                    n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
+                    STUFF((SELECT ', ' + c.Name 
+                           FROM NewsCategory nc2 
+                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
+                           WHERE nc2.NewsId = n.Id 
+                           FOR XML PATH('')), 1, 2, '') as CategoryNames
+                FROM News n
+                WHERE n.Status = 1 
+                AND n.Title LIKE @search
+                AND (@lastId IS NULL OR n.Id < @lastId)
+                ORDER BY n.Id DESC";
+
+                    newsList = db.Database.SqlQuery<NewsListItem>(searchSql,
+                        new System.Data.SqlClient.SqlParameter("@pageSize", pageSize + 1),
+                        new System.Data.SqlClient.SqlParameter("@search", "%" + search + "%"),
+                        new System.Data.SqlClient.SqlParameter("@lastId", (object)lastId ?? DBNull.Value)
+                    ).ToList();
+                }
+                else if (categoryId.HasValue)
+                {
+                    // Filter by category với Raw SQL
+                    var categorySql = @"
+                SELECT TOP (@pageSize) 
+                    n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
+                    STUFF((SELECT ', ' + c.Name 
+                           FROM NewsCategory nc2 
+                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
+                           WHERE nc2.NewsId = n.Id 
+                           FOR XML PATH('')), 1, 2, '') as CategoryNames
+                FROM News n
+                INNER JOIN NewsCategory nc ON n.Id = nc.NewsId
+                WHERE n.Status = 1 
+                AND nc.CategoryId = @categoryId
+                AND (@lastId IS NULL OR n.Id < @lastId)
+                ORDER BY n.Id DESC";
+
+                    newsList = db.Database.SqlQuery<NewsListItem>(categorySql,
+                        new System.Data.SqlClient.SqlParameter("@pageSize", pageSize + 1),
+                        new System.Data.SqlClient.SqlParameter("@categoryId", categoryId.Value),
+                        new System.Data.SqlClient.SqlParameter("@lastId", (object)lastId ?? DBNull.Value)
+                    ).ToList();
+
+                    ViewBag.SelectedCategory = db.Categories.Find(categoryId.Value);
+                }
+                else
+                {
+                    // All news với Raw SQL
+                    var allNewsSql = @"
+                SELECT TOP (@pageSize) 
+                    n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
+                    STUFF((SELECT ', ' + c.Name 
+                           FROM NewsCategory nc2 
+                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
+                           WHERE nc2.NewsId = n.Id 
+                           FOR XML PATH('')), 1, 2, '') as CategoryNames
+                FROM News n
+                WHERE n.Status = 1 
+                AND (@lastId IS NULL OR n.Id < @lastId)
+                ORDER BY n.Id DESC";
+
+                    newsList = db.Database.SqlQuery<NewsListItem>(allNewsSql,
+                        new System.Data.SqlClient.SqlParameter("@pageSize", pageSize + 1),
+                        new System.Data.SqlClient.SqlParameter("@lastId", (object)lastId ?? DBNull.Value)
+                    ).ToList();
+                }
+
+                // Check for next page
+                if (newsList.Count > pageSize)
+                {
+                    hasNextPage = true;
+                    nextLastId = newsList[pageSize - 1].Id;
+                    newsList.RemoveAt(pageSize); // Remove extra item
+                }
+
+                // Set ViewBag data
+                ViewBag.Categories = new SelectList(db.Categories.Where(c => c.Status).OrderBy(c => c.Name), "Id", "Name", categoryId);
                 ViewBag.CategoryId = categoryId;
-            }
-
-            // Tìm kiếm nếu có
-            if (!string.IsNullOrEmpty(search))
-            {
-                newsQuery = newsQuery.Where(n =>
-                    n.Title.Contains(search) ||
-                    n.Summary.Contains(search) ||
-                    n.Content.Contains(search));
                 ViewBag.SearchTerm = search;
-            }
+                ViewBag.HasNextPage = hasNextPage;
+                ViewBag.NextLastId = nextLastId;
+                ViewBag.HasPrevious = lastId.HasValue;
+                ViewBag.TotalCount = newsList.Count; // Approximate count
 
-            // Phân trang
-            var totalCount = newsQuery.Count();
-            var newsList = newsQuery
-                .OrderByDescending(n => n.CreatedDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                return View(newsList);
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                System.Diagnostics.Debug.WriteLine($"Error in News.Index: {ex.Message}");
+                ViewBag.ErrorMessage = "Có lỗi xảy ra khi tải dữ liệu.";
+                return View(new List<NewsListItem>());
+            }
+        }
+        [HttpGet]
+        public ActionResult QuickSearch(string term, int page = 1, int maxResults = 20)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(term) || term.Length < 2)
+                {
+                    return Json(new { success = true, results = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
+                }
+
+                var sql = @"
+            SELECT TOP (@maxResults) Id, Title, Summary, CreatedDate
+            FROM News 
+            WHERE Status = 1 
+            AND Title LIKE @term
+            ORDER BY Id DESC";
+
+                var results = db.Database.SqlQuery<SimpleNewsItem>(sql,
+                    new System.Data.SqlClient.SqlParameter("@maxResults", maxResults),
+                    new System.Data.SqlClient.SqlParameter("@term", "%" + term + "%")
+                ).ToList()
+                .Select(n => new
+                {
+                    Id = n.Id,
+                    Title = n.Title ?? "",
+                    Summary = n.Summary != null && n.Summary.Length > 150
+                             ? n.Summary.Substring(0, 150) + "..."
+                             : (n.Summary ?? ""),
+                    CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy")
+                })
                 .ToList();
 
-            // Dữ liệu cho View
-            ViewBag.Categories = new SelectList(db.Categories.Where(c => c.Status).OrderBy(c => c.Name), "Id", "Name", categoryId);
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-            ViewBag.TotalCount = totalCount;
-            ViewBag.PageSize = pageSize;
-
-            return View(newsList);
+                return Json(new
+                {
+                    success = true,
+                    results = results,
+                    totalCount = results.Count
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // GET: News/Details/5
@@ -115,6 +227,7 @@ namespace NewsManagement.Controllers
         }
 
         // GET: News/Edit/5
+        // GET: News/Edit/5
         public ActionResult Edit(int id)
         {
             News news = db.News.Include(n => n.Categories).FirstOrDefault(n => n.Id == id);
@@ -123,8 +236,19 @@ namespace NewsManagement.Controllers
                 return HttpNotFound();
             }
 
-            var selectedCategories = news.Categories.Select(c => c.Id).ToArray();
-            ViewBag.Categories = GetCategoriesCheckboxList(selectedCategories);
+            // Load all categories and mark selected ones
+            var allCategories = db.Categories.Where(c => c.Status).OrderBy(c => c.Name).ToList();
+            var selectedCategoryIds = news.Categories.Select(c => c.Id).ToList();
+
+            var categoryCheckboxList = allCategories.Select(c => new CategoryCheckboxViewModel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                IsSelected = selectedCategoryIds.Contains(c.Id)
+            }).ToList();
+
+            ViewBag.Categories = categoryCheckboxList;
+            ViewBag.SelectedCategoryIds = selectedCategoryIds; // For JavaScript initialization
 
             return View(news);
         }
@@ -142,7 +266,16 @@ namespace NewsManagement.Controllers
                     if (selectedCategories == null || selectedCategories.Length == 0)
                     {
                         ModelState.AddModelError("", "Vui lòng chọn ít nhất một danh mục cho tin tức.");
-                        ViewBag.Categories = GetCategoriesCheckboxList(selectedCategories);
+
+                        // Reload categories for view
+                        var allCategories = db.Categories.Where(c => c.Status).OrderBy(c => c.Name).ToList();
+                        ViewBag.Categories = allCategories.Select(c => new CategoryCheckboxViewModel
+                        {
+                            Id = c.Id,
+                            Name = c.Name,
+                            IsSelected = false
+                        }).ToList();
+
                         return View(news);
                     }
 
@@ -159,6 +292,7 @@ namespace NewsManagement.Controllers
                     existingNews.Content = news.Content;
                     existingNews.Ordering = news.Ordering;
                     existingNews.Status = news.Status;
+                    // CreatedDate không thay đổi
 
                     // Xóa tất cả quan hệ danh mục cũ
                     existingNews.Categories.Clear();
@@ -180,7 +314,15 @@ namespace NewsManagement.Controllers
                 ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật tin tức: " + ex.Message);
             }
 
-            ViewBag.Categories = GetCategoriesCheckboxList(selectedCategories);
+            // Reload categories if validation fails
+            var allCategoriesReload = db.Categories.Where(c => c.Status).OrderBy(c => c.Name).ToList();
+            ViewBag.Categories = allCategoriesReload.Select(c => new CategoryCheckboxViewModel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                IsSelected = selectedCategories != null && selectedCategories.Contains(c.Id)
+            }).ToList();
+
             return View(news);
         }
 

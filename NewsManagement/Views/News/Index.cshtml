@@ -1,7 +1,6 @@
-﻿@model List<NewsManagement.Models.News>
+﻿@model List<NewsManagement.Models.NewsListItem>
 @{
     ViewBag.Title = "Quản lý tin tức";
-    ViewBag.Subtitle = "Danh sách tất cả tin tức";
 }
 
 <link href="~/Content/css/site.css" rel="stylesheet" />
@@ -16,6 +15,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="management-card">
+                    <!-- Giữ nguyên header -->
                     <div class="card-header-custom d-flex justify-content-between align-items-center">
                         <div>
                             <h3><i class="fas fa-newspaper mr-3"></i>Quản lý tin tức</h3>
@@ -26,7 +26,7 @@
                         </a>
                     </div>
 
-                    <!-- Filters Section -->
+                    <!-- Giữ nguyên filters section -->
                     <div class="filters-section">
                         @using (Html.BeginForm("Index", "News", FormMethod.Get, new { @class = "filter-form" }))
                         {
@@ -64,7 +64,7 @@
                         }
                     </div>
 
-                    <!-- Results Info -->
+                    <!-- Messages -->
                     @if (TempData["Success"] != null)
                     {
                         <div class="alert alert-success mx-4 mt-3">
@@ -72,28 +72,14 @@
                         </div>
                     }
 
-                    <div class="results-info">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-info-circle mr-2"></i>
-                                <strong>Tìm thấy @ViewBag.TotalCount tin tức</strong>
-                                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
-                                {
-                                    <span> - Tìm kiếm: "@ViewBag.SearchTerm"</span>
-                                }
-                                @if (ViewBag.SelectedCategory != null)
-                                {
-                                    <span> - Danh mục: "@(((NewsManagement.Models.Category)ViewBag.SelectedCategory).Name)"</span>
-                                }
-                            </div>
-                            <small>
-                                <i class="fas fa-clock mr-1"></i>
-                                Cập nhật: @DateTime.Now.ToString("HH:mm dd/MM/yyyy")
-                            </small>
+                    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+                    {
+                        <div class="alert alert-danger mx-4 mt-3">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>@ViewBag.ErrorMessage
                         </div>
-                    </div>
+                    }
 
-                    <!-- News Table -->
+                    <!-- THAY THẾ TOÀN BỘ TABLE SECTION -->
                     @if (Model != null && Model.Count > 0)
                     {
                         <div class="table-responsive">
@@ -129,15 +115,16 @@
                                             </td>
                                             <td>
                                                 <div class="category-badges">
-                                                    @if (news.Categories != null && news.Categories.Any())
+                                                    @if (!string.IsNullOrEmpty(news.CategoryNames))
                                                     {
-                                                        foreach (var category in news.Categories.Take(3))
+                                                        var categories = news.CategoryNames.Split(',');
+                                                        foreach (var category in categories.Take(3))
                                                         {
-                                                            <span class="badge category-badge">@category.Name</span>
+                                                            <span class="badge category-badge">@category.Trim()</span>
                                                         }
-                                                        if (news.Categories.Count() > 3)
+                                                        if (categories.Length > 3)
                                                         {
-                                                            <span class="badge badge-light">+@(news.Categories.Count() - 3)</span>
+                                                            <span class="badge badge-light">+@(categories.Length - 3)</span>
                                                         }
                                                     }
                                                     else
@@ -190,84 +177,53 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
-                        if (ViewBag.TotalPages != null && (int)ViewBag.TotalPages > 1)
-                        {
-                            <div class="pagination-container">
-                                <div class="pagination-wrapper d-flex justify-content-between align-items-center">
-                                    <div class="pagination-info">
-                                        <span class="text-muted">
-                                            Trang @(ViewBag.CurrentPage ?? 1) / @ViewBag.TotalPages
-                                            (@ViewBag.TotalCount tin tức)
-                                        </span>
-                                    </div>
+                        <!-- THAY THẾ PAGINATION MỚI -->
+                        <div class="pagination-container p-3 border-top bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    @if (ViewBag.HasPrevious)
+                                    {
+                                        <a href="@Url.Action("Index", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
+                                           class="btn btn-outline-primary">
+                                            <i class="fas fa-arrow-left mr-1"></i>Về đầu
+                                        </a>
+                                    }
+                                </div>
 
-                                    <div class="pagination-controls">
-                                        @if (ViewBag.CurrentPage != null && (int)ViewBag.CurrentPage > 1)
+                                <div class="text-center">
+                                    <small class="text-muted">
+                                        Hiển thị @Model.Count tin tức
+                                        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
                                         {
-                                            <a href="@Url.Action("Index", new { page = 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
-                                               class="btn btn-outline-primary btn-sm me-1">
-                                                <i class="fas fa-angle-double-left"></i> Đầu
-                                            </a>
-                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.CurrentPage - 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
-                                               class="btn btn-outline-primary btn-sm me-2">
-                                                <i class="fas fa-angle-left"></i> Trước
-                                            </a>
+                                            <span> - Tìm kiếm: "@ViewBag.SearchTerm"</span>
                                         }
+                                    </small>
+                                </div>
 
-                                        <select class="form-control form-control-sm d-inline-block w-auto me-2"
-                                                onchange="window.location.href='@Url.Action("Index")?page=' + this.value + '&categoryId=@ViewBag.CategoryId&search=@ViewBag.SearchTerm'">
-                                            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
-                                            {
-                                                <option value="@i" @(i == (ViewBag.CurrentPage ?? 1) ? "selected" : "")>
-                                                    Trang @i
-                                                </option>
-                                            }
-                                        </select>
-
-                                        @if (ViewBag.CurrentPage != null && (int)ViewBag.CurrentPage < (int)ViewBag.TotalPages)
-                                        {
-                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.CurrentPage + 1, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
-                                               class="btn btn-outline-primary btn-sm me-1">
-                                                Sau <i class="fas fa-angle-right"></i>
-                                            </a>
-                                            <a href="@Url.Action("Index", new { page = (int)ViewBag.TotalPages, categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm })"
-                                               class="btn btn-outline-primary btn-sm">
-                                                Cuối <i class="fas fa-angle-double-right"></i>
-                                            </a>
-                                        }
-                                    </div>
+                                <div>
+                                    @if (ViewBag.HasNextPage)
+                                    {
+                                        <a href="@Url.Action("Index", new {
+                                               categoryId = ViewBag.CategoryId,
+                                               search = ViewBag.SearchTerm,
+                                               lastId = ViewBag.NextLastId
+                                           })" class="btn btn-primary">
+                                            Tiếp theo <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
+                                    }
                                 </div>
                             </div>
-                        }
+                        </div>
                     }
                     else
                     {
-                        <!-- No News State -->
+                        <!-- No News State - giữ nguyên -->
                         <div class="no-news-state">
                             <div class="no-news-icon">
-                                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
-                                {
-                                    <i class="fas fa-search"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-newspaper"></i>
-                                }
+                                <i class="fas fa-newspaper"></i>
                             </div>
                             <h4>Không có tin tức</h4>
-                            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string))
-                            {
-                                <p>Không tìm thấy tin tức phù hợp với từ khóa "<strong>@ViewBag.SearchTerm</strong>".</p>
-                                <p>Thử tìm kiếm với từ khóa khác hoặc kiểm tra chính tả.</p>
-                            }
-                            else
-                            {
-                                <p>Chưa có tin tức nào được đăng.</p>
-                                <a href="@Url.Action("Create")" class="btn btn-primary-custom">
-                                    <i class="fas fa-plus mr-2"></i>Thêm tin tức đầu tiên
-                                </a>
-                            }
+                            <p>Không tìm thấy tin tức phù hợp.</p>
                         </div>
                     }
                 </div>
@@ -275,6 +231,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade delete-modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
