@@ -16,6 +16,8 @@ let searchTimeouts = {};
 let categoryCache = new Map(); // Cache for subcategories
 let expandedState = new Set(); // Track expanded state
 let isLoading = false;
+var categorySearchTimeout;
+var isSearchMode = true;
 
 // ===== DOCUMENT READY =====
 $(document).ready(function () {
@@ -760,6 +762,214 @@ $(document).keydown(function (e) {
     }
 });
 
+
+// THAY THẾ JavaScript search trong home-page.js
+var categorySearchTimeout;
+var isSearchMode = true; // Default to search mode
+
+$(document).ready(function () {
+    initializeCategorySearch();
+    initializeTreeBrowse();
+});
+
+function initializeCategorySearch() {
+    // Real-time search với debouncing
+    $('#categorySearchInput').on('input', function () {
+        clearTimeout(categorySearchTimeout);
+        var term = $(this).val().trim();
+
+        if (term.length < 2) {
+            showSearchPlaceholder();
+            return;
+        }
+
+        // Debounce 300ms
+        categorySearchTimeout = setTimeout(function () {
+            performCategorySearch(term);
+        }, 300);
+    });
+
+    $('#clearCategorySearch').click(function () {
+        $('#categorySearchInput').val('');
+        showSearchPlaceholder();
+    });
+}
+
+function performCategorySearch(term) {
+    showSearchLoading();
+
+    $.ajax({
+        url: '/Category/SearchCategories',
+        type: 'GET',
+        data: { term: term, pageSize: 50 },
+        dataType: 'json',
+        timeout: 10000,
+        success: function (data) {
+            if (data.success && data.categories.length > 0) {
+                displaySearchResults(data.categories, data.hasMore);
+            } else {
+                showNoSearchResults(term);
+            }
+        },
+        error: function () {
+            showSearchError();
+        }
+    });
+}
+
+function displaySearchResults(categories, hasMore) {
+    var html = '<div class="search-results-list">';
+
+    // Results header
+    html += '<div class="results-header mb-2">';
+    html += '<small class="text-muted">Tìm thấy ' + categories.length + ' kết quả';
+    if (hasMore) html += ' (có thêm kết quả khác)';
+    html += '</small>';
+    html += '</div>';
+
+    // Category results
+    categories.forEach(function (cat) {
+        html += '<div class="search-result-item" data-category-id="' + cat.Id + '">';
+        html += '<div class="category-item-content">';
+        html += '<div class="category-main">';
+        html += '<strong class="category-name">' + escapeHtml(cat.Name) + '</strong>';
+        if (cat.Path && cat.Path !== cat.Name) {
+            html += '<br><small class="category-path text-muted">' + escapeHtml(cat.Path) + '</small>';
+        }
+        html += '</div>';
+        html += '<div class="category-stats">';
+        html += '<span class="badge badge-primary mr-1">' + cat.NewsCount + ' tin</span>';
+        if (cat.HasChildren) {
+            html += '<span class="badge badge-secondary">Có danh mục con</span>';
+        }
+        html += '</div>';
+        html += '</div>';
+        html += '<button type="button" class="btn btn-sm btn-outline-primary select-category-btn">';
+        html += '<i class="fas fa-check mr-1"></i>Chọn';
+        html += '</button>';
+        html += '</div>';
+    });
+
+    if (hasMore) {
+        html += '<div class="text-center mt-2">';
+        html += '<small class="text-muted">Nhập thêm ký tự để tìm chính xác hơn</small>';
+        html += '</div>';
+    }
+
+    html += '</div>';
+    $('#categorySearchResults').html(html);
+
+    // Attach events
+    $('.select-category-btn').click(function () {
+        var item = $(this).closest('.search-result-item');
+        var categoryId = item.attr('data-category-id');
+        var categoryName = item.find('.category-name').text();
+        selectCategory(categoryId, categoryName);
+    });
+}
+
+function showSearchLoading() {
+    $('#categorySearchResults').html(`
+        <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary mr-2"></div>
+            <span>Đang tìm kiếm...</span>
+        </div>
+    `);
+}
+
+function showSearchPlaceholder() {
+    $('#categorySearchResults').html(`
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-search fa-2x mb-2"></i>
+            <p>Nhập từ khóa để tìm kiếm danh mục</p>
+            <small>Hỗ trợ tìm kiếm trong 45,000+ danh mục</small>
+        </div>
+    `);
+}
+
+function showNoSearchResults(term) {
+    $('#categorySearchResults').html(`
+        <div class="text-center py-4">
+            <i class="fas fa-search fa-2x text-muted mb-2"></i>
+            <p class="text-muted mb-2">Không tìm thấy danh mục cho "<strong>${escapeHtml(term)}</strong>"</p>
+            <small class="text-muted">Thử từ khóa khác hoặc kiểm tra chính tả</small>
+        </div>
+    `);
+}
+
+// Tree browse (lazy loading)
+function initializeTreeBrowse() {
+    $('#toggleTreeBrowse').click(function () {
+        var container = $('#categoryTreeContainer');
+        if (container.is(':visible')) {
+            container.slideUp();
+            $(this).html('<i class="fas fa-tree mr-1"></i>Duyệt theo cây thư mục');
+        } else {
+            container.slideDown();
+            $(this).html('<i class="fas fa-tree mr-1"></i>Ẩn cây thư mục');
+            if (!container.hasClass('loaded')) {
+                loadRootCategoriesPaged();
+                container.addClass('loaded');
+            }
+        }
+    });
+}
+
+function loadRootCategoriesPaged(page = 1) {
+    $.ajax({
+        url: '/Category/GetRootCategoriesPaged',
+        type: 'GET',
+        data: { page: page, pageSize: 30 },
+        success: function (data) {
+            if (data.success) {
+                displayTreeCategories(data.categories, data.hasMore, page);
+            }
+        },
+        error: function () {
+            $('#categoryTreeContainer').html('<div class="alert alert-danger">Lỗi tải danh mục</div>');
+        }
+    });
+}
+
+function displayTreeCategories(categories, hasMore, page) {
+    var html = '<div class="tree-categories">';
+
+    categories.forEach(function (cat) {
+        html += '<div class="tree-category-item" data-category-id="' + cat.Id + '">';
+        html += '<div class="d-flex justify-content-between align-items-center py-1">';
+        html += '<div class="flex-grow-1 category-selection" data-category-id="' + cat.Id + '" data-category-name="' + escapeHtml(cat.Name) + '">';
+        html += '<i class="fas fa-folder mr-2"></i>' + escapeHtml(cat.Name);
+        html += '<small class="text-muted ml-2">(' + cat.NewsCount + ' tin)</small>';
+        html += '</div>';
+        if (cat.HasChildren) {
+            html += '<button type="button" class="btn btn-sm btn-outline-secondary expand-btn" data-parent-id="' + cat.Id + '">';
+            html += '<i class="fas fa-plus"></i>';
+            html += '</button>';
+        }
+        html += '</div>';
+        html += '<div id="children-' + cat.Id + '" class="children-container ml-3" style="display: none;"></div>';
+        html += '</div>';
+    });
+
+    if (hasMore) {
+        html += '<div class="text-center mt-2">';
+        html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="loadRootCategoriesPaged(' + (page + 1) + ')">';
+        html += 'Xem thêm danh mục...';
+        html += '</button>';
+        html += '</div>';
+    }
+
+    html += '</div>';
+
+    if (page === 1) {
+        $('#categoryTreeContainer').html(html);
+    } else {
+        $('#categoryTreeContainer .tree-categories').append(html);
+    }
+
+    // Attach events
+    attachTreeEvents();
+}
 // ===== EXPOSE GLOBAL FUNCTIONS =====
 window.homePageFunctions = {
     debugCache,

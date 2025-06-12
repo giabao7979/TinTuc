@@ -322,6 +322,7 @@ namespace NewsManagement.Controllers
             return View(newsList);
         }
 
+        // THAY THẾ method SearchCategories trong CategoryController.cs
         [HttpGet]
         public JsonResult SearchCategories(string term, int page = 1, int pageSize = 20)
         {
@@ -332,31 +333,22 @@ namespace NewsManagement.Controllers
                     return Json(new { success = true, categories = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
-                // RAW SQL cho search categories
-                var sql = @"
-            SELECT TOP (@pageSize) 
-                c.Id, c.Name,
-                (SELECT COUNT(*) FROM NewsCategory nc WHERE nc.CategoryId = c.Id) as NewsCount,
-                CASE WHEN c.ParentId IS NULL THEN c.Name
-                     ELSE (SELECT p.Name FROM Category p WHERE p.Id = c.ParentId) + ' > ' + c.Name
-                END as Path
-            FROM Category c
-            WHERE c.Status = 1 
-            AND c.Name LIKE @term
-            ORDER BY NewsCount DESC";
+                // Sử dụng stored procedure
+                var results = db.Database.SqlQuery<CategorySearchResult>(
+                    "EXEC sp_SearchCategories @SearchTerm, @PageSize, @Page",
+                    new System.Data.SqlClient.SqlParameter("@SearchTerm", term),
+                    new System.Data.SqlClient.SqlParameter("@PageSize", pageSize),
+                    new System.Data.SqlClient.SqlParameter("@Page", page)
+                ).ToList();
 
-                var categories = db.Database.SqlQuery<dynamic>(sql,
-                    new System.Data.SqlClient.SqlParameter("@pageSize", pageSize),
-                    new System.Data.SqlClient.SqlParameter("@term", "%" + term + "%")
-                ).ToList()
-                .Select(c => new
+                var categories = results.Select(c => new
                 {
-                    Id = (int)c.Id,
-                    Name = (string)c.Name ?? "",
-                    NewsCount = (int)c.NewsCount,
-                    Path = (string)c.Path ?? ""
-                })
-                .ToList();
+                    Id = c.Id,
+                    Name = c.Name,
+                    NewsCount = c.NewsCount,
+                    Path = c.FullPath,
+                    HasChildren = c.ChildCount > 0
+                }).ToList();
 
                 return Json(new
                 {
@@ -364,8 +356,81 @@ namespace NewsManagement.Controllers
                     categories = categories,
                     totalCount = categories.Count,
                     currentPage = page,
-                    totalPages = 1
+                    hasMore = categories.Count == pageSize
                 }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // DTO class cho search results
+        public class CategorySearchResult
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int? ParentId { get; set; }
+            public string FullPath { get; set; }
+            public int NewsCount { get; set; }
+            public int ChildCount { get; set; }
+        }
+
+        // THÊM method mới vào CategoryController
+        [HttpGet]
+        public JsonResult GetRootCategoriesPaged(int page = 1, int pageSize = 50)
+        {
+            try
+            {
+                var results = db.Database.SqlQuery<CategorySearchResult>(
+                    "EXEC sp_GetRootCategories @PageSize, @Page",
+                    new System.Data.SqlClient.SqlParameter("@PageSize", pageSize),
+                    new System.Data.SqlClient.SqlParameter("@Page", page)
+                ).ToList();
+
+                var categories = results.Select(c => new
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    NewsCount = c.NewsCount,
+                    HasChildren = c.ChildCount > 0
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    categories = categories,
+                    currentPage = page,
+                    hasMore = categories.Count == pageSize
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // THAY THẾ GetSubcategories method
+        [HttpGet]
+        public ActionResult GetSubcategories(int parentId)
+        {
+            try
+            {
+                var results = db.Database.SqlQuery<CategorySearchResult>(
+                    "EXEC sp_GetSubcategories @ParentId, @PageSize",
+                    new System.Data.SqlClient.SqlParameter("@ParentId", parentId),
+                    new System.Data.SqlClient.SqlParameter("@PageSize", 100) // Limit subcategories
+                ).ToList();
+
+                var subcategories = results.Select(c => new
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    NewsCount = c.NewsCount,
+                    HasChildren = c.ChildCount > 0
+                }).ToList();
+
+                return Json(new { success = true, subcategories = subcategories }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
