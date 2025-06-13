@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "D:\\TinTuc\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 280,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,41 +26,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\News\\Index.cshtml",
               "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Index.cshtml",
               "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\News\\Index.cshtml",
               "RelativeToolTip": "NewsManagement\\Views\\News\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAABeAAAAAAAAAA==",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAAACYAAACoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-12T18:28:11.652Z",
+              "WhenOpened": "2025-06-13T06:54:11.643Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "NewsController.cs",
               "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
               "RelativeDocumentMoniker": "NewsManagement\\Controllers\\NewsController.cs",
               "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
               "RelativeToolTip": "NewsManagement\\Controllers\\NewsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAABoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-12T18:28:01.477Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CategoryController.cs",
-              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\CategoryController.cs",
-              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\CategoryController.cs",
-              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\CategoryController.cs",
-              "RelativeToolTip": "NewsManagement\\Controllers\\CategoryController.cs",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAAAAwAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-12T14:49:31.884Z",
+              "WhenOpened": "2025-06-13T06:50:19.442Z",
               "EditorCaption": ""
             }
           ]

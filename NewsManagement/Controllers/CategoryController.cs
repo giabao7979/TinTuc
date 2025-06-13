@@ -37,8 +37,8 @@ namespace NewsManagement.Controllers
             var categoryViewModels = pagedCategories.Select(c => new CategoryViewModel
             {
                 Category = c,
-                NewsCount = GetDirectNewsCount(c.Id),
-                TotalNewsCount = GetTotalNewsCountInCategoryTree(c.Id),
+                //NewsCount = GetDirectNewsCount(c.Id),
+                //TotalNewsCount = GetTotalNewsCountInCategoryTree(c.Id),
                 Level = GetCategoryLevel(c.Id),
                 HasChildren = db.Categories.Any(child => child.ParentId == c.Id)
             }).ToList();

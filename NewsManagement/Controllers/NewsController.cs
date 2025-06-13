@@ -11,54 +11,86 @@ namespace NewsManagement.Controllers
     {
         private TinTucEntities2 db = new TinTucEntities2();
 
-        // GET: News
-        // THAY THẾ method Index cũ bằng code này
-        public ActionResult Index(int? categoryId, string search, int? lastId = null, int pageSize = 20)
+        public ActionResult Index(int? categoryId, string search, int? lastId = null, int pageSize = 10)
         {
             try
             {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 List<NewsListItem> newsList;
                 bool hasNextPage = false;
                 int? nextLastId = null;
 
                 if (!string.IsNullOrEmpty(search))
                 {
-                    // Search với Raw SQL
+                    // 🚀 Tận dụng IX_News_Title_Status có sẵn
                     var searchSql = @"
                 SELECT TOP (@pageSize) 
                     n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
                     STUFF((SELECT ', ' + c.Name 
-                           FROM NewsCategory nc2 
-                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
+                           FROM NewsCategory nc2 WITH (NOLOCK)
+                           INNER JOIN Category c WITH (NOLOCK) ON nc2.CategoryId = c.Id 
                            WHERE nc2.NewsId = n.Id 
                            FOR XML PATH('')), 1, 2, '') as CategoryNames
-                FROM News n
+                FROM News n WITH (NOLOCK)
                 WHERE n.Status = 1 
-                AND n.Title LIKE @search
+                AND n.Title LIKE @search  -- Tận dụng IX_News_Title_Status
                 AND (@lastId IS NULL OR n.Id < @lastId)
                 ORDER BY n.Id DESC";
 
+                    // Fallback cho Summary search
+                    var searchSummarySQL = @"
+                SELECT TOP (@pageSize) 
+                    n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
+                    STUFF((SELECT ', ' + c.Name 
+                           FROM NewsCategory nc2 WITH (NOLOCK)
+                           INNER JOIN Category c WITH (NOLOCK) ON nc2.CategoryId = c.Id 
+                           WHERE nc2.NewsId = n.Id 
+                           FOR XML PATH('')), 1, 2, '') as CategoryNames
+                FROM News n WITH (NOLOCK)
+                WHERE n.Status = 1 
+                AND (n.Title LIKE @search OR n.Summary LIKE @search)
+                AND (@lastId IS NULL OR n.Id < @lastId)
+                ORDER BY n.Id DESC";
+
+                    var searchTerm = "%" + search + "%";
+
+                    // Thử search Title trước (nhanh hơn)
                     newsList = db.Database.SqlQuery<NewsListItem>(searchSql,
                         new System.Data.SqlClient.SqlParameter("@pageSize", pageSize + 1),
-                        new System.Data.SqlClient.SqlParameter("@search", "%" + search + "%"),
+                        new System.Data.SqlClient.SqlParameter("@search", searchTerm),
                         new System.Data.SqlClient.SqlParameter("@lastId", (object)lastId ?? DBNull.Value)
                     ).ToList();
+
+                    // Nếu ít kết quả, search cả Summary
+                    if (newsList.Count < pageSize / 2)
+                    {
+                        var additionalResults = db.Database.SqlQuery<NewsListItem>(searchSummarySQL,
+                            new System.Data.SqlClient.SqlParameter("@pageSize", pageSize + 1),
+                            new System.Data.SqlClient.SqlParameter("@search", searchTerm),
+                            new System.Data.SqlClient.SqlParameter("@lastId", (object)lastId ?? DBNull.Value)
+                        ).ToList();
+
+                        // Merge và remove duplicates
+                        var existingIds = newsList.Select(n => n.Id).ToHashSet();
+                        newsList.AddRange(additionalResults.Where(n => !existingIds.Contains(n.Id)));
+                        newsList = newsList.Take(pageSize + 1).ToList();
+                    }
                 }
                 else if (categoryId.HasValue)
                 {
-                    // Filter by category với Raw SQL
+                    // 🚀 Tận dụng IDX_NewsCategory_CategoryId có sẵn
                     var categorySql = @"
                 SELECT TOP (@pageSize) 
                     n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
                     STUFF((SELECT ', ' + c.Name 
-                           FROM NewsCategory nc2 
-                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
+                           FROM NewsCategory nc2 WITH (NOLOCK)
+                           INNER JOIN Category c WITH (NOLOCK) ON nc2.CategoryId = c.Id 
                            WHERE nc2.NewsId = n.Id 
                            FOR XML PATH('')), 1, 2, '') as CategoryNames
-                FROM News n
-                INNER JOIN NewsCategory nc ON n.Id = nc.NewsId
+                FROM News n WITH (NOLOCK)
+                INNER JOIN NewsCategory nc WITH (NOLOCK) ON n.Id = nc.NewsId
                 WHERE n.Status = 1 
-                AND nc.CategoryId = @categoryId
+                AND nc.CategoryId = @categoryId  -- Sẽ dùng IDX_NewsCategory_CategoryId
                 AND (@lastId IS NULL OR n.Id < @lastId)
                 ORDER BY n.Id DESC";
 
@@ -72,17 +104,20 @@ namespace NewsManagement.Controllers
                 }
                 else
                 {
-                    // All news với Raw SQL
+                    // 🚀 Tận dụng IX_News_Status_Id có sẵn (hoặc Enhanced nếu đã tạo)
                     var allNewsSql = @"
                 SELECT TOP (@pageSize) 
                     n.Id, n.Title, n.Summary, n.CreatedDate, n.Status, n.Ordering,
-                    STUFF((SELECT ', ' + c.Name 
-                           FROM NewsCategory nc2 
-                           INNER JOIN Category c ON nc2.CategoryId = c.Id 
-                           WHERE nc2.NewsId = n.Id 
-                           FOR XML PATH('')), 1, 2, '') as CategoryNames
-                FROM News n
-                WHERE n.Status = 1 
+                    ISNULL(c_names.CategoryNames, '') as CategoryNames
+                FROM News n WITH (NOLOCK)
+                OUTER APPLY (
+                    SELECT STUFF((SELECT ', ' + c.Name 
+                                 FROM NewsCategory nc2 WITH (NOLOCK)
+                                 INNER JOIN Category c WITH (NOLOCK) ON nc2.CategoryId = c.Id 
+                                 WHERE nc2.NewsId = n.Id 
+                                 FOR XML PATH('')), 1, 2, '') as CategoryNames
+                ) c_names
+                WHERE n.Status = 1   -- Sẽ dùng IX_News_Status_Id
                 AND (@lastId IS NULL OR n.Id < @lastId)
                 ORDER BY n.Id DESC";
 
@@ -97,8 +132,12 @@ namespace NewsManagement.Controllers
                 {
                     hasNextPage = true;
                     nextLastId = newsList[pageSize - 1].Id;
-                    newsList.RemoveAt(pageSize); // Remove extra item
+                    newsList.RemoveAt(pageSize);
                 }
+
+                stopwatch.Stop();
+
+                System.Diagnostics.Debug.WriteLine($"🚀 Query executed in {stopwatch.ElapsedMilliseconds}ms using existing indexes");
 
                 // Set ViewBag data
                 ViewBag.Categories = new SelectList(db.Categories.Where(c => c.Status).OrderBy(c => c.Name), "Id", "Name", categoryId);
@@ -107,20 +146,77 @@ namespace NewsManagement.Controllers
                 ViewBag.HasNextPage = hasNextPage;
                 ViewBag.NextLastId = nextLastId;
                 ViewBag.HasPrevious = lastId.HasValue;
-                ViewBag.TotalCount = newsList.Count; // Approximate count
+                ViewBag.TotalCount = newsList.Count;
+                ViewBag.QueryTime = stopwatch.ElapsedMilliseconds;
 
                 return View(newsList);
             }
             catch (Exception ex)
             {
-                // Log error
-                System.Diagnostics.Debug.WriteLine($"Error in News.Index: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Error in News.Index: {ex.Message}");
                 ViewBag.ErrorMessage = "Có lỗi xảy ra khi tải dữ liệu.";
                 return View(new List<NewsListItem>());
             }
         }
+
+        // 🚀 Method load CategoryNames riêng - NHANH HƠN
+        private void LoadCategoryNamesForNews(List<NewsListItem> newsList)
+        {
+            if (!newsList.Any()) return;
+
+            var newsIds = newsList.Select(n => n.Id).ToList();
+            var newsIdParams = string.Join(",", newsIds);
+
+            // Query categories cho tất cả news cùng lúc
+            var categoriesSql = $@"
+        SELECT nc.NewsId, c.Name
+        FROM NewsCategory nc WITH (NOLOCK)
+        INNER JOIN Category c WITH (NOLOCK) ON nc.CategoryId = c.Id
+        WHERE nc.NewsId IN ({newsIdParams})
+        ORDER BY nc.NewsId, c.Name";
+
+            var categoryData = db.Database.SqlQuery<NewsCategory>(categoriesSql).ToList();
+
+            // Group by NewsId
+            var categoryLookup = categoryData.GroupBy(c => c.NewsId)
+                                           .ToDictionary(g => g.Key, g => string.Join(", ", g.Select(c => c.Name)));
+
+            // Assign to news items
+            foreach (var news in newsList)
+            {
+                news.CategoryNames = categoryLookup.ContainsKey(news.Id)
+                                   ? categoryLookup[news.Id]
+                                   : "Chưa phân loại";
+            }
+        }
+
+        // 🚀 Cache Categories dropdown - KHÔNG QUERY MỖI LẦN
+        private static List<Category> _cachedCategories = null;
+        private static DateTime _cacheTime = DateTime.MinValue;
+
+        private SelectList GetCachedCategories(int? selectedValue)
+        {
+            // Cache 10 phút
+            if (_cachedCategories == null || DateTime.Now.Subtract(_cacheTime).TotalMinutes > 10)
+            {
+                _cachedCategories = db.Database.SqlQuery<Category>(
+                    "SELECT Id, Name FROM Category WITH (NOLOCK) WHERE Status = 1 ORDER BY Name"
+                ).ToList();
+                _cacheTime = DateTime.Now;
+                System.Diagnostics.Debug.WriteLine($"🔄 Categories cache refreshed: {_cachedCategories.Count} items");
+            }
+
+            return new SelectList(_cachedCategories, "Id", "Name", selectedValue);
+        }
+
+        // Helper class cho category data
+        public class NewsCategory
+        {
+            public int NewsId { get; set; }
+            public string Name { get; set; }
+        }
         [HttpGet]
-        public ActionResult QuickSearch(string term, int page = 1, int maxResults = 20)
+        public ActionResult QuickSearch(string term, int page = 1, int maxResults = 10)
         {
             try
             {
@@ -129,38 +225,75 @@ namespace NewsManagement.Controllers
                     return Json(new { success = true, results = new List<object>(), totalCount = 0 }, JsonRequestBehavior.AllowGet);
                 }
 
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                // 🚀 SIÊU ĐơN GIẢN - KHÔNG LOAD GÌ THỪA
                 var sql = @"
             SELECT TOP (@maxResults) Id, Title, Summary, CreatedDate
-            FROM News 
+            FROM News WITH (NOLOCK)
             WHERE Status = 1 
-            AND Title LIKE @term
-            ORDER BY Id DESC";
+            AND (Title LIKE @term OR Summary LIKE @term)
+            ORDER BY 
+                CASE WHEN Title LIKE @exactTerm THEN 1 ELSE 2 END,
+                Id DESC";
 
-                var results = db.Database.SqlQuery<SimpleNewsItem>(sql,
+                var searchTerm = "%" + term + "%";
+                var exactTerm = term + "%";  // Starts with term
+
+                var rawResults = db.Database.SqlQuery<SimpleNewsItem>(sql,
                     new System.Data.SqlClient.SqlParameter("@maxResults", maxResults),
-                    new System.Data.SqlClient.SqlParameter("@term", "%" + term + "%")
-                ).ToList()
-                .Select(n => new
+                    new System.Data.SqlClient.SqlParameter("@term", searchTerm),
+                    new System.Data.SqlClient.SqlParameter("@exactTerm", exactTerm)
+                ).ToList();
+
+                var results = rawResults.Select(n => new
                 {
                     Id = n.Id,
                     Title = n.Title ?? "",
-                    Summary = n.Summary != null && n.Summary.Length > 150
-                             ? n.Summary.Substring(0, 150) + "..."
+                    Summary = n.Summary != null && n.Summary.Length > 100
+                             ? n.Summary.Substring(0, 100) + "..."
                              : (n.Summary ?? ""),
                     CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy")
-                })
-                .ToList();
+                }).ToList();
+
+                stopwatch.Stop();
+                System.Diagnostics.Debug.WriteLine($"🔍 QuickSearch '{term}' took {stopwatch.ElapsedMilliseconds}ms");
 
                 return Json(new
                 {
                     success = true,
                     results = results,
-                    totalCount = results.Count
+                    totalCount = results.Count,
+                    queryTime = stopwatch.ElapsedMilliseconds
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GetCategoryNames(int[] newsIds)
+        {
+            try
+            {
+                var newsIdParams = string.Join(",", newsIds);
+                var categoriesSql = $@"
+            SELECT nc.NewsId, c.Name
+            FROM NewsCategory nc WITH (NOLOCK)
+            INNER JOIN Category c WITH (NOLOCK) ON nc.CategoryId = c.Id
+            WHERE nc.NewsId IN ({newsIdParams})";
+
+                var categoryData = db.Database.SqlQuery<NewsCategory>(categoriesSql).ToList();
+                var result = categoryData.GroupBy(c => c.NewsId)
+                                        .ToDictionary(g => g.Key.ToString(), g => string.Join(", ", g.Select(c => c.Name)));
+
+                return Json(new { success = true, categories = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
 

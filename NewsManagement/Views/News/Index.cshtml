@@ -1,6 +1,6 @@
 ﻿@model List<NewsManagement.Models.NewsListItem>
 @{
-    ViewBag.Title = "Quản lý tin tức";
+     ViewBag.Title = "Quản lý tin tức";
 }
 
 <link href="~/Content/css/site.css" rel="stylesheet" />
@@ -581,5 +581,46 @@ function performDeleteAjax(newsId) {
             showNotification(errorMessage, 'danger');
         }
     });
+    $(document).ready(function () {
+        // Load category names sau khi page load
+        loadCategoryNames();
+    });
+
+    function loadCategoryNames() {
+        var newsIds = [];
+        $('.news-table tbody tr').each(function () {
+            var newsId = $(this).data('news-id');
+            if (newsId) {
+                newsIds.push(newsId);
+            }
+        });
+
+        if (newsIds.length === 0) return;
+
+        $.post('/News/GetCategoryNames', { newsIds: newsIds }, function (data) {
+            if (data.success) {
+                for (var newsId in data.categories) {
+                    var categoryNames = data.categories[newsId];
+                    $(`tr[data-news-id="${newsId}"] .category-badges`).html(
+                        categoryNames ? createCategoryBadges(categoryNames) : '<span class="text-muted">Chưa phân loại</span>'
+                    );
+                }
+            }
+        });
+    }
+
+    function createCategoryBadges(categoryNames) {
+        var categories = categoryNames.split(', ');
+        var html = '';
+        for (var i = 0; i < Math.min(3, categories.length); i++) {
+            html += '<span class="badge category-badge">' + categories[i] + '</span>';
+        }
+        if (categories.length > 3) {
+            html += '<span class="badge badge-light">+' + (categories.length - 3) + '</span>';
+        }
+        return html;
+    }
 }
 </script>
+
+@*tôi đang cần tối ưu lại trang home và trang category để hệ thống chạy tốt hơn dữ liệu của tôi đang có 5tr bản ghi tin tức và 5000 danh mục sau tôi sẽ thêm lên cho thành 40000 danh mục nên tôi cần tối ưu máy tôi k quá khỏe nên tối ưu tốt nhất có thể*@ 

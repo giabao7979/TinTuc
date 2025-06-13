@@ -35,8 +35,8 @@
     <thead>
         <tr>
             <th>Tên danh mục</th>
-            <th>Số tin hiện có</th>
-            <th>Tổng số tin trong cây</th>
+            @*<th>Số tin hiện có</th>
+            <th>Tổng số tin trong cây</th>*@
             <th>Cấp</th>
             <th></th>
         </tr>
@@ -48,8 +48,8 @@
                 <td>
                     @Html.ActionLink(item.Category.Name, "Index", new { parentId = item.Category.Id })
                 </td>
-                <td>@item.NewsCount</td>
-                <td>@item.TotalNewsCount</td>
+                @*<td>@item.NewsCount</td>
+                <td>@item.TotalNewsCount</td>*@
                 <td>@item.Level</td>
                 <td>
                     @Html.ActionLink("Sửa", "Edit", new { id = item.Category.Id }, new { @class = "btn btn-sm btn-warning" }) |
