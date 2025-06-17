@@ -34,6 +34,9 @@
                         <a href="@Url.Action("Index", "Category")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "Category" ? "active" : "")">
                             <i class="fa fa-folder mr-2"></i>Quản lý danh mục
                         </a>
+                        <a href="@Url.Action("Generate", "BulkData")" class="btn @(ViewContext.RouteData.Values["controller"].ToString() == "BulkData" ? "active" : "")" title="Tạo dữ liệu hàng loạt">
+                            <i class="fa fa-magic mr-2"></i>Tạo dữ liệu hàng loạt
+                        </a>
                         @if (ViewBag.ShowRefreshButton == true)
                         {
                             <button onclick="location.reload()" class="btn">
@@ -92,8 +95,11 @@
                             <a href="@Url.Action("Index", "News")" class="mr-3">
                                 <i class="fa fa-newspaper mr-1"></i>Tin tức
                             </a>
-                            <a href="@Url.Action("Index", "Category")">
+                            <a href="@Url.Action("Index", "Category")" class="mr-3">
                                 <i class="fa fa-folder mr-1"></i>Danh mục
+                            </a>
+                            <a href="@Url.Action("Generate", "BulkData")">
+                                <i class="fa fa-magic mr-1"></i>Tạo dữ liệu
                             </a>
                         </div>
                         <p class="mb-0 mt-2">

@@ -1,4 +1,6 @@
 ﻿@model NewsManagement.Models.News
+@using Newtonsoft.Json
+
 @{
     ViewBag.Title = "Chỉnh sửa tin tức";
 }
@@ -241,8 +243,7 @@
 // Global variables
 var selectedCategories = [];
 var searchTimeout;
-var initialCategories = @Html.Raw(Json.Encode(ViewBag.Categories ?? new List<object>()));
-
+var initialCategories = @Html.Raw(JsonConvert.SerializeObject(ViewBag.Categories ?? new List<object>()));
 $(document).ready(function() {
     initializeForm();
     loadInitialCategories();

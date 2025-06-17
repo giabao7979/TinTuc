@@ -4,6 +4,7 @@
 }
 
 <link href="~/Content/css/site.css" rel="stylesheet" />
+<link href="~/Content/css/new.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
@@ -26,19 +27,83 @@
                         </a>
                     </div>
 
-                    <!-- Giữ nguyên filters section -->
                     <div class="filters-section">
                         @using (Html.BeginForm("Index", "News", FormMethod.Get, new { @class = "filter-form" }))
                         {
                             <div class="row">
+                                <!-- ENHANCED CATEGORY FILTER -->
                                 <div class="col-md-4">
                                     <div class="filter-group">
-                                        <label for="categoryId">
+                                        <label for="categoryFilter">
                                             <i class="fas fa-folder mr-1"></i>Danh mục
                                         </label>
-                                        @Html.DropDownList("categoryId", ViewBag.Categories as SelectList, "-- Tất cả danh mục --", new { @class = "form-control" })
+
+                                        <!-- Category Selector -->
+                                        <div class="category-filter-section">
+                                            <!-- Selected Category Display -->
+                                            <div class="selected-category-display mb-2">
+                                                <div class="card border-primary">
+                                                    <div class="card-body py-2">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Danh mục hiện tại:</strong>
+                                                                <span id="selectedCategoryName" class="text-primary ml-2">
+                                                                    @if (ViewBag.CategoryId != null)
+                                                                    {
+                                                                        var selectedCategory = ((SelectList)ViewBag.Categories).FirstOrDefault(x => x.Value == ViewBag.CategoryId.ToString());
+                                                                        <i class="fas fa-folder mr-1"></i><span>@(selectedCategory?.Text ?? "Danh mục đã chọn")</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="fas fa-home mr-1"></i><span>Tất cả danh mục</span>
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <button type="button" id="clearCategorySelection" class="btn btn-sm btn-outline-secondary" style="@(ViewBag.CategoryId != null ? "" : "display: none;")">
+                                                                <i class="fas fa-times mr-1"></i>Bỏ chọn
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Category Tree Toggle -->
+                                            <div class="category-tree-controls mb-2">
+                                                <button type="button" id="toggleCategoryTree" class="btn btn-outline-primary btn-block">
+                                                    <i class="fas fa-chevron-down" id="toggleIcon"></i>
+                                                    <span id="toggleText">Hiển thị cây danh mục</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- Category Tree Container -->
+                                            <div id="categoryTreeContainer" class="category-tree-container" style="display: none;">
+                                                <div class="card">
+                                                    <div class="card-header py-2">
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-folder mr-2"></i>Chọn danh mục
+                                                            <span class="badge badge-info ml-2" id="categoryCount">Đang tải...</span>
+                                                        </h6>
+                                                    </div>
+                                                    <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                                                        <div id="categoryTree" class="category-tree-content">
+                                                            <div class="loading-spinner text-center py-4">
+                                                                <div class="spinner-border text-primary" role="status">
+                                                                    <span class="sr-only">Loading...</span>
+                                                                </div>
+                                                                <p class="mt-2 mb-0">Đang tải danh mục...</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hidden Input for Selected Category ID -->
+                                            <input type="hidden" id="selectedCategoryId" name="categoryId" value="@ViewBag.CategoryId" />
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- SEARCH FILTER -->
                                 <div class="col-md-6">
                                     <div class="filter-group">
                                         <label for="search">
@@ -47,6 +112,8 @@
                                         @Html.TextBox("search", ViewBag.SearchTerm as string, new { @class = "form-control", placeholder = "Nhập từ khóa tìm kiếm..." })
                                     </div>
                                 </div>
+
+                                <!-- FILTER BUTTONS -->
                                 <div class="col-md-2">
                                     <div class="filter-group">
                                         <label>&nbsp;</label>
@@ -63,6 +130,7 @@
                             </div>
                         }
                     </div>
+
 
                     <!-- Messages -->
                     @if (TempData["Success"] != null)
@@ -620,6 +688,422 @@ function performDeleteAjax(newsId) {
         }
         return html;
     }
+}
+// Global variables for category filter
+var categoryTreeVisible = false;
+var selectedCategoryId = @Html.Raw(ViewBag.CategoryId?.ToString() ?? "null");
+var categoriesData = [];
+var expandedCategoryIds = [];
+
+$(document).ready(function() {
+    initializeCategoryFilter();
+});
+
+function initializeCategoryFilter() {
+    // Toggle category tree
+    $('#toggleCategoryTree').click(function() {
+        toggleCategoryTree();
+    });
+
+    // Clear category selection
+    $('#clearCategorySelection').click(function() {
+        clearCategorySelection();
+    });
+
+    // Update display if category is pre-selected
+    if (selectedCategoryId) {
+        updateSelectedCategoryDisplay(selectedCategoryId, 'Danh mục đã chọn');
+    }
+}
+
+function toggleCategoryTree() {
+    if (!categoryTreeVisible) {
+        showCategoryTree();
+    } else {
+        hideCategoryTree();
+    }
+}
+
+function showCategoryTree() {
+    categoryTreeVisible = true;
+    $('#categoryTreeContainer').slideDown(300);
+    $('#toggleIcon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    $('#toggleText').text('Ẩn cây danh mục');
+
+    if (categoriesData.length === 0) {
+        loadRootCategories();
+    }
+}
+
+function hideCategoryTree() {
+    categoryTreeVisible = false;
+    $('#categoryTreeContainer').slideUp(300);
+    $('#toggleIcon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    $('#toggleText').text('Hiển thị cây danh mục');
+}
+
+function loadRootCategories() {
+    console.log('🌳 Loading root categories for filter...');
+
+    $('#categoryTree').html(`
+        <div class="loading-spinner text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0">Đang tải danh mục...</p>
+        </div>
+    `);
+
+    $.ajax({
+        url: '/Home/GetCategoriesTree',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 15000,
+        success: function(data) {
+            console.log('📦 Categories loaded for filter:', data);
+
+            if (data.success && data.categories) {
+                categoriesData = data.categories;
+                renderCategoryTree(data.categories);
+                $('#categoryCount').text(data.categories.length + ' danh mục');
+            } else {
+                showCategoryError('Không thể tải danh mục');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Failed to load categories for filter:', error);
+            showCategoryError('Lỗi kết nối đến server');
+        }
+    });
+}
+
+function renderCategoryTree(categories) {
+    if (!categories || categories.length === 0) {
+        $('#categoryTree').html(`
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Chưa có danh mục nào</p>
+            </div>
+        `);
+        return;
+    }
+
+    var html = '<div class="categories-menu p-2">';
+
+    // Add "All Categories" option
+    html += `
+        <div class="category-item mb-3" data-category-level="root">
+            <div class="root-category-option ${!selectedCategoryId ? 'active' : ''}" data-category-id="" data-category-name="Tất cả danh mục">
+                <div class="category-content">
+                    <div class="d-flex align-items-center">
+                        <div class="category-icon text-info mr-2">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="category-name">
+                            <strong>🏠 Tất cả danh mục</strong>
+                            <small class="d-block text-muted">Hiển thị toàn bộ tin tức</small>
+                        </div>
+                    </div>
+                    <div class="category-meta">
+                        <span class="badge badge-info">Tất cả</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr style="margin: 10px 0; border-color: #dee2e6;">
+    `;
+
+    // Add actual categories
+    for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        html += renderCategoryItem(category, 0);
+    }
+
+    html += '</div>';
+    $('#categoryTree').html(html);
+
+    // Attach event listeners
+    attachCategoryEventListeners();
+
+    // Highlight selected category if any
+    if (selectedCategoryId) {
+        highlightSelectedCategory();
+    }
+
+    console.log('✅ Category tree rendered for filter');
+}
+
+function renderCategoryItem(category, level) {
+    var linkClass = getCategoryLinkClass(level);
+    var iconClass = getCategoryIconClass(level);
+    var isSelected = selectedCategoryId == category.Id;
+    var isExpanded = expandedCategoryIds.includes(category.Id);
+
+    var html = `
+        <div class="category-item" data-category-level="${level}" data-category-id="${category.Id}">
+            <div class="${linkClass} ${isSelected ? 'active' : ''}"
+                 data-category-id="${category.Id}"
+                 data-category-name="${escapeHtml(category.Name)}"
+                 data-level="${level}">
+                <div class="category-content">
+                    <div class="d-flex align-items-center flex-grow-1">
+                        <div class="category-icon mr-2">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="category-name">
+                            ${escapeHtml(category.Name)}
+                        </div>
+                    </div>
+                    <div class="category-meta">
+                        <span class="news-count">${category.NewsCount || 0}</span>
+                        ${category.HasChildren ? `
+                            <button type="button" class="category-toggle-btn ml-2 ${isExpanded ? 'expanded' : ''}"
+                                    data-parent-id="${category.Id}"
+                                    data-level="${level}"
+                                    title="${isExpanded ? 'Thu gọn' : 'Mở rộng'} danh mục con">
+                                <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>`;
+
+    // Subcategories container
+    if (category.HasChildren) {
+        html += `<div id="subcategories-${category.Id}" class="subcategories-container ${isExpanded ? 'expanded' : ''}"
+                      style="display: ${isExpanded ? 'block' : 'none'};">`;
+
+        if (isExpanded) {
+            html += `<div class="loading-subcategories text-center py-2">
+                        <div class="spinner-border spinner-border-sm text-primary mr-2"></div>
+                        <small class="text-muted">Đang tải...</small>
+                     </div>`;
+        }
+
+        html += `</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+}
+
+function attachCategoryEventListeners() {
+    // Category selection
+    $(document).off('click', '.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option');
+    $(document).on('click', '.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option', function(e) {
+        if ($(e.target).closest('.category-toggle-btn').length) {
+            return;
+        }
+
+        var categoryId = $(this).attr('data-category-id');
+        var categoryName = $(this).attr('data-category-name');
+
+        selectCategory(categoryId, categoryName);
+    });
+
+    // Toggle subcategories
+    $(document).off('click', '.category-toggle-btn');
+    $(document).on('click', '.category-toggle-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var parentId = parseInt($(this).attr('data-parent-id'));
+        var level = parseInt($(this).attr('data-level')) || 0;
+
+        toggleSubcategories(parentId, level + 1);
+    });
+
+    // Load expanded subcategories
+    loadExpandedSubcategories();
+}
+
+function toggleSubcategories(parentId, level) {
+    var container = $('#subcategories-' + parentId);
+    var toggleBtn = $(`[data-parent-id="${parentId}"]`);
+    var icon = toggleBtn.find('i');
+
+    if (container.hasClass('expanded')) {
+        // Collapse
+        container.removeClass('expanded').slideUp(300, function() {
+            container.empty();
+        });
+        icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+        toggleBtn.removeClass('expanded');
+
+        // Remove from expanded list
+        expandedCategoryIds = expandedCategoryIds.filter(id => id !== parentId);
+    } else {
+        // Expand
+        container.show().html(`
+            <div class="text-center py-3" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; margin: 4px 0;">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <small class="d-block mt-2 text-muted">Đang tải danh mục con...</small>
+            </div>
+        `);
+
+        container.addClass('expanded');
+        icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+        toggleBtn.addClass('expanded');
+
+        // Add to expanded list
+        if (!expandedCategoryIds.includes(parentId)) {
+            expandedCategoryIds.push(parentId);
+        }
+
+        // Load subcategories
+        loadSubcategories(parentId, level, container);
+    }
+}
+
+function loadSubcategories(parentId, level, container) {
+    console.log('📡 Loading subcategories for filter:', parentId, level);
+
+    $.ajax({
+        url: '/Home/GetSubcategories',
+        type: 'GET',
+        data: { parentId: parentId },
+        dataType: 'json',
+        timeout: 10000,
+        success: function(data) {
+            if (data.success && data.subcategories && data.subcategories.length > 0) {
+                var html = '';
+                for (var i = 0; i < data.subcategories.length; i++) {
+                    html += renderCategoryItem(data.subcategories[i], level);
+                }
+                container.html(html);
+            } else {
+                container.html(`
+                    <div class="text-center py-3" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; margin: 4px 0;">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Danh mục này chưa có danh mục con
+                        </small>
+                    </div>
+                `);
+            }
+            container.show();
+        },
+        error: function(xhr, status, error) {
+            showSubcategoryError(container, parentId, level, 'Lỗi tải danh mục con: ' + error);
+        }
+    });
+}
+
+function loadExpandedSubcategories() {
+    expandedCategoryIds.forEach(function(parentId) {
+        var container = $('#subcategories-' + parentId);
+        if (container.length && container.hasClass('expanded')) {
+            var level = parseInt(container.closest('[data-category-level]').attr('data-category-level')) + 1;
+            loadSubcategories(parentId, level, container);
+        }
+    });
+}
+
+function selectCategory(categoryId, categoryName) {
+    // Remove previous selection
+    $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .root-category-option').removeClass('active');
+
+    // Highlight selected
+    if (categoryId) {
+        $(`[data-category-id="${categoryId}"]`).addClass('active');
+    } else {
+        $('.root-category-option').addClass('active');
+    }
+
+    // Update form and display
+    updateSelectedCategoryDisplay(categoryId, categoryName);
+}
+
+function updateSelectedCategoryDisplay(categoryId, categoryName) {
+    selectedCategoryId = categoryId || null;
+    $('#selectedCategoryId').val(selectedCategoryId || '');
+
+    if (selectedCategoryId) {
+        $('#selectedCategoryName').html(`
+            <i class="fas fa-folder mr-1"></i>${escapeHtml(categoryName)}
+        `);
+        $('#clearCategorySelection').show();
+    } else {
+        $('#selectedCategoryName').html(`
+            <i class="fas fa-home mr-1"></i>Tất cả danh mục
+        `);
+        $('#clearCategorySelection').hide();
+    }
+}
+
+function clearCategorySelection() {
+    selectedCategoryId = null;
+    $('#selectedCategoryId').val('');
+    $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link').removeClass('active');
+    $('.root-category-option').addClass('active');
+    updateSelectedCategoryDisplay(null, '');
+}
+
+function highlightSelectedCategory() {
+    if (selectedCategoryId) {
+        $(`[data-category-id="${selectedCategoryId}"]`).addClass('active');
+    } else {
+        $('.root-category-option').addClass('active');
+    }
+}
+
+function showSubcategoryError(container, parentId, level, errorMsg) {
+    container.html(`
+        <div class="text-center py-3" style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 4px 0;">
+            <small class="text-danger">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                ${errorMsg}
+            </small>
+            <br>
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2"
+                    onclick="loadSubcategories(${parentId}, ${level}, $('#subcategories-${parentId}'))">
+                <i class="fas fa-redo mr-1"></i>Thử lại
+            </button>
+        </div>
+    `);
+    container.show();
+}
+
+function showCategoryError(message) {
+    $('#categoryTree').html(`
+        <div class="text-center py-4">
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <p class="text-danger">${message}</p>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadRootCategories()">
+                <i class="fas fa-redo mr-1"></i>Thử lại
+            </button>
+        </div>
+    `);
+}
+
+// Utility functions
+function getCategoryLinkClass(level) {
+    switch (level) {
+        case 0: return 'category-link';
+        case 1: return 'subcategory-link';
+        case 2: return 'sub-subcategory-link';
+        case 3: return 'level-4-link';
+        default: return 'level-5-link';
+    }
+}
+
+function getCategoryIconClass(level) {
+    switch (level) {
+        case 0: return 'fas fa-folder';
+        case 1: return 'fas fa-folder-open';
+        case 2: return 'fas fa-file-alt';
+        case 3: return 'fas fa-file';
+        default: return 'fas fa-circle';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 </script>
 

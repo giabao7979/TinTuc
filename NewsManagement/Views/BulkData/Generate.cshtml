@@ -1,0 +1,508 @@
+﻿@{
+    ViewBag.Title = "Tạo dữ liệu hàng loạt";
+}
+
+@Html.AntiForgeryToken()
+
+<link href="~/Content/css/site.css" rel="stylesheet" />
+<link href="~/Content/css/new.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-magic mr-3"></i>Tạo Dữ Liệu Hàng Loạt
+                    </h2>
+                    <p class="mb-0 opacity-75">Công cụ tạo tin tức tự động cho hệ thống</p>
+                </div>
+
+                <div class="card-body">
+                    <!-- Current Stats -->
+                    <div class="stats-section mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-primary">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 id="totalCategories">@ViewBag.TotalCategories</h4>
+                                        <p>Danh mục có sẵn</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-success">
+                                        <i class="fas fa-newspaper"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 id="totalNews">@ViewBag.TotalNews</h4>
+                                        <p>Tin tức hiện có</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-warning">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 id="estimatedTime">~ 60 phút</h4>
+                                        <p>Thời gian ước tính</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-icon bg-info">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h4 id="targetNews">40M</h4>
+                                        <p>Mục tiêu tạo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generation Form -->
+                    <div class="generation-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="totalNewsInput">
+                                        <i class="fas fa-newspaper mr-2"></i>Số lượng tin tức muốn tạo
+                                    </label>
+                                    <input type="number"
+                                           id="totalNewsInput"
+                                           class="form-control"
+                                           value="40000000"
+                                           min="1000"
+                                           max="100000000"
+                                           step="1000">
+                                    <small class="text-muted">Từ 1,000 đến 100,000,000 tin tức</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="batchSizeInput">
+                                        <i class="fas fa-layer-group mr-2"></i>Kích thước batch
+                                    </label>
+                                    <input type="number"
+                                           id="batchSizeInput"
+                                           class="form-control"
+                                           value="10000"
+                                           min="1000"
+                                           max="50000"
+                                           step="1000">
+                                    <small class="text-muted">Số tin tức xử lý mỗi lần (1,000 - 50,000)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Section -->
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-exclamation-triangle mr-2"></i>Lưu ý quan trọng:</h5>
+                            <ul class="mb-0">
+                                <li>Quá trình này sẽ tạo dữ liệu lớn và có thể mất thời gian dài</li>
+                                <li>Đảm bảo có đủ dung lượng đĩa cứng (ít nhất 20GB cho 40M tin tức)</li>
+                                <li>Không đóng trình duyệt trong quá trình thực hiện</li>
+                                <li>Dữ liệu được tạo sẽ phân bố ngẫu nhiên vào các danh mục có sẵn</li>
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="text-center">
+                            <button type="button" id="generateBtn" class="btn btn-success btn-lg mr-3">
+                                <i class="fas fa-play mr-2"></i>Bắt Đầu Tạo Dữ Liệu
+                            </button>
+                            <button type="button" id="refreshStatsBtn" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-sync-alt mr-2"></i>Làm Mới Thống Kê
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progressSection" class="progress-section" style="display: none;">
+                        <hr class="my-4">
+                        <h5><i class="fas fa-cogs mr-2"></i>Tiến trình tạo dữ liệu</h5>
+
+                        <div class="progress mb-3" style="height: 30px;">
+                            <div id="progressBar"
+                                 class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                 role="progressbar"
+                                 style="width: 0%">
+                                0%
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="progress-stat">
+                                    <strong>Đã tạo:</strong>
+                                    <span id="progressGenerated">0</span> tin tức
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="progress-stat">
+                                    <strong>Thời gian trôi qua:</strong>
+                                    <span id="progressTime">00:00:00</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="progress-stat">
+                                    <strong>Tốc độ:</strong>
+                                    <span id="progressSpeed">0</span> tin/giây
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div id="progressLog" class="progress-log">
+                                <small class="text-muted">Nhật ký tiến trình sẽ hiển thị ở đây...</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="resultsSection" class="results-section" style="display: none;">
+                        <hr class="my-4">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle mr-2"></i>Hoàn thành tạo dữ liệu!</h5>
+                            <div id="resultsContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card:nth-child(1) {
+            border-left-color: #007bff;
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: #28a745;
+        }
+
+        .stat-card:nth-child(3) {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: #17a2b8;
+        }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: white;
+        font-size: 24px;
+    }
+
+    .stat-content h4 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stat-content p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .progress-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .progress-stat {
+        text-align: center;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .progress-log {
+        background: #2d3436;
+        color: #00b894;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        height: 200px;
+        overflow-y: auto;
+        border: 1px solid #636e72;
+    }
+
+    .btn-lg {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+    }
+
+    #generateBtn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .alert-warning ul {
+        padding-left: 20px;
+    }
+
+    .generation-form {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+let generationStartTime;
+let progressInterval;
+
+$(document).ready(function() {
+    // Refresh stats on page load
+    refreshStats();
+
+    // Generate button click
+    $('#generateBtn').click(function() {
+        startGeneration();
+    });
+
+    // Refresh stats button
+    $('#refreshStatsBtn').click(function() {
+        refreshStats();
+    });
+
+    // Update estimated time when inputs change
+    $('#totalNewsInput, #batchSizeInput').on('input', function() {
+        updateEstimatedTime();
+    });
+});
+
+function refreshStats() {
+    $('#refreshStatsBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang tải...');
+
+    $.get('@Url.Action("GetDatabaseStats")', function(data) {
+        if (data.success !== false) {
+            $('#totalCategories').text(data.totalCategories);
+            $('#totalNews').text(data.totalNews.toLocaleString());
+            updateEstimatedTime();
+        }
+        $('#refreshStatsBtn').prop('disabled', false).html('<i class="fas fa-sync-alt mr-2"></i>Làm Mới Thống Kê');
+    });
+}
+
+function updateEstimatedTime() {
+    var totalNews = parseInt($('#totalNewsInput').val());
+    var batchSize = parseInt($('#batchSizeInput').val());
+
+    // Estimate: ~1000 news per second with batch processing
+    var estimatedSeconds = totalNews / 1000;
+    var hours = Math.floor(estimatedSeconds / 3600);
+    var minutes = Math.floor((estimatedSeconds % 3600) / 60);
+
+    var timeText = hours > 0 ? `~ ${hours}h ${minutes}m` : `~ ${minutes} phút`;
+    $('#estimatedTime').text(timeText);
+
+    $('#targetNews').text((totalNews / 1000000).toFixed(1) + 'M');
+}
+
+function startGeneration() {
+    var totalNews = parseInt($('#totalNewsInput').val());
+    var batchSize = parseInt($('#batchSizeInput').val());
+
+    // Validation
+    if (totalNews < 1000 || totalNews > 100000000) {
+        alert('Số lượng tin tức phải từ 1,000 đến 100,000,000');
+        return;
+    }
+
+    if (batchSize < 1000 || batchSize > 50000) {
+        alert('Kích thước batch phải từ 1,000 đến 50,000');
+        return;
+    }
+
+    // Confirm before starting
+    if (!confirm(`Bạn có chắc muốn tạo ${totalNews.toLocaleString()} tin tức?\n\nQuá trình này có thể mất thời gian dài và không thể dừng giữa chừng.`)) {
+        return;
+    }
+
+    // Disable form and show progress
+    $('#generateBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang Tạo...');
+    $('#totalNewsInput, #batchSizeInput').prop('disabled', true);
+    $('#progressSection').slideDown();
+    $('#resultsSection').hide();
+
+    // Start timer
+    generationStartTime = new Date();
+    startProgressTimer();
+
+    // Add to log
+    addToLog('🚀 Bắt đầu tạo ' + totalNews.toLocaleString() + ' tin tức...');
+
+    // Get anti-forgery token
+    var token = $('input[name="__RequestVerificationToken"]').val();
+    if (!token) {
+        // Create token if not exists
+        $('body').append('@Html.AntiForgeryToken()');
+        token = $('input[name="__RequestVerificationToken"]').val();
+    }
+
+    // Start generation
+    $.ajax({
+        url: '@Url.Action("GenerateBulkNews")',
+        type: 'POST',
+        data: {
+            totalNews: totalNews,
+            batchSize: batchSize,
+            __RequestVerificationToken: token
+        },
+        timeout: 7200000, // 2 hours timeout
+        success: function(response) {
+            stopProgressTimer();
+
+            if (response.success) {
+                showResults(response);
+                addToLog('✅ Hoàn thành thành công!');
+                addToLog(`📊 Đã tạo: ${response.totalGenerated.toLocaleString()} tin tức`);
+                addToLog(`⏱️ Thời gian: ${response.timeElapsed}`);
+            } else {
+                showError(response.message);
+                addToLog('❌ Lỗi: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            stopProgressTimer();
+            var errorMsg = 'Lỗi kết nối: ' + error;
+            if (status === 'timeout') {
+                errorMsg = 'Quá thời gian chờ. Quá trình có thể vẫn đang chạy trên server.';
+            }
+            showError(errorMsg);
+            addToLog('❌ ' + errorMsg);
+        },
+        complete: function() {
+            // Re-enable form
+            $('#generateBtn').prop('disabled', false).html('<i class="fas fa-play mr-2"></i>Bắt Đầu Tạo Dữ Liệu');
+            $('#totalNewsInput, #batchSizeInput').prop('disabled', false);
+
+            // Refresh stats
+            setTimeout(refreshStats, 2000);
+        }
+    });
+}
+
+function startProgressTimer() {
+    progressInterval = setInterval(function() {
+        var elapsed = new Date() - generationStartTime;
+        var hours = Math.floor(elapsed / 3600000);
+        var minutes = Math.floor((elapsed % 3600000) / 60000);
+        var seconds = Math.floor((elapsed % 60000) / 1000);
+
+        var timeString =
+            (hours < 10 ? '0' : '') + hours + ':' +
+            (minutes < 10 ? '0' : '') + minutes + ':' +
+            (seconds < 10 ? '0' : '') + seconds;
+
+        $('#progressTime').text(timeString);
+
+        // Simulate progress (since we don't have real-time updates)
+        var totalNews = parseInt($('#totalNewsInput').val());
+        var estimatedDuration = totalNews / 1000 * 1000; // milliseconds
+        var progress = Math.min(95, (elapsed / estimatedDuration) * 100);
+
+        $('#progressBar').css('width', progress + '%').text(Math.round(progress) + '%');
+
+        var estimatedGenerated = Math.floor((progress / 100) * totalNews);
+        $('#progressGenerated').text(estimatedGenerated.toLocaleString());
+
+        var speed = estimatedGenerated / (elapsed / 1000);
+        $('#progressSpeed').text(Math.round(speed));
+
+    }, 1000);
+}
+
+function stopProgressTimer() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+    }
+    $('#progressBar').css('width', '100%').text('100%').removeClass('progress-bar-animated');
+}
+
+function showResults(response) {
+    $('#resultsSection').slideDown();
+    $('#resultsContent').html(`
+        <p><strong>Tổng số tin tức đã tạo:</strong> ${response.totalGenerated.toLocaleString()}</p>
+        <p><strong>Thời gian thực hiện:</strong> ${response.timeElapsed}</p>
+        <p><strong>Tốc độ trung bình:</strong> ${Math.round(response.totalGenerated / (new Date() - generationStartTime) * 1000).toLocaleString()} tin/giây</p>
+        <div class="mt-3">
+            <a href="@Url.Action("Index", "News")" class="btn btn-primary">
+                <i class="fas fa-list mr-2"></i>Xem Danh Sách Tin Tức
+            </a>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-success ml-2">
+                <i class="fas fa-home mr-2"></i>Về Trang Chủ
+            </a>
+        </div>
+    `);
+}
+
+function showError(message) {
+    $('#resultsSection').slideDown();
+    $('#resultsContent').parent().removeClass('alert-success').addClass('alert-danger');
+    $('#resultsContent').parent().find('h5').html('<i class="fas fa-exclamation-triangle mr-2"></i>Có lỗi xảy ra!');
+    $('#resultsContent').html(`
+        <p><strong>Lỗi:</strong> ${message}</p>
+        <div class="mt-3">
+            <button onclick="location.reload()" class="btn btn-warning">
+                <i class="fas fa-redo mr-2"></i>Thử Lại
+            </button>
+        </div>
+    `);
+}
+
+function addToLog(message) {
+    var timestamp = new Date().toLocaleTimeString();
+    var logEntry = `[${timestamp}] ${message}\n`;
+    $('#progressLog').append(logEntry);
+    $('#progressLog').scrollTop($('#progressLog')[0].scrollHeight);
+}
+</script>

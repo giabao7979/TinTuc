@@ -3,12 +3,36 @@
   "WorkspaceRootPath": "D:\\TinTuc\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\views\\news\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|d:\\tintuc\\newsmanagement\\controllers\\bulkdatacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\controllers\\bulkdatacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\views\\bulkdata\\generate.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\bulkdata\\generate.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\views\\news\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|D:\\TinTuc\\newsmanagement\\content\\css\\new.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67321FB9-1B63-4D53-80E3-AC342414AA23}|NewsManagement\\NewsManagement.csproj|solutionrelative:newsmanagement\\content\\css\\new.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 280,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,28 +50,105 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\News\\Edit.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Edit.cshtml",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\News\\Edit.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\News\\Edit.cshtml",
+              "ViewState": "AgIAANUAAAAAAAAAAAAAAPUAAABpAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-17T08:55:04.563Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Generate.cshtml",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\BulkData\\Generate.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\BulkData\\Generate.cshtml",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\BulkData\\Generate.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\BulkData\\Generate.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPsBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-16T04:19:14.624Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "BulkDataController.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\BulkDataController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\BulkDataController.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\BulkDataController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\BulkDataController.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAA2wBYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-16T04:18:01.002Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "NewsManagement\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALAAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-06-16T04:15:50.601Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "new.css",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Content\\css\\new.css",
+              "RelativeDocumentMoniker": "NewsManagement\\Content\\css\\new.css",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Content\\css\\new.css",
+              "RelativeToolTip": "NewsManagement\\Content\\css\\new.css",
+              "ViewState": "AgIAACkIAAAAAAAAAAAQwDoIAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-06-16T02:43:49.515Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Views\\News\\Index.cshtml",
               "RelativeDocumentMoniker": "NewsManagement\\Views\\News\\Index.cshtml",
               "ToolTip": "D:\\TinTuc\\NewsManagement\\Views\\News\\Index.cshtml",
               "RelativeToolTip": "NewsManagement\\Views\\News\\Index.cshtml",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAAACYAAACoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAACBzwAkBAABbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-06-13T06:54:11.643Z",
+              "WhenOpened": "2025-06-16T02:43:10.313Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "NewsController.cs",
               "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
               "RelativeDocumentMoniker": "NewsManagement\\Controllers\\NewsController.cs",
               "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\NewsController.cs",
               "RelativeToolTip": "NewsManagement\\Controllers\\NewsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABmAAAAAAAAAA==",
+              "ViewState": "AgIAAJ0CAAAAAAAAAAArwL4CAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-13T06:50:19.442Z",
+              "WhenOpened": "2025-06-16T02:42:26.465Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\TinTuc\\NewsManagement\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "NewsManagement\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\TinTuc\\NewsManagement\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "NewsManagement\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAwwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-16T02:25:02.743Z",
               "EditorCaption": ""
             }
           ]

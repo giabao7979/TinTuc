@@ -11,7 +11,7 @@ namespace NewsManagement.Controllers
     {
         private TinTucEntities2 db = new TinTucEntities2();
 
-        public ActionResult Index(int? categoryId, string search, int? lastId = null, int pageSize = 10)
+        public ActionResult Index(int? categoryId, string search, int? lastId = null, int pageSize = 5)
         {
             try
             {
