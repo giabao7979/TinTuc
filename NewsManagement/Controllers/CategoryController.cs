@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using PagedList;
 using NewsManagement.Models;
+using System.Threading.Tasks;
 
 namespace NewsManagement.Controllers
 {
@@ -246,7 +247,270 @@ namespace NewsManagement.Controllers
             ViewBag.ParentId = new SelectList(availableParents, "Id", "DisplayName", category.ParentId);
             return View(category);
         }
+        [HttpGet]
+        public async Task<JsonResult> GetAvailableCategoriesForEdit(int editingCategoryId, string searchTerm = "", int page = 1, int pageSize = 50)
+        {
+            try
+            {
+                // Sử dụng CTE để tìm tất cả descendants của category đang edit
+                var sql = @"
+            WITH CategoryHierarchy AS (
+                -- Bắt đầu từ category đang edit
+                SELECT Id, ParentId, 0 as Level
+                FROM Category 
+                WHERE Id = @editingCategoryId
+                
+                UNION ALL
+                
+                -- Recursively tìm tất cả children/descendants
+                SELECT c.Id, c.ParentId, ch.Level + 1
+                FROM Category c
+                INNER JOIN CategoryHierarchy ch ON c.ParentId = ch.Id
+                WHERE ch.Level < 20  -- Giới hạn độ sâu để tránh infinite loop
+            ),
+            AvailableCategories AS (
+                SELECT c.Id, c.Name, c.ParentId, c.Ordering,
+                       ROW_NUMBER() OVER (ORDER BY 
+                           CASE WHEN @searchTerm = '' THEN c.Ordering ELSE 0 END,
+                           CASE WHEN @searchTerm != '' AND c.Name LIKE @searchTerm + '%' THEN 0 ELSE 1 END,
+                           c.Name
+                       ) as RowNum
+                FROM Category c
+                WHERE c.Status = 1 
+                  AND c.Id != @editingCategoryId  -- Loại trừ chính category đang edit
+                  AND c.Id NOT IN (SELECT Id FROM CategoryHierarchy) -- Loại trừ tất cả descendants
+                  AND (@searchTerm = '' OR c.Name LIKE '%' + @searchTerm + '%')
+            )
+            SELECT ac.Id, ac.Name, ac.ParentId, ac.Ordering,
+                   (SELECT COUNT(*) 
+                    FROM News n 
+                    INNER JOIN NewsCategory nc ON n.Id = nc.NewsId 
+                    WHERE nc.CategoryId = ac.Id AND n.Status = 1) as NewsCount,
+                   CASE WHEN EXISTS(
+                       SELECT 1 FROM Category child 
+                       WHERE child.ParentId = ac.Id AND child.Status = 1
+                   ) THEN 1 ELSE 0 END as HasChildren
+            FROM AvailableCategories ac
+            WHERE ac.RowNum BETWEEN @startRow AND @endRow
+            ORDER BY ac.RowNum";
 
+                var startRow = (page - 1) * pageSize + 1;
+                var endRow = page * pageSize;
+
+                var results = db.Database.SqlQuery<CategoryForEditResult>(sql,
+                    new System.Data.SqlClient.SqlParameter("@editingCategoryId", editingCategoryId),
+                    new System.Data.SqlClient.SqlParameter("@searchTerm", searchTerm ?? ""),
+                    new System.Data.SqlClient.SqlParameter("@startRow", startRow),
+                    new System.Data.SqlClient.SqlParameter("@endRow", endRow)
+                ).ToList();
+
+                // Đếm tổng số categories available
+                var countSql = @"
+            WITH CategoryHierarchy AS (
+                SELECT Id, ParentId, 0 as Level
+                FROM Category WHERE Id = @editingCategoryId
+                UNION ALL
+                SELECT c.Id, c.ParentId, ch.Level + 1
+                FROM Category c
+                INNER JOIN CategoryHierarchy ch ON c.ParentId = ch.Id
+                WHERE ch.Level < 20
+            )
+            SELECT COUNT(*)
+            FROM Category c
+            WHERE c.Status = 1 
+              AND c.Id != @editingCategoryId
+              AND c.Id NOT IN (SELECT Id FROM CategoryHierarchy)
+              AND (@searchTerm = '' OR c.Name LIKE '%' + @searchTerm + '%')";
+
+                var totalCount = db.Database.SqlQuery<int>(countSql,
+                    new System.Data.SqlClient.SqlParameter("@editingCategoryId", editingCategoryId),
+                    new System.Data.SqlClient.SqlParameter("@searchTerm", searchTerm ?? "")
+                ).FirstOrDefault();
+
+                // Build response với category paths
+                var categories = results.Select(r => new
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    ParentId = r.ParentId,
+                    NewsCount = r.NewsCount,
+                    HasChildren = r.HasChildren > 0,
+                    Path = GetCategoryPathFast(r.Id) // Sử dụng cache nếu có
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    categories = categories,
+                    totalCount = totalCount,
+                    currentPage = page,
+                    pageSize = pageSize,
+                    hasMore = (page * pageSize) < totalCount,
+                    searchTerm = searchTerm
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message,
+                    details = ex.InnerException?.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpGet]
+        public JsonResult GetCategoryName(int id)
+        {
+            try
+            {
+                var category = db.Categories
+                    .Where(c => c.Id == id)
+                    .Select(c => new { c.Name, c.ParentId })
+                    .FirstOrDefault();
+
+                if (category != null)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        name = category.Name,
+                        parentId = category.ParentId
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { success = false, message = "Category not found" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpGet]
+        public JsonResult ValidateCategorySelection(int editingCategoryId, int? parentId)
+        {
+            try
+            {
+                if (!parentId.HasValue)
+                {
+                    return Json(new { success = true, valid = true }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Check if trying to select self
+                if (parentId.Value == editingCategoryId)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        valid = false,
+                        message = "Không thể chọn chính danh mục này làm danh mục cha"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Check if parent is a descendant
+                var isDescendant = IsDescendantOfOptimized(parentId.Value, editingCategoryId);
+                if (isDescendant)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        valid = false,
+                        message = "Không thể chọn danh mục con làm danh mục cha"
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { success = true, valid = true }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        private string GetCategoryPathFast(int categoryId)
+        {
+            // Sử dụng cache để tránh rebuild path nhiều lần
+            var cacheKey = $"CategoryPath_{categoryId}";
+
+            // Nếu có cache system (Redis/MemoryCache), check cache trước
+            // if (Cache[cacheKey] != null) return Cache[cacheKey].ToString();
+
+            try
+            {
+                var pathSql = @"
+            WITH CategoryPath AS (
+                SELECT Id, Name, ParentId, CAST(Name as NVARCHAR(1000)) as Path, 0 as Level
+                FROM Category 
+                WHERE Id = @categoryId
+                
+                UNION ALL
+                
+                SELECT c.Id, c.Name, c.ParentId, 
+                       CAST(c.Name + ' > ' + cp.Path as NVARCHAR(1000)) as Path, 
+                       cp.Level + 1
+                FROM Category c
+                INNER JOIN CategoryPath cp ON c.Id = cp.ParentId
+                WHERE cp.Level < 10
+            )
+            SELECT TOP 1 Path 
+            FROM CategoryPath 
+            ORDER BY Level DESC";
+
+                var path = db.Database.SqlQuery<string>(pathSql,
+                    new System.Data.SqlClient.SqlParameter("@categoryId", categoryId)
+                ).FirstOrDefault();
+
+                // Cache result
+                // Cache.Insert(cacheKey, path ?? "Unknown", DateTime.Now.AddMinutes(30));
+
+                return path ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+        private bool IsDescendantOfOptimized(int childId, int ancestorId)
+        {
+            try
+            {
+                var sql = @"
+            WITH CategoryHierarchy AS (
+                SELECT Id, ParentId, 0 as Level
+                FROM Category 
+                WHERE Id = @childId
+                
+                UNION ALL
+                
+                SELECT c.Id, c.ParentId, ch.Level + 1
+                FROM Category c
+                INNER JOIN CategoryHierarchy ch ON c.Id = ch.ParentId
+                WHERE ch.Level < 20
+            )
+            SELECT COUNT(*)
+            FROM CategoryHierarchy
+            WHERE Id = @ancestorId";
+
+                var count = db.Database.SqlQuery<int>(sql,
+                    new System.Data.SqlClient.SqlParameter("@childId", childId),
+                    new System.Data.SqlClient.SqlParameter("@ancestorId", ancestorId)
+                ).FirstOrDefault();
+
+                return count > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public class CategoryForEditResult
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int? ParentId { get; set; }
+            public int Ordering { get; set; }
+            public int NewsCount { get; set; }
+            public int HasChildren { get; set; }
+        }
         public ActionResult Delete(int id)
         {
             Category category = db.Categories.Find(id);

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Mvc;
 using NewsManagement.Models;
@@ -278,14 +280,34 @@ namespace NewsManagement.Controllers
         {
             try
             {
-                var newsIdParams = string.Join(",", newsIds);
-                var categoriesSql = $@"
+                if (newsIds == null || newsIds.Length == 0)
+                {
+                    return Json(new { success = false, message = "No news IDs provided" });
+                }
+
+                // Tạo DataTable cho TVP
+                var newsIdTable = new DataTable();
+                newsIdTable.Columns.Add("Id", typeof(int));
+
+                foreach (var id in newsIds)
+                {
+                    newsIdTable.Rows.Add(id);
+                }
+
+                var categoriesSql = @"
             SELECT nc.NewsId, c.Name
             FROM NewsCategory nc WITH (NOLOCK)
             INNER JOIN Category c WITH (NOLOCK) ON nc.CategoryId = c.Id
-            WHERE nc.NewsId IN ({newsIdParams})";
+            INNER JOIN @newsIds nids ON nc.NewsId = nids.Id";
 
-                var categoryData = db.Database.SqlQuery<NewsCategory>(categoriesSql).ToList();
+                var parameter = new SqlParameter("@newsIds", SqlDbType.Structured)
+                {
+                    TypeName = "dbo.IntListTableType", // Cần tạo User-Defined Table Type trước
+                    Value = newsIdTable
+                };
+
+                var categoryData = db.Database.SqlQuery<NewsCategory>(categoriesSql, parameter).ToList();
+
                 var result = categoryData.GroupBy(c => c.NewsId)
                                         .ToDictionary(g => g.Key.ToString(), g => string.Join(", ", g.Select(c => c.Name)));
 
@@ -293,7 +315,7 @@ namespace NewsManagement.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "An error occurred while retrieving categories" });
             }
         }
 

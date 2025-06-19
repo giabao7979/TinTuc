@@ -1,21 +1,27 @@
-﻿@{
-    ViewBag.Title = "Trang chủ - Tin tức mới nhất";
-}
-<!-- Link đến CSS cải thiện -->
-<link href="~/Content/css/home-page.css" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<div class="container-fluid">
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Tin tức mới nhất</title>
+    <!-- Bootstrap CSS -->
+    <link href="~/Content/css/home-page.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
-    <!-- Main Content -->
+
+</head>
+<body>
+
     <div class="container-fluid">
         <div class="row">
+            <!-- Sidebar danh mục -->
             <div class="col-lg-4 col-md-5">
                 <div class="card categories-card">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-sitemap mr-2"></i>Danh mục tin tức
+                            <i class="fas fa-sitemap mr-2"></i>Danh mục tin tức (8 cấp)
                         </h5>
                         <small class="d-block mt-1 opacity-75">
                             <i class="fas fa-info-circle mr-1"></i>Click để xem tin tức,
@@ -31,31 +37,39 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Chú thích danh mục -->
                 <div class="card mt-3">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-info mr-2"></i>Chú thích</h6>
+                        <h6 class="mb-0"><i class="fas fa-info mr-2"></i>Chú thích 8 cấp</h6>
                     </div>
                     <div class="card-body p-3">
                         <div class="small">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="category-icon text-primary mr-2"><i class="fas fa-folder"></i></div>
-                                <span>Danh mục chính</span>
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-primary rounded mr-2" style="width: 12px; height: 3px;"></div>
+                                <span>Cấp 0: Danh mục gốc</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="category-icon text-success mr-2"><i class="fas fa-folder-open"></i></div>
-                                <span>Danh mục con cấp 1</span>
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-success rounded mr-2" style="width: 12px; height: 3px;"></div>
+                                <span>Cấp 1: Danh mục con</span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="category-icon text-warning mr-2"><i class="fas fa-file-alt"></i></div>
-                                <span>Danh mục con cấp 2</span>
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-warning rounded mr-2" style="width: 12px; height: 3px;"></div>
+                                <span>Cấp 2: Danh mục con</span>
                             </div>
-                            <div class="d-flex align-items-center">
-                                <div class="category-icon text-danger mr-2"><i class="fas fa-file"></i></div>
-                                <span>Danh mục con cấp 3+</span>
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-info rounded mr-2" style="width: 12px; height: 3px;"></div>
+                                <span>Cấp 3: Danh mục con</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <div class="bg-dark rounded mr-2" style="width: 12px; height: 3px;"></div>
+                                <span>Cấp 4-7: Danh mục sâu</span>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Quick navigation -->
                 <div class="card mt-3">
                     <div class="card-header">
                         <h6 class="mb-0"><i class="fas fa-fast-forward mr-2"></i>Chuyển nhanh</h6>
@@ -78,7 +92,10 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Main content -->
             <div class="col-lg-8 col-md-7">
+                <!-- Search -->
                 <div class="card search-card">
                     <div class="card-header">
                         <h5 class="mb-0">
@@ -106,14 +123,13 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Content display -->
                 <div class="card content-card">
                     <div class="card-header" id="content-header">
                         <h3 class="mb-0" id="content-title">
                             <i class="fas fa-newspaper mr-2"></i>Tin tức ở danh mục 1
                         </h3>
-                        @*<small class="d-block mt-1 opacity-75" id="content-subtitle">
-                            Đang tải tin tức từ danh mục đầu tiên...
-                        </small>*@
                     </div>
                     <div class="card-body">
                         <div id="content-container" class="content-container">
@@ -127,594 +143,554 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="~/Js/home-page.js"></script>
-<script>
-    // Global variables
-    var currentMode = 'category';
-    var currentCategoryId = 1;
-    var currentCategoryName = '';
-    var searchTimeout;
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 
-    // Đảm bảo tất cả đều load xong
-    $(document).ready(function () {
-        console.log('✅ DOM ready, jQuery:', $.fn.jquery);
+    <script>
+        // ===== GLOBAL VARIABLES =====
+        var currentMode = 'category';
+        var currentCategoryId = 1;
+        var currentCategoryName = '';
+        var searchTimeout;
 
-        // Đợi một chút để đảm bảo DOM hoàn chỉnh
-        setTimeout(function () {
-            initializeHomePage();
-        }, 300);
-    });
+        // ===== INITIALIZATION =====
+        $(document).ready(function () {
+            console.log('✅ DOM ready, jQuery:', $.fn.jquery);
 
-    function initializeHomePage() {
-        console.log('Initializing home page...');
-
-        // Kiểm tra elements
-        if (!$('#content-container').length) {
-            console.error(' #content-container not found');
-            return;
-        }
-
-        if (!$('#categories-menu').length) {
-            console.error(' #categories-menu not found');
-            return;
-        }
-
-        console.log('All elements found, proceeding...');
-
-        // Load categories
-        loadCategories();
-
-        // Auto load category 1 after a delay
-        setTimeout(function () {
-            loadCategoryNews(1);
-        }, 1000);
-
-        // Setup search
-        setupSearch();
-    }
-
-    function setupSearch() {
-        $('#search-input').off('keyup').on('keyup', function (e) {
-            try {
-                if (e.key === 'Enter') {
-                    performSearch();
-                    return;
-                }
-
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(function () {
-                    var query = $('#search-input').val().trim();
-                    if (query.length >= 2) {
-                        performSearch();
-                    } else if (query.length === 0) {
-                        clearSearch();
-                    }
-                }, 500);
-            } catch (error) {
-                console.error('Search error:', error);
-            }
-        });
-    }
-
-    function loadCategories() {
-        console.log('📂 Loading categories...');
-
-        $.ajax({
-            url: '/Home/GetCategoriesTree',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                console.log('Categories response:', data);
-                if (data.success && data.categories) {
-                    displayCategories(data.categories);
-                } else {
-                    showErrorCategories();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading categories:', error);
-                showErrorCategories();
-            }
-        });
-    }
-
-    function displayCategories(categories) {
-        if (!Array.isArray(categories)) {
-            console.error('Invalid categories data');
-            return;
-        }
-
-        var html = '<div class="categories-menu">';
-
-        for (var i = 0; i < Math.min(categories.length, 50); i++) {
-            var cat = categories[i];
-            if (!cat.Id || !cat.Name) continue;
-
-            html += '<div class="category-item" data-category-level="0">';
-            html += '<div class="category-link" data-category-id="' + cat.Id + '" data-category-name="' + escapeHtml(cat.Name) + '" data-level="0">';
-            html += '<div class="category-content">';
-            html += '<div class="d-flex align-items-center">';
-            html += '<div class="category-icon text-primary"><i class="fas fa-folder"></i></div>';
-            html += '<div class="category-name font-weight-bold">' + escapeHtml(cat.Name) + '</div>';
-            html += '</div>';
-            html += '<div class="category-meta">';
-            html += '<span class="news-count badge badge-primary">' + (cat.NewsCount || 0) + '</span>';
-
-            // Toggle button nếu có danh mục con
-            if (cat.HasChildren) {
-                html += '<button class="category-toggle-btn toggle-btn btn btn-sm btn-outline-secondary ml-2" ';
-                html += 'data-parent-id="' + cat.Id + '" data-level="0" type="button">';
-                html += '<i class="fas fa-chevron-right"></i>';
-                html += '</button>';
-            }
-
-            html += '</div>';
-            html += '</div></div>';
-
-            // Container cho subcategories
-            if (cat.HasChildren) {
-                html += '<div id="subcategories-' + cat.Id + '" class="subcategories-container" style="display: none;"></div>';
-            }
-
-            html += '</div>'; // End category-item
-        }
-
-        html += '</div>';
-
-        $('#categories-menu').html(html);
-        attachCategoryEventListeners();
-
-        // Set category 1 as active
-        setTimeout(function () {
-            setActiveCategory(1);
-        }, 500);
-    }
-
-    function attachCategoryEventListeners() {
-        console.log('📎 Attaching category event listeners...');
-
-        // Category click events
-        $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link').off('click').on('click', function (e) {
-            if ($(e.target).closest('.toggle-btn').length) {
-                return; // Không trigger nếu click vào toggle button
-            }
-
-            var categoryId = $(this).data('category-id');
-            var categoryName = $(this).data('category-name');
-            console.log('Category clicked:', categoryId, categoryName);
-
-            if (categoryId) {
-                loadCategoryNews(categoryId);
-            }
+            setTimeout(function () {
+                initializeHomePage();
+            }, 300);
         });
 
-        // Toggle button events
-        $('.toggle-btn').off('click').on('click', function (e) {
-            e.stopPropagation();
-            var parentId = $(this).data('parent-id');
-            var level = $(this).data('level') || 0;
-            console.log('Toggle clicked:', parentId, level);
+        function initializeHomePage() {
+            console.log('🚀 Initializing optimized home page...');
 
-            if (parentId) {
-                toggleCategory(parentId, level);
-            }
-        });
-    }
-
-    function loadCategoryNews(categoryId) {
-        console.log('📰 Loading news for category:', categoryId);
-
-        if (!categoryId) return;
-
-        currentCategoryId = categoryId;
-        currentCategoryName = findCategoryNameById(categoryId) || ('Danh mục ' + categoryId);
-
-        setActiveCategory(categoryId);
-        updateHeader('Tin tức ở danh mục: ' + currentCategoryName);
-        showLoadingInContent();
-
-        $.ajax({
-            url: '/Home/GetNewsByCategory',
-            type: 'GET',
-            data: { categoryId: categoryId, page: 1, pageSize: 20 },
-            dataType: 'json',
-            success: function (data) {
-                console.log('News response:', data);
-
-                if (data.success && data.data && data.data.length > 0) {
-                    displayNews(data.data, data.totalCount);
-                } else {
-                    showNoNews();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading news:', error);
-                showNewsError();
-            }
-        });
-    }
-
-    function displayNews(newsArray, totalCount) {
-        var html = '<div class="alert alert-info mb-4">';
-        html += '<i class="fas fa-info-circle mr-2"></i>';
-        html += 'Tìm thấy ' + totalCount + ' tin tức';
-        html += '</div>';
-
-        html += '<div class="row">';
-
-        for (var i = 0; i < newsArray.length; i++) {
-            var news = newsArray[i];
-            html += '<div class="col-md-6 col-lg-4 mb-4">';
-            html += '<div class="card news-card h-100">';
-            html += '<div class="card-body">';
-            html += '<h5 class="card-title">';
-            html += '<a href="/News/Details/' + news.Id + '">' + escapeHtml(news.Title) + '</a>';
-            html += '</h5>';
-
-            if (news.Summary) {
-                html += '<p class="card-text text-muted">' + escapeHtml(news.Summary) + '</p>';
-            }
-
-            html += '<div class="card-footer bg-transparent">';
-            html += '<small class="text-muted">' + escapeHtml(news.CreatedDate) + '</small>';
-            html += '</div>';
-            html += '</div></div></div>';
-        }
-
-        html += '</div>';
-
-        // Navigation
-        html += '<div class="text-center mt-4">';
-        html += '<button class="btn btn-outline-primary" onclick="loadCategoryNews(' + currentCategoryId + ')">';
-        html += '<i class="fas fa-redo mr-1"></i>Tải lại';
-        html += '</button>';
-        html += '</div>';
-
-        $('#content-container').html(html);
-    }
-
-    function performSearch() {
-        var query = $('#search-input').val().trim();
-        if (query.length < 2) {
-            alert('Vui lòng nhập ít nhất 2 ký tự');
-            return;
-        }
-
-        updateHeader('Tìm kiếm: "' + query + '"');
-        showLoadingInContent();
-
-        $.ajax({
-            url: '/Home/QuickSearch',
-            type: 'GET',
-            data: { term: query, maxResults: 20 },
-            dataType: 'json',
-            success: function (data) {
-                if (data.success && data.results && data.results.length > 0) {
-                    displaySearchResults(data.results, query);
-                } else {
-                    showNoSearchResults(query);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Search error:', error);
-                showSearchError();
-            }
-        });
-    }
-
-    function displaySearchResults(results, query) {
-        var html = '<div class="alert alert-success mb-4">';
-        html += '<i class="fas fa-search mr-2"></i>';
-        html += 'Tìm thấy ' + results.length + ' kết quả cho: "' + escapeHtml(query) + '"';
-        html += '</div>';
-
-        html += '<div class="row">';
-
-        for (var i = 0; i < results.length; i++) {
-            var news = results[i];
-            html += '<div class="col-md-6 col-lg-4 mb-4">';
-            html += '<div class="card">';
-            html += '<div class="card-body">';
-            html += '<h5 class="card-title">';
-            html += '<a href="/News/Details/' + news.Id + '">' + escapeHtml(news.Title) + '</a>';
-            html += '</h5>';
-
-            if (news.Summary) {
-                html += '<p class="card-text">' + escapeHtml(news.Summary) + '</p>';
-            }
-
-            html += '<small class="text-muted">' + escapeHtml(news.CreatedDate) + '</small>';
-            html += '</div></div></div>';
-        }
-
-        html += '</div>';
-
-        html += '<div class="text-center mt-4">';
-        html += '<button class="btn btn-secondary" onclick="clearSearch()">';
-        html += '<i class="fas fa-arrow-left mr-1"></i>Quay lại';
-        html += '</button>';
-        html += '</div>';
-
-        $('#content-container').html(html);
-    }
-
-    function clearSearch() {
-        $('#search-input').val('');
-        loadCategoryNews(currentCategoryId || 1);
-    }
-
-    // Helper functions
-    function setActiveCategory(categoryId) {
-        // Remove active từ tất cả
-        $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link').removeClass('active');
-
-        // Add active cho category được chọn
-        $('[data-category-id="' + categoryId + '"]').addClass('active');
-
-        // Scroll đến category active nếu cần
-        var $activeCategory = $('[data-category-id="' + categoryId + '"]');
-        var $categoryMenu = $('#categories-menu');
-
-        if ($activeCategory.length && $categoryMenu.length) {
-            var categoryTop = $activeCategory.position().top;
-            var menuHeight = $categoryMenu.height();
-            var menuScrollTop = $categoryMenu.scrollTop();
-
-            if (categoryTop < 0 || categoryTop > menuHeight) {
-                $categoryMenu.animate({
-                    scrollTop: menuScrollTop + categoryTop - menuHeight / 2
-                }, 300);
-            }
-        }
-    }
-
-    function findCategoryNameById(categoryId) {
-        var name = '';
-        // Tìm trong tất cả các category levels
-        $('[data-category-id="' + categoryId + '"]').each(function () {
-            name = $(this).data('category-name');
-            return false; // Break loop
-        });
-        return name;
-    }
-
-    function updateHeader(title) {
-        $('#content-title').html('<i class="fas fa-newspaper mr-2"></i>' + title);
-    }
-
-    function showLoadingInContent() {
-        $('#content-container').html(
-            '<div class="text-center py-5">' +
-            '<div class="spinner-border text-primary mb-3"></div>' +
-            '<p>Đang tải...</p>' +
-            '</div>'
-        );
-    }
-
-    function showNoNews() {
-        $('#content-container').html(
-            '<div class="alert alert-warning text-center">' +
-            '<h4><i class="fas fa-folder-open mr-2"></i>Không có tin tức</h4>' +
-            '<p>Danh mục này chưa có tin tức nào.</p>' +
-            '</div>'
-        );
-    }
-
-    function showNewsError() {
-        $('#content-container').html(
-            '<div class="alert alert-danger text-center">' +
-            '<h4><i class="fas fa-exclamation-triangle mr-2"></i>Lỗi</h4>' +
-            '<p>Không thể tải tin tức. Vui lòng thử lại.</p>' +
-            '<button class="btn btn-primary" onclick="loadCategoryNews(' + currentCategoryId + ')">Thử lại</button>' +
-            '</div>'
-        );
-    }
-
-    function showNoSearchResults(query) {
-        $('#content-container').html(
-            '<div class="alert alert-warning text-center">' +
-            '<h4><i class="fas fa-search mr-2"></i>Không tìm thấy</h4>' +
-            '<p>Không có kết quả cho: "' + escapeHtml(query) + '"</p>' +
-            '<button class="btn btn-primary" onclick="clearSearch()">Quay lại</button>' +
-            '</div>'
-        );
-    }
-
-    function showSearchError() {
-        $('#content-container').html(
-            '<div class="alert alert-danger text-center">' +
-            '<h4><i class="fas fa-exclamation-triangle mr-2"></i>Lỗi tìm kiếm</h4>' +
-            '<p>Có lỗi xảy ra khi tìm kiếm.</p>' +
-            '<button class="btn btn-primary" onclick="clearSearch()">Quay lại</button>' +
-            '</div>'
-        );
-    }
-
-    function showErrorCategories() {
-        $('#categories-menu').html(
-            '<div class="text-center p-3">' +
-            '<p class="text-muted">Không thể tải danh mục</p>' +
-            '<button class="btn btn-sm btn-secondary" onclick="loadCategories()">Thử lại</button>' +
-            '</div>'
-        );
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        var div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ===== TOGGLE SUBCATEGORIES FUNCTIONS =====
-    function toggleCategory(categoryId, level) {
-        console.log('🔄 toggleCategory:', categoryId, level);
-
-        var container = $('#subcategories-' + categoryId);
-        var toggleBtn = $('[data-parent-id="' + categoryId + '"]');
-
-        if (container.hasClass('expanded')) {
-            // Đóng
-            container.removeClass('expanded').slideUp(300);
-            toggleBtn.removeClass('expanded').find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-        } else {
-            // Mở
-            container.html('<div class="text-center p-3"><small class="text-muted"><i class="fa fa-spinner fa-spin"></i> Đang tải...</small></div>');
-            container.addClass('expanded').slideDown(300);
-            toggleBtn.addClass('expanded').find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
-
-            // Load subcategories
-            loadSubcategories(categoryId, level + 1);
-        }
-    }
-
-    function loadSubcategories(parentId, level) {
-        console.log('📂 loadSubcategories:', parentId, level);
-
-        $.ajax({
-            url: '/Home/GetSubcategories',
-            type: 'GET',
-            data: { parentId: parentId },
-            dataType: 'json',
-            success: function (data) {
-                console.log('Subcategories loaded:', data);
-
-                if (data.success && data.subcategories && data.subcategories.length > 0) {
-                    displaySubcategories(parentId, data.subcategories, level);
-                } else {
-                    $('#subcategories-' + parentId).html('<div class="text-center p-2"><small class="text-muted">Không có danh mục con</small></div>');
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading subcategories:', error);
-                var container = $('#subcategories-' + parentId);
-                container.html(
-                    '<div class="text-center p-2">' +
-                    '<small class="text-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Lỗi tải danh mục con</small><br>' +
-                    '<button onclick="loadSubcategories(' + parentId + ', ' + level + ')" class="btn btn-sm btn-outline-danger mt-1">' +
-                    '<i class="fas fa-redo mr-1"></i>Thử lại</button>' +
-                    '</div>'
-                );
-            }
-        });
-    }
-
-    function displaySubcategories(parentId, subcategories, level) {
-        var container = $('#subcategories-' + parentId);
-        var html = '';
-
-        for (var i = 0; i < subcategories.length; i++) {
-            var sub = subcategories[i];
-            if (!sub.Id || !sub.Name) continue;
-
-            var linkClass = getCategoryLinkClass(level);
-            var iconClass = getCategoryIconClass(level);
-
-            html += '<div class="category-item" data-category-level="' + level + '">';
-            html += '<div class="' + linkClass + '" data-category-id="' + sub.Id + '" data-category-name="' + escapeHtml(sub.Name) + '" data-level="' + level + '">';
-            html += '<div class="category-content">';
-            html += '<div class="d-flex align-items-center flex-grow-1">';
-            html += '<div class="category-icon"><i class="' + iconClass + '"></i></div>';
-            html += '<div class="category-name">' + escapeHtml(sub.Name) + '</div>';
-            html += '</div>';
-            html += '<div class="category-meta">';
-            html += '<span class="news-count">' + (sub.NewsCount || 0) + '</span>';
-
-            // Toggle button cho subcategory nếu có con và chưa quá sâu
-            if (sub.HasChildren && level < 4) {
-                html += '<button class="category-toggle-btn toggle-btn ml-2" ';
-                html += 'data-parent-id="' + sub.Id + '" data-level="' + level + '" type="button">';
-                html += '<i class="fas fa-chevron-right"></i>';
-                html += '</button>';
-            }
-
-            html += '</div></div></div>';
-
-            // Container cho subcategories của cấp này
-            if (sub.HasChildren && level < 4) {
-                html += '<div id="subcategories-' + sub.Id + '" class="subcategories-container" style="display: none;"></div>';
-            }
-
-            html += '</div>';
-        }
-
-        container.html(html);
-
-        // Attach events cho subcategories mới
-        attachSubcategoryEventListeners(container);
-    }
-
-    function attachSubcategoryEventListeners(container) {
-        // Click events cho subcategories
-        container.find('.subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link').off('click').on('click', function (e) {
-            if ($(e.target).closest('.toggle-btn').length) {
+            if (!$('#content-container').length || !$('#categories-menu').length) {
+                console.error('❌ Required elements not found');
                 return;
             }
 
-            var categoryId = $(this).data('category-id');
-            var categoryName = $(this).data('category-name');
-
-            if (categoryId) {
-                loadCategoryNews(categoryId);
-            }
-        });
-
-        // Toggle events cho subcategories
-        container.find('.toggle-btn').off('click').on('click', function (e) {
-            e.stopPropagation();
-            var parentId = $(this).data('parent-id');
-            var level = $(this).data('level');
-
-            if (parentId) {
-                toggleCategory(parentId, level);
-            }
-        });
-    }
-
-    function getCategoryLinkClass(level) {
-        switch (level) {
-            case 1: return 'subcategory-link';
-            case 2: return 'sub-subcategory-link';
-            case 3: return 'level-4-link';
-            case 4: return 'level-5-link';
-            default: return 'level-5-link';
+            loadCategories();
+            setTimeout(() => loadCategoryNews(1), 1000);
+            setupSearch();
         }
-    }
 
-    function getCategoryIconClass(level) {
-        switch (level) {
-            case 1: return 'fas fa-folder-open text-success';
-            case 2: return 'fas fa-file-alt text-warning';
-            case 3: return 'fas fa-file text-danger';
-            case 4: return 'fas fa-circle text-info';
-            default: return 'fas fa-dot-circle text-secondary';
+        function setupSearch() {
+            $('#search-input').off('keyup').on('keyup', function (e) {
+                try {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                        return;
+                    }
+
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(function () {
+                        var query = $('#search-input').val().trim();
+                        if (query.length >= 2) {
+                            performSearch();
+                        } else if (query.length === 0) {
+                            clearSearch();
+                        }
+                    }, 500);
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            });
         }
-    }
 
-    console.log('✅ All functions loaded');
+        // ===== CATEGORY LOADING =====
+        function loadCategories() {
+            console.log('📂 Loading categories...');
 
-    // Add CSS cho subcategories nếu chưa có
-    if (!$('#subcategory-styles').length) {
-        $('<style id="subcategory-styles">' +
-            '.subcategories-container { margin-top: 8px; margin-left: 15px; }' +
-            '.subcategory-link { padding: 10px 14px; margin-left: 20px; background: #f1f3f4; border-left: 4px solid #28a745; border-radius: 6px; margin-bottom: 5px; }' +
-            '.subcategory-link:hover { background: #28a745; color: white; text-decoration: none; }' +
-            '.subcategory-link.active { background: #28a745; color: white; }' +
-            '.sub-subcategory-link { padding: 8px 12px; margin-left: 40px; background: #e9ecef; border-left: 4px solid #ffc107; border-radius: 6px; margin-bottom: 5px; }' +
-            '.sub-subcategory-link:hover { background: #ffc107; color: white; text-decoration: none; }' +
-            '.sub-subcategory-link.active { background: #ffc107; color: white; }' +
-            '.level-4-link { padding: 6px 10px; margin-left: 60px; background: #dee2e6; border-left: 4px solid #dc3545; border-radius: 4px; margin-bottom: 5px; }' +
-            '.level-4-link:hover { background: #dc3545; color: white; text-decoration: none; }' +
-            '.level-4-link.active { background: #dc3545; color: white; }' +
-            '.level-5-link { padding: 4px 8px; margin-left: 80px; background: #ced4da; border-left: 4px solid #17a2b8; border-radius: 4px; margin-bottom: 5px; }' +
-            '.level-5-link:hover { background: #17a2b8; color: white; text-decoration: none; }' +
-            '.level-5-link.active { background: #17a2b8; color: white; }' +
-            '.category-toggle-btn { width: 24px; height: 24px; border-radius: 50%; padding: 0; }' +
-            '.category-toggle-btn.expanded { background-color: #007bff; color: white; }' +
-            '</style>').appendTo('head');
-    }
-</script>
+            $.ajax({
+                url: '/Home/GetCategoriesTree',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log('Categories response:', data);
+                    if (data.success && data.categories) {
+                        displayCategories(data.categories);
+                    } else {
+                        showErrorCategories();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading categories:', error);
+                    showErrorCategories();
+                }
+            });
+        }
+
+        function displayCategories(categories) {
+            if (!Array.isArray(categories)) {
+                console.error('Invalid categories data');
+                return;
+            }
+
+            var html = '<div class="categories-menu">';
+
+            for (var i = 0; i < Math.min(categories.length, 100); i++) {
+                var cat = categories[i];
+                if (!cat.Id || !cat.Name) continue;
+
+                html += '<div class="category-item" data-category-level="0">';
+                html += '<div class="category-link" data-category-id="' + cat.Id + '" data-category-name="' + escapeHtml(cat.Name) + '" data-level="0">';
+                html += '<div class="category-content">';
+                html += '<div class="category-name font-weight-bold">' + escapeHtml(cat.Name) + '</div>';
+                html += '<div class="category-meta">';
+                html += '<span class="news-count">' + (cat.NewsCount || 0) + '</span>';
+
+                if (cat.HasChildren) {
+                    html += '<button class="category-toggle-btn toggle-btn" ';
+                    html += 'data-parent-id="' + cat.Id + '" data-level="0" type="button">';
+                    html += '<i class="fas fa-chevron-right"></i>';
+                    html += '</button>';
+                }
+
+                html += '</div></div></div>';
+
+                if (cat.HasChildren) {
+                    html += '<div id="subcategories-' + cat.Id + '" class="subcategories-container"></div>';
+                }
+
+                html += '</div>';
+            }
+
+            html += '</div>';
+
+            $('#categories-menu').html(html);
+            attachCategoryEventListeners();
+
+            setTimeout(() => setActiveCategory(1), 500);
+        }
+
+        function attachCategoryEventListeners() {
+            console.log('📎 Attaching category event listeners...');
+
+            // Category click events for all 8 levels
+            $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .level-6-link, .level-7-link, .level-8-link').off('click').on('click', function (e) {
+                if ($(e.target).closest('.toggle-btn').length) {
+                    return;
+                }
+
+                var categoryId = $(this).data('category-id');
+                var categoryName = $(this).data('category-name');
+                console.log('Category clicked:', categoryId, categoryName);
+
+                if (categoryId) {
+                    loadCategoryNews(categoryId);
+                }
+            });
+
+            // Toggle button events
+            $('.toggle-btn').off('click').on('click', function (e) {
+                e.stopPropagation();
+                var parentId = $(this).data('parent-id');
+                var level = $(this).data('level') || 0;
+                console.log('Toggle clicked:', parentId, level);
+
+                if (parentId) {
+                    toggleCategory(parentId, level);
+                }
+            });
+        }
+
+        // ===== NEWS LOADING =====
+        function loadCategoryNews(categoryId) {
+            console.log('📰 Loading news for category:', categoryId);
+
+            if (!categoryId) return;
+
+            currentCategoryId = categoryId;
+            currentCategoryName = findCategoryNameById(categoryId) || ('Danh mục ' + categoryId);
+
+            setActiveCategory(categoryId);
+            updateHeader('Tin tức ở danh mục: ' + currentCategoryName);
+            showLoadingInContent();
+
+            $.ajax({
+                url: '/Home/GetNewsByCategory',
+                type: 'GET',
+                data: { categoryId: categoryId, page: 1, pageSize: 20 },
+                dataType: 'json',
+                success: function (data) {
+                    console.log('News response:', data);
+
+                    if (data.success && data.data && data.data.length > 0) {
+                        displayNews(data.data, data.totalCount);
+                    } else {
+                        showNoNews();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading news:', error);
+                    showNewsError();
+                }
+            });
+        }
+
+        function displayNews(newsArray, totalCount) {
+            var html = '<div class="alert alert-info mb-4">';
+            html += '<i class="fas fa-info-circle mr-2"></i>';
+            html += 'Tìm thấy ' + totalCount + ' tin tức trong danh mục "' + escapeHtml(currentCategoryName) + '"';
+            html += '</div>';
+
+            html += '<div class="row">';
+
+            for (var i = 0; i < newsArray.length; i++) {
+                var news = newsArray[i];
+                html += '<div class="col-md-6 col-lg-4 mb-4">';
+                html += '<div class="card news-card h-100">';
+                html += '<div class="card-body d-flex flex-column">';
+                html += '<h5 class="news-title">';
+                html += '<a href="/News/Details/' + news.Id + '">' + escapeHtml(news.Title) + '</a>';
+                html += '</h5>';
+
+                if (news.Summary) {
+                    html += '<p class="news-summary flex-grow-1">' + escapeHtml(news.Summary) + '</p>';
+                }
+
+                html += '<div class="mt-auto pt-2 border-top">';
+                html += '<small class="text-muted">';
+                html += '<i class="far fa-calendar-alt mr-1"></i>' + escapeHtml(news.CreatedDate);
+                html += '</small>';
+                html += '</div>';
+                html += '</div></div></div>';
+            }
+
+            html += '</div>';
+
+            // Navigation
+            html += '<div class="text-center mt-4">';
+            html += '<div class="btn-group" role="group">';
+            html += '<button class="btn btn-outline-primary" onclick="loadCategoryNews(' + currentCategoryId + ')">';
+            html += '<i class="fas fa-redo mr-1"></i>Tải lại';
+            html += '</button>';
+            if (currentCategoryId > 1) {
+                html += '<button class="btn btn-outline-secondary" onclick="loadCategoryNews(' + (currentCategoryId - 1) + ')">';
+                html += '<i class="fas fa-chevron-left mr-1"></i>Trước';
+                html += '</button>';
+            }
+            html += '<button class="btn btn-outline-secondary" onclick="loadCategoryNews(' + (currentCategoryId + 1) + ')">';
+            html += 'Sau<i class="fas fa-chevron-right ml-1"></i>';
+            html += '</button>';
+            html += '</div>';
+            html += '</div>';
+
+            $('#content-container').html(html);
+        }
+
+        // ===== SEARCH FUNCTIONS =====
+        function performSearch() {
+            var query = $('#search-input').val().trim();
+            if (query.length < 2) {
+                alert('Vui lòng nhập ít nhất 2 ký tự');
+                return;
+            }
+
+            updateHeader('Tìm kiếm: "' + query + '"');
+            showLoadingInContent();
+
+            $.ajax({
+                url: '/Home/QuickSearch',
+                type: 'GET',
+                data: { term: query, maxResults: 20 },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success && data.results && data.results.length > 0) {
+                        displaySearchResults(data.results, query);
+                    } else {
+                        showNoSearchResults(query);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Search error:', error);
+                    showSearchError();
+                }
+            });
+        }
+
+        function displaySearchResults(results, query) {
+            var html = '<div class="alert alert-success mb-4">';
+            html += '<i class="fas fa-search mr-2"></i>';
+            html += 'Tìm thấy ' + results.length + ' kết quả cho: "' + escapeHtml(query) + '"';
+            html += '</div>';
+
+            html += '<div class="row">';
+
+            for (var i = 0; i < results.length; i++) {
+                var news = results[i];
+                html += '<div class="col-md-6 col-lg-4 mb-4">';
+                html += '<div class="card news-card h-100">';
+                html += '<div class="card-body">';
+                html += '<h5 class="news-title">';
+                html += '<a href="/News/Details/' + news.Id + '">' + escapeHtml(news.Title) + '</a>';
+                html += '</h5>';
+
+                if (news.Summary) {
+                    html += '<p class="news-summary">' + escapeHtml(news.Summary) + '</p>';
+                }
+
+                html += '<small class="text-muted">';
+                html += '<i class="far fa-calendar-alt mr-1"></i>' + escapeHtml(news.CreatedDate);
+                html += '</small>';
+                html += '</div></div></div>';
+            }
+
+            html += '</div>';
+
+            html += '<div class="text-center mt-4">';
+            html += '<button class="btn btn-secondary" onclick="clearSearch()">';
+            html += '<i class="fas fa-arrow-left mr-1"></i>Quay lại danh mục hiện tại';
+            html += '</button>';
+            html += '</div>';
+
+            $('#content-container').html(html);
+        }
+
+        function clearSearch() {
+            $('#search-input').val('');
+            loadCategoryNews(currentCategoryId || 1);
+        }
+
+        // ===== TOGGLE FUNCTIONS (SUPPORT 8 LEVELS) =====
+        function toggleCategory(categoryId, level) {
+            console.log('🔄 toggleCategory:', categoryId, level);
+
+            var container = $('#subcategories-' + categoryId);
+            var toggleBtn = $('[data-parent-id="' + categoryId + '"]');
+
+            if (container.hasClass('expanded')) {
+                container.removeClass('expanded').slideUp(300);
+                toggleBtn.removeClass('expanded').find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
+            } else {
+                container.html('<div class="text-center p-2"><small class="text-muted"><i class="fa fa-spinner fa-spin"></i> Đang tải...</small></div>');
+                container.addClass('expanded').slideDown(300);
+                toggleBtn.addClass('expanded').find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
+
+                loadSubcategories(categoryId, level + 1);
+            }
+        }
+
+        function loadSubcategories(parentId, level) {
+            console.log('📂 loadSubcategories:', parentId, level);
+
+            // Limit depth to 8 levels (0-7)
+            if (level > 7) {
+                $('#subcategories-' + parentId).html('<div class="text-center p-2"><small class="text-muted">Đã đạt cấp tối đa</small></div>');
+                return;
+            }
+
+            $.ajax({
+                url: '/Home/GetSubcategories',
+                type: 'GET',
+                data: { parentId: parentId },
+                dataType: 'json',
+                success: function (data) {
+                    console.log('Subcategories loaded:', data);
+
+                    if (data.success && data.subcategories && data.subcategories.length > 0) {
+                        displaySubcategories(parentId, data.subcategories, level);
+                    } else {
+                        $('#subcategories-' + parentId).html('<div class="text-center p-2"><small class="text-muted">Không có danh mục con</small></div>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading subcategories:', error);
+                    var container = $('#subcategories-' + parentId);
+                    container.html(
+                        '<div class="text-center p-2">' +
+                        '<small class="text-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Lỗi tải danh mục</small><br>' +
+                        '<button onclick="loadSubcategories(' + parentId + ', ' + level + ')" class="btn btn-sm btn-outline-danger mt-1">' +
+                        '<i class="fas fa-redo mr-1"></i>Thử lại</button>' +
+                        '</div>'
+                    );
+                }
+            });
+        }
+
+        function displaySubcategories(parentId, subcategories, level) {
+            var container = $('#subcategories-' + parentId);
+            var html = '';
+
+            for (var i = 0; i < subcategories.length; i++) {
+                var sub = subcategories[i];
+                if (!sub.Id || !sub.Name) continue;
+
+                var linkClass = getCategoryLinkClass(level);
+
+                html += '<div class="category-item" data-category-level="' + level + '">';
+                html += '<div class="' + linkClass + '" data-category-id="' + sub.Id + '" data-category-name="' + escapeHtml(sub.Name) + '" data-level="' + level + '">';
+                html += '<div class="category-content">';
+                html += '<div class="category-name">' + escapeHtml(sub.Name) + '</div>';
+                html += '<div class="category-meta">';
+                html += '<span class="news-count">' + (sub.NewsCount || 0) + '</span>';
+
+                // Toggle button if has children and not at max depth
+                if (sub.HasChildren && level < 7) {
+                    html += '<button class="category-toggle-btn toggle-btn" ';
+                    html += 'data-parent-id="' + sub.Id + '" data-level="' + level + '" type="button">';
+                    html += '<i class="fas fa-chevron-right"></i>';
+                    html += '</button>';
+                }
+
+                html += '</div></div></div>';
+
+                // Container for next level
+                if (sub.HasChildren && level < 7) {
+                    html += '<div id="subcategories-' + sub.Id + '" class="subcategories-container"></div>';
+                }
+
+                html += '</div>';
+            }
+
+            container.html(html);
+            attachSubcategoryEventListeners(container);
+        }
+
+        function attachSubcategoryEventListeners(container) {
+            // Click events for all levels
+            container.find('.subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .level-6-link, .level-7-link, .level-8-link').off('click').on('click', function (e) {
+                if ($(e.target).closest('.toggle-btn').length) {
+                    return;
+                }
+
+                var categoryId = $(this).data('category-id');
+                if (categoryId) {
+                    loadCategoryNews(categoryId);
+                }
+            });
+
+            // Toggle events
+            container.find('.toggle-btn').off('click').on('click', function (e) {
+                e.stopPropagation();
+                var parentId = $(this).data('parent-id');
+                var level = $(this).data('level');
+
+                if (parentId) {
+                    toggleCategory(parentId, level);
+                }
+            });
+        }
+
+        function getCategoryLinkClass(level) {
+            switch (level) {
+                case 1: return 'subcategory-link';
+                case 2: return 'sub-subcategory-link';
+                case 3: return 'level-4-link';
+                case 4: return 'level-5-link';
+                case 5: return 'level-6-link';
+                case 6: return 'level-7-link';
+                case 7: return 'level-8-link';
+                default: return 'level-8-link';
+            }
+        }
+
+        // ===== HELPER FUNCTIONS =====
+        function setActiveCategory(categoryId) {
+            $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .level-6-link, .level-7-link, .level-8-link').removeClass('active');
+            $('[data-category-id="' + categoryId + '"]').addClass('active');
+
+            // Scroll to active category
+            var $activeCategory = $('[data-category-id="' + categoryId + '"]');
+            var $categoryMenu = $('#categories-menu');
+
+            if ($activeCategory.length && $categoryMenu.length) {
+                var categoryTop = $activeCategory.position().top;
+                var menuHeight = $categoryMenu.height();
+                var menuScrollTop = $categoryMenu.scrollTop();
+
+                if (categoryTop < 0 || categoryTop > menuHeight) {
+                    $categoryMenu.animate({
+                        scrollTop: menuScrollTop + categoryTop - menuHeight / 2
+                    }, 300);
+                }
+            }
+        }
+
+        function findCategoryNameById(categoryId) {
+            var name = '';
+            $('[data-category-id="' + categoryId + '"]').each(function () {
+                name = $(this).data('category-name');
+                return false;
+            });
+            return name;
+        }
+
+        function updateHeader(title) {
+            $('#content-title').html('<i class="fas fa-newspaper mr-2"></i>' + title);
+        }
+
+        function showLoadingInContent() {
+            $('#content-container').html(
+                '<div class="loading-spinner">' +
+                '<div class="spinner-border text-primary"></div>' +
+                '<p>Đang tải...</p>' +
+                '</div>'
+            );
+        }
+
+        function showNoNews() {
+            $('#content-container').html(
+                '<div class="alert alert-warning text-center">' +
+                '<h4><i class="fas fa-folder-open mr-2"></i>Không có tin tức</h4>' +
+                '<p>Danh mục "' + escapeHtml(currentCategoryName) + '" chưa có tin tức nào.</p>' +
+                '<a href="/News/Create" class="btn btn-primary mt-2">' +
+                '<i class="fas fa-plus mr-1"></i>Thêm tin tức mới</a>' +
+                '</div>'
+            );
+        }
+
+        function showNewsError() {
+            $('#content-container').html(
+                '<div class="alert alert-danger text-center">' +
+                '<h4><i class="fas fa-exclamation-triangle mr-2"></i>Lỗi</h4>' +
+                '<p>Không thể tải tin tức. Vui lòng thử lại.</p>' +
+                '<button class="btn btn-primary" onclick="loadCategoryNews(' + currentCategoryId + ')">Thử lại</button>' +
+                '</div>'
+            );
+        }
+
+        function showNoSearchResults(query) {
+            $('#content-container').html(
+                '<div class="alert alert-warning text-center">' +
+                '<h4><i class="fas fa-search mr-2"></i>Không tìm thấy</h4>' +
+                '<p>Không có kết quả cho: "' + escapeHtml(query) + '"</p>' +
+                '<button class="btn btn-primary" onclick="clearSearch()">Quay lại danh mục hiện tại</button>' +
+                '</div>'
+            );
+        }
+
+        function showSearchError() {
+            $('#content-container').html(
+                '<div class="alert alert-danger text-center">' +
+                '<h4><i class="fas fa-exclamation-triangle mr-2"></i>Lỗi tìm kiếm</h4>' +
+                '<p>Có lỗi xảy ra khi tìm kiếm.</p>' +
+                '<button class="btn btn-primary" onclick="clearSearch()">Quay lại danh mục hiện tại</button>' +
+                '</div>'
+            );
+        }
+
+        function showErrorCategories() {
+            $('#categories-menu').html(
+                '<div class="text-center p-3">' +
+                '<p class="text-muted">Không thể tải danh mục</p>' +
+                '<button class="btn btn-sm btn-secondary" onclick="loadCategories()">Thử lại</button>' +
+                '</div>'
+            );
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        console.log('✅ Optimized 8-level category system loaded');
+    </script>
+
+</body>
+</html>
