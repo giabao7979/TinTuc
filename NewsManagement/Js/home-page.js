@@ -62,21 +62,19 @@ $(document).ready(function () {
 });
 
 // ===== MAIN FUNCTION: Load news by category ID =====
-function loadCategoryNews(categoryId) {
-    console.log('🔄 loadCategoryNews called with categoryId:', categoryId);
+function loadCategoryNews(categoryId, includeSubcategories = true) {
+    console.log('📰 loadCategoryNews called with:', categoryId, 'includeSubcategories:', includeSubcategories);
 
     if (!categoryId) {
         console.error('❌ Missing categoryId');
         return;
     }
 
-    // Kiểm tra jQuery có sẵn không
     if (typeof $ === 'undefined') {
         console.error('❌ jQuery not available');
         return;
     }
 
-    // Find category name from loaded categories
     var categoryName = findCategoryNameById(categoryId);
     if (!categoryName) {
         categoryName = 'Danh mục ' + categoryId;
@@ -84,61 +82,60 @@ function loadCategoryNews(categoryId) {
 
     console.log('📁 Loading news for category:', categoryId, '-', categoryName);
 
-    // Update global state
     currentCategoryId = categoryId;
     currentCategoryName = categoryName;
     currentMode = 'category';
 
-    // Set active state
     setActiveCategory(categoryId);
 
-    // Update UI
-    updateHeader('Tin tức ở danh mục: ' + categoryName);
+    var modeText = includeSubcategories ? '(bao gồm danh mục con)' : '(chỉ danh mục này)';
+    updateHeader('📁 ' + categoryName + ' ' + modeText);
     updateSubtitle('Đang tải tin tức...');
     showCategoryLoading(categoryName);
 
-    // Add loading state
     addCategoryLoadingState(categoryId);
 
-    // Make AJAX request
     $.ajax({
         url: '/Home/GetNewsByCategory',
         type: 'GET',
         data: {
             categoryId: categoryId,
             page: 1,
-            pageSize: 20
+            pageSize: 20,
+            includeSubcategories: includeSubcategories
         },
         dataType: 'json',
         timeout: 15000,
         success: function (data) {
             console.log('✅ Category news loaded:', data);
 
-            // Remove loading state
             removeCategoryLoadingState(categoryId);
 
             if (data.success) {
                 if (data.data && data.data.length > 0) {
                     console.log('📊 Successfully loaded ' + data.data.length + ' news items');
 
-                    // Update header
-                    updateHeader('Tin tức ở danh mục: ' + categoryName);
+                    var modeText = data.includeSubcategories ? '(bao gồm danh mục con)' : '(chỉ danh mục này)';
+                    updateHeader('📁 ' + categoryName + ' ' + modeText);
                     updateSubtitle('Tìm thấy ' + data.totalCount + ' tin tức');
 
-                    // Display news
-                    displayCategoryNews(data.data, categoryName, data.totalCount);
+                    displayCategoryNews(data.data, categoryName, data.totalCount,
+                        data.includeSubcategories, data.subcategoryCount);
 
-                    // Success notification
-                    showSuccessMessage('Đã tải ' + data.data.length + ' tin tức từ "' + categoryName + '"');
+                    var successMsg = 'Đã tải ' + data.data.length + ' tin tức từ "' + categoryName + '"';
+                    if (data.subcategoryCount > 0) {
+                        successMsg += ' và ' + data.subcategoryCount + ' danh mục con';
+                    }
+                    showSuccessMessage(successMsg);
                 } else {
                     console.log('ℹ️ No news found for this category');
-                    updateHeader('Tin tức ở danh mục: ' + categoryName);
+                    updateHeader('📁 ' + categoryName + ' ' + modeText);
                     updateSubtitle('Danh mục này chưa có tin tức');
                     showNoCategoryNews(categoryName);
                 }
             } else {
                 console.error('❌ API returned error:', data.message);
-                updateHeader('Lỗi tải danh mục: ' + categoryName);
+                updateHeader('❌ Lỗi tải danh mục: ' + categoryName);
                 updateSubtitle('Có lỗi xảy ra khi tải dữ liệu');
                 showCategoryError(categoryName + ' (API Error: ' + (data.message || 'Unknown') + ')');
             }
@@ -151,7 +148,6 @@ function loadCategoryNews(categoryId) {
                 statusCode: xhr.status
             });
 
-            // Remove loading state
             removeCategoryLoadingState(categoryId);
 
             var errorMsg = 'Lỗi kết nối';
@@ -163,16 +159,47 @@ function loadCategoryNews(categoryId) {
                 errorMsg = 'Hết thời gian chờ';
             }
 
-            updateHeader('Lỗi tải danh mục: ' + categoryName);
+            updateHeader('❌ Lỗi tải danh mục: ' + categoryName);
             updateSubtitle('Không thể kết nối đến server');
             showCategoryError(categoryName + ' (' + errorMsg + ')');
 
-            // Error notification
             showErrorMessage('Không thể tải tin tức từ "' + categoryName + '"');
         }
     });
 }
+console.log('✅ Enhanced category system with total news count (including subcategories) loaded');
+function setupSearch() {
+    $('#search-input').off('keyup').on('keyup', function (e) {
+        try {
+            // Nếu nhấn Enter thì tìm ngay
+            if (e.key === 'Enter') {
+                performSearch();
+                return;
+            }
 
+            // Clear timeout cũ
+            clearTimeout(searchTimeout);
+
+            var query = $(this).val().trim();
+
+            // Nếu xóa hết thì quay về danh mục hiện tại
+            if (query.length === 0) {
+                clearSearch();
+                return;
+            }
+
+            // Chỉ tìm khi dừng nhập (tăng thời gian chờ)
+            searchTimeout = setTimeout(function () {
+                if (query.length >= 3) { // Tăng từ 2 lên 3 ký tự
+                    performSearch();
+                }
+            }, 1200); // Tăng từ 500ms lên 1200ms (1.2 giây)
+
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    });
+}
 // ===== HELPER: Find category name by ID =====
 function findCategoryNameById(categoryId) {
     var categoryName = '';
@@ -205,24 +232,48 @@ function loadNewsByCategory(categoryId, categoryName) {
 }
 
 // ===== DISPLAY FUNCTIONS =====
-function displayCategoryNews(newsArray, categoryName, totalCount) {
+function displayCategoryNews(newsArray, categoryName, totalCount, includeSubcategories, subcategoryCount) {
     console.log('✅ displayCategoryNews called with:', {
         newsCount: newsArray ? newsArray.length : 0,
         categoryName: categoryName,
-        totalCount: totalCount
+        totalCount: totalCount,
+        includeSubcategories: includeSubcategories,
+        subcategoryCount: subcategoryCount
     });
 
     try {
         var html = '';
 
-        // Header thông tin danh mục với style mới
+        // ✅ Header thông tin danh mục với thông tin chi tiết hơn
         html += '<div class="alert alert-primary border-left-primary mb-4">';
         html += '<div class="d-flex align-items-center">';
         html += '<i class="fas fa-folder-open mr-3" style="font-size: 1.5rem;"></i>';
-        html += '<div>';
-        html += '<h5 class="mb-1"><strong>Tin tức ở danh mục: ' + escapeHtml(categoryName) + '</strong></h5>';
-        html += '<small class="text-muted">Tìm thấy ' + totalCount + ' tin tức trong danh mục này</small>';
+        html += '<div class="flex-grow-1">';
+        html += '<h5 class="mb-1"><strong>📁 ' + escapeHtml(categoryName) + '</strong></h5>';
+
+        if (includeSubcategories && subcategoryCount > 0) {
+            html += '<small class="text-muted">';
+            html += '📊 Tổng <strong>' + totalCount + '</strong> tin tức từ danh mục này và <strong>' + subcategoryCount + '</strong> danh mục con';
+            html += '</small>';
+        } else {
+            html += '<small class="text-muted">';
+            html += '📊 Tổng <strong>' + totalCount + '</strong> tin tức (bao gồm cả danh mục con)';
+            html += '</small>';
+        }
         html += '</div>';
+
+        // Toggle button để chuyển đổi chế độ xem
+        html += '<div class="btn-group btn-group-sm ml-3" role="group">';
+        html += '<button class="btn btn-outline-primary" onclick="toggleNewsMode(' + currentCategoryId + ', true)" ';
+        html += 'title="Xem tin từ tất cả danh mục con">';
+        html += '<i class="fas fa-sitemap mr-1"></i>Bao gồm con';
+        html += '</button>';
+        html += '<button class="btn btn-outline-secondary" onclick="toggleNewsMode(' + currentCategoryId + ', false)" ';
+        html += 'title="Chỉ xem tin trực tiếp trong danh mục này">';
+        html += '<i class="fas fa-folder mr-1"></i>Chỉ danh mục này';
+        html += '</button>';
+        html += '</div>';
+
         html += '</div>';
         html += '</div>';
 
@@ -232,61 +283,80 @@ function displayCategoryNews(newsArray, categoryName, totalCount) {
 
             for (var i = 0; i < newsArray.length; i++) {
                 var news = newsArray[i];
-                html += generateNewsCard(news, true);
+                html += generateNewsCard(news, true); // Hiển thị danh mục của mỗi tin
             }
 
             html += '</div>';
 
-            // Thông tin tổng kết
+            // Thông tin phân trang
             if (totalCount > newsArray.length) {
                 html += '<div class="alert alert-info mt-3">';
+                html += '<div class="d-flex align-items-center justify-content-between">';
+                html += '<div>';
                 html += '<i class="fas fa-info-circle mr-2"></i>';
-                html += 'Hiển thị ' + newsArray.length + ' trong tổng số ' + totalCount + ' tin tức. ';
-                html += '<button class="btn btn-sm btn-outline-primary ml-2" onclick="loadMoreNews()">Tải thêm</button>';
+                html += 'Hiển thị <strong>' + newsArray.length + '</strong> trong tổng số <strong>' + totalCount + '</strong> tin tức';
+                html += '</div>';
+                html += '<button class="btn btn-outline-primary" onclick="loadMoreNews(' + currentCategoryId + ')">';
+                html += '<i class="fas fa-plus mr-1"></i>Tải thêm';
+                html += '</button>';
+                html += '</div>';
                 html += '</div>';
             }
         } else {
             // Không có tin tức
             html += '<div class="alert alert-warning text-center">';
-            html += '<h4><i class="fas fa-folder-open mr-2"></i>Danh mục trống</h4>';
-            html += '<p>Danh mục "<strong>' + escapeHtml(categoryName) + '</strong>" chưa có tin tức nào.</p>';
+            html += '<h4><i class="fas fa-folder-open mr-2"></i>📭 Danh mục trống</h4>';
+            html += '<p>Danh mục "<strong>' + escapeHtml(categoryName) + '</strong>" và các danh mục con chưa có tin tức nào.</p>';
             html += '<div class="mt-3">';
-            html += '<a href="/News/Create" class="btn btn-primary mr-2">';
+            html += '<a href="/News/Create?categoryId=' + currentCategoryId + '" class="btn btn-primary mr-2">';
             html += '<i class="fas fa-plus mr-1"></i>Thêm tin tức mới';
             html += '</a>';
+            html += '<button class="btn btn-outline-info" onclick="showCategoryStatistics(' + currentCategoryId + ')">';
+            html += '<i class="fas fa-chart-bar mr-1"></i>Xem thống kê';
+            html += '</button>';
             html += '</div>';
             html += '</div>';
         }
 
-        // Navigation buttons
-        html += '<div class="text-center mt-4">';
-        html += '<div class="btn-group" role="group">';
+        // Navigation buttons với thông tin tổng quan
+        html += '<div class="card mt-4">';
+        html += '<div class="card-body">';
+        html += '<div class="row">';
 
-        // Previous category button
+        // Previous category
+        html += '<div class="col-md-4">';
         if (currentCategoryId > 1) {
-            html += '<button onclick="loadCategoryNews(' + (currentCategoryId - 1) + ')" class="btn btn-outline-secondary">';
-            html += '<i class="fas fa-chevron-left mr-1"></i>Danh mục trước';
+            html += '<button onclick="loadCategoryNews(' + (currentCategoryId - 1) + ')" class="btn btn-outline-secondary btn-block">';
+            html += '<i class="fas fa-chevron-left mr-1"></i>Danh mục ' + (currentCategoryId - 1);
             html += '</button>';
         }
+        html += '</div>';
 
-        // Reload current category
-        html += '<button onclick="loadCategoryNews(' + currentCategoryId + ')" class="btn btn-outline-primary">';
-        html += '<i class="fas fa-redo mr-1"></i>Tải lại';
+        // Reload current
+        html += '<div class="col-md-4">';
+        html += '<button onclick="loadCategoryNews(' + currentCategoryId + ')" class="btn btn-primary btn-block">';
+        html += '<i class="fas fa-redo mr-1"></i>Tải lại danh mục';
         html += '</button>';
+        html += '</div>';
 
-        // Next category button  
-        html += '<button onclick="loadCategoryNews(' + (currentCategoryId + 1) + ')" class="btn btn-outline-secondary">';
-        html += 'Danh mục tiếp<i class="fas fa-chevron-right ml-1"></i>';
+        // Next category
+        html += '<div class="col-md-4">';
+        html += '<button onclick="loadCategoryNews(' + (currentCategoryId + 1) + ')" class="btn btn-outline-secondary btn-block">';
+        html += 'Danh mục ' + (currentCategoryId + 1) + '<i class="fas fa-chevron-right ml-1"></i>';
         html += '</button>';
+        html += '</div>';
 
         html += '</div>';
         html += '</div>';
+        html += '</div>';
 
-        // Update content with error handling
         var contentContainer = $('#content-container');
         if (contentContainer.length > 0) {
             contentContainer.html(html);
             console.log('✅ Content updated successfully');
+
+            // Enable tooltips
+            $('[title]').tooltip();
 
             // Scroll to content
             $('html, body').animate({
@@ -299,6 +369,51 @@ function displayCategoryNews(newsArray, categoryName, totalCount) {
         console.error('Error in displayCategoryNews:', error);
     }
 }
+function showCategoryStatistics(categoryId) {
+    // TODO: Implement category statistics
+    alert('Tính năng thống kê danh mục sẽ được phát triển sau!\n\nSẽ hiển thị:\n- Số tin theo từng danh mục con\n- Biểu đồ phân bố\n- Xu hướng theo thời gian');
+}
+
+function toggleNewsMode(categoryId, includeSubcategories) {
+    console.log('🔄 Toggle news mode:', categoryId, includeSubcategories);
+
+    updateHeader('Đang chuyển đổi chế độ xem...');
+    showLoadingInContent();
+
+    $.ajax({
+        url: '/Home/GetNewsByCategory',
+        type: 'GET',
+        data: {
+            categoryId: categoryId,
+            page: 1,
+            pageSize: 20,
+            includeSubcategories: includeSubcategories
+        },
+        dataType: 'json',
+        success: function (data) {
+            console.log('✅ News mode toggled:', data);
+
+            if (data.success) {
+                var modeText = includeSubcategories ? 'bao gồm danh mục con' : 'chỉ danh mục hiện tại';
+                updateHeader('📁 ' + data.categoryName + ' (' + modeText + ')');
+
+                if (data.data && data.data.length > 0) {
+                    displayCategoryNews(data.data, data.categoryName, data.totalCount,
+                        data.includeSubcategories, data.subcategoryCount);
+                } else {
+                    showNoCategoryNews(data.categoryName);
+                }
+            } else {
+                showCategoryError(data.categoryName || 'Unknown');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('❌ Error toggling news mode:', error);
+            showCategoryError('Lỗi chuyển đổi chế độ xem');
+        }
+    });
+}
+
 
 function generateNewsCard(news, showCategories) {
     if (typeof showCategories === 'undefined') {
@@ -369,7 +484,6 @@ function displayCategories(categories) {
         for (var i = 0; i < categories.length; i++) {
             var category = categories[i];
 
-            // Validate category data
             if (!category.Id || !category.Name || processedIds.has(category.Id)) {
                 console.warn('⚠️ Invalid or duplicate category:', category);
                 continue;
@@ -377,10 +491,9 @@ function displayCategories(categories) {
 
             processedIds.add(category.Id);
 
-            // ===== CRITICAL: Each root category is a complete block =====
             html += '<div class="category-item" data-category-level="0">';
 
-            // Root category link
+            // Root category link với thông tin chi tiết hơn
             html += '<div class="category-link" ';
             html += 'data-category-id="' + category.Id + '" ';
             html += 'data-category-name="' + escapeHtml(category.Name) + '" ';
@@ -391,10 +504,19 @@ function displayCategories(categories) {
             html += '<div class="category-name font-weight-bold">' + escapeHtml(category.Name) + '</div>';
             html += '</div>';
             html += '<div class="category-meta">';
-            html += '<span class="news-count badge badge-primary">' + (category.NewsCount || 0) + '</span>';
+
+            // ✅ Hiển thị tổng số tin với tooltip
+            var totalNews = category.NewsCount || 0;
+            var tooltipText = 'Tổng ' + totalNews + ' tin tức (bao gồm cả danh mục con)';
+
+            html += '<span class="news-count badge badge-primary" title="' + tooltipText + '">';
+            html += '<i class="fas fa-newspaper mr-1"></i>' + totalNews;
+            html += '</span>';
 
             if (category.HasChildren) {
-                html += '<button class="category-toggle-btn toggle-btn btn btn-sm btn-outline-secondary ml-2" data-parent-id="' + category.Id + '" data-level="0">';
+                html += '<button class="category-toggle-btn toggle-btn btn btn-sm btn-outline-secondary ml-2" ';
+                html += 'data-parent-id="' + category.Id + '" data-level="0" ';
+                html += 'title="Mở rộng để xem danh mục con">';
                 html += '<i class="fas fa-chevron-right"></i>';
                 html += '</button>';
             }
@@ -402,12 +524,11 @@ function displayCategories(categories) {
             html += '</div>';
             html += '</div></div>';
 
-            // Container for subcategories - INSIDE the same category-item
             if (category.HasChildren) {
                 html += '<div id="subcategories-' + category.Id + '" class="subcategories-container" style="display: none;"></div>';
             }
 
-            html += '</div>'; // End category-item - VERY IMPORTANT!
+            html += '</div>';
         }
 
         html += '</div>';
@@ -419,7 +540,9 @@ function displayCategories(categories) {
             categoriesMenu.html(html);
             attachCategoryEventListeners();
 
-            // Auto-set category 1 as active
+            // Enable tooltips
+            $('[title]').tooltip();
+
             setTimeout(function () {
                 if (processedIds.has(1)) {
                     setActiveCategory(1);
@@ -433,6 +556,69 @@ function displayCategories(categories) {
         console.error('Error in displayCategories:', error);
         showErrorCategories();
     }
+}
+function displaySubcategories(parentId, subcategories, level) {
+    var container = $('#subcategories-' + parentId);
+    var html = '';
+
+    for (var i = 0; i < subcategories.length; i++) {
+        var sub = subcategories[i];
+        if (!sub.Id || !sub.Name) continue;
+
+        var linkClass = getCategoryLinkClass(level);
+        var iconClass = getCategoryIconClass(level);
+        var indentClass = 'category-level-' + level;
+
+        html += '<div class="category-item ' + indentClass + '" data-category-level="' + level + '">';
+
+        html += '<div class="' + linkClass + '" ';
+        html += 'data-category-id="' + sub.Id + '" ';
+        html += 'data-category-name="' + escapeHtml(sub.Name) + '" ';
+        html += 'data-level="' + level + '">';
+
+        html += '<div class="category-content">';
+        html += '<div class="d-flex align-items-center flex-grow-1">';
+        html += '<div class="category-icon"><i class="' + iconClass + '"></i></div>';
+        html += '<div class="category-name">' + escapeHtml(sub.Name) + '</div>';
+        html += '</div>';
+
+        html += '<div class="category-meta">';
+
+        // ✅ Hiển thị tổng số tin với tooltip cho danh mục con
+        var totalNews = sub.NewsCount || 0;
+        var tooltipText = 'Tổng ' + totalNews + ' tin tức (bao gồm cả danh mục con)';
+
+        html += '<span class="news-count badge badge-secondary" title="' + tooltipText + '">';
+        html += '<i class="fas fa-newspaper mr-1"></i>' + totalNews;
+        html += '</span>';
+
+        if (sub.HasChildren && level < 7) {
+            html += '<button class="category-toggle-btn toggle-btn ml-2" ';
+            html += 'data-parent-id="' + sub.Id + '" ';
+            html += 'data-level="' + level + '" ';
+            html += 'title="Mở rộng để xem danh mục con" ';
+            html += 'type="button">';
+            html += '<i class="fas fa-chevron-right"></i>';
+            html += '</button>';
+        }
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        if (sub.HasChildren && level < 7) {
+            html += '<div id="subcategories-' + sub.Id + '" class="subcategories-container" style="display: none;"></div>';
+        }
+
+        html += '</div>';
+    }
+
+    container.html(html);
+
+    // Enable tooltips cho các element mới
+    container.find('[title]').tooltip();
+
+    attachSubcategoryEventListeners(container);
 }
 
 function attachCategoryEventListeners() {
@@ -479,40 +665,50 @@ function attachCategoryEventListeners() {
 
 // ===== SEARCH FUNCTIONS =====
 function performSearch() {
-    try {
-        var query = $('#search-input').val().trim();
-        if (query.length < 2) {
-            alert('Vui lòng nhập ít nhất 2 ký tự để tìm kiếm');
-            return;
-        }
+    var query = $('#search-input').val().trim();
+    if (query.length < 3) { // Cập nhật thông báo
+        alert('Vui lòng nhập ít nhất 3 ký tự để tìm kiếm');
+        return;
+    }
 
-        currentMode = 'search';
-        updateHeader('Kết quả tìm kiếm: "' + query + '"');
-        updateSubtitle('Tìm kiếm trong tiêu đề, trích ngắn và nội dung');
-        showLoading();
+    // Hiển thị trạng thái đang tìm
+    showSearchIndicator(true);
 
-        // Clear active category when searching
-        $('.category-link, .subcategory-link, .sub-subcategory-link, .level-4-link, .level-5-link, .level-6-link, .level-7-link, .level-8-link').removeClass('active');
+    updateHeader('Tìm kiếm: "' + query + '"');
+    showLoadingInContent();
 
-        $.ajax({
-            url: '/Home/QuickSearch',
-            type: 'GET',
-            data: { term: query, maxResults: 20 },
-            dataType: 'json',
-            success: function (data) {
-                if (data.success && data.results && data.results.length > 0) {
-                    displaySearchResults(data.results, query);
-                } else {
-                    showNoSearchResults(query);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Search error:', error);
-                showSearchError('Lỗi tìm kiếm: ' + error);
+    $.ajax({
+        url: '/Home/QuickSearch',
+        type: 'GET',
+        data: { term: query, maxResults: 20 },
+        dataType: 'json',
+        success: function (data) {
+            showSearchIndicator(false);
+            if (data.success && data.results && data.results.length > 0) {
+                displaySearchResults(data.results, query);
+            } else {
+                showNoSearchResults(query);
             }
-        });
-    } catch (error) {
-        console.error('Error in performSearch:', error);
+        },
+        error: function (xhr, status, error) {
+            showSearchIndicator(false);
+            console.error('Search error:', error);
+            showSearchError();
+        }
+    });
+}
+function showSearchIndicator(isSearching) {
+    var $searchBtn = $('button[onclick="performSearch()"]');
+    var $searchInput = $('#search-input');
+
+    if (isSearching) {
+        $searchBtn.html('<i class="fa fa-spinner fa-spin mr-1"></i>Đang tìm...');
+        $searchBtn.prop('disabled', true);
+        $searchInput.addClass('searching');
+    } else {
+        $searchBtn.html('<i class="fa fa-search mr-1"></i>Tìm kiếm');
+        $searchBtn.prop('disabled', false);
+        $searchInput.removeClass('searching');
     }
 }
 

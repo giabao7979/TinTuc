@@ -96,6 +96,8 @@
             <!-- Main content -->
             <div class="col-lg-8 col-md-7">
                 <!-- Search -->
+                <!-- CẬP NHẬT PHẦN SEARCH TRONG Views/Home/Index.cshtml -->
+
                 <div class="card search-card">
                     <div class="card-header">
                         <h5 class="mb-0">
@@ -105,7 +107,7 @@
                     <div class="card-body">
                         <div class="input-group search-input-group">
                             <input type="text" id="search-input" class="form-control"
-                                   placeholder="Nhập từ khóa tìm kiếm trong tiêu đề, trích ngắn hoặc nội dung tin tức...">
+                                   placeholder="Nhập từ khóa tìm kiếm (tối thiểu 3 ký tự)...">
                             <div class="input-group-append">
                                 <button type="button" onclick="performSearch()" class="btn btn-primary">
                                     <i class="fa fa-search mr-1"></i>Tìm kiếm
@@ -114,15 +116,163 @@
                                     <i class="fa fa-times mr-1"></i>Xóa
                                 </button>
                             </div>
+                            <!-- Quick search results container -->
+                            <div id="quickSearchResults" style="display: none;"></div>
                         </div>
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="fas fa-lightbulb mr-1"></i>
-                                Mẹo: Nhập ít nhất 2 ký tự để bắt đầu tìm kiếm. Bấm "Xóa" để quay lại danh mục hiện tại.
-                            </small>
+
+                        <!-- Updated search hints -->
+                        <div class="search-hints">
+                            <div class="hint-item">
+                                <i class="fas fa-info-circle"></i>
+                                Nhập ít nhất 3 ký tự và dừng để tìm kiếm tự động
+                            </div>
+                            <div class="hint-item">
+                                <i class="fas fa-keyboard"></i>
+                                Hoặc nhấn Enter để tìm ngay
+                            </div>
+                            <div class="hint-item">
+                                <i class="fas fa-clock"></i>
+                                Hệ thống sẽ chờ 1.2 giây sau khi bạn dừng nhập
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- CẬP NHẬT SCRIPT TRONG CÙNG FILE -->
+                <script>
+                    // Cập nhật hàm performSearch với thông báo mới
+                    function performSearch() {
+                        var query = $('#search-input').val().trim();
+                        if (query.length < 3) {
+                            // Hiển thị thông báo thân thiện hơn
+                            showNotification('Vui lòng nhập ít nhất 3 ký tự để có kết quả tìm kiếm tốt hơn 😊', 'info');
+                            $('#search-input').focus();
+                            return;
+                        }
+
+                        // Hiển thị trạng thái đang tìm
+                        showSearchIndicator(true);
+
+                        updateHeader('🔍 Đang tìm kiếm: "' + query + '"');
+                        showLoadingInContent();
+
+                        $.ajax({
+                            url: '/Home/QuickSearch',
+                            type: 'GET',
+                            data: { term: query, maxResults: 20 },
+                            dataType: 'json',
+                            timeout: 10000, // 10 giây timeout
+                            success: function (data) {
+                                showSearchIndicator(false);
+                                if (data.success && data.results && data.results.length > 0) {
+                                    displaySearchResults(data.results, query);
+                                    showNotification('Tìm thấy ' + data.results.length + ' kết quả!', 'success');
+                                } else {
+                                    showNoSearchResults(query);
+                                    showNotification('Không tìm thấy kết quả cho "' + query + '"', 'warning');
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                showSearchIndicator(false);
+                                console.error('Search error:', error);
+                                showSearchError();
+
+                                if (status === 'timeout') {
+                                    showNotification('Tìm kiếm quá lâu, vui lòng thử lại', 'error');
+                                } else {
+                                    showNotification('Có lỗi xảy ra khi tìm kiếm', 'error');
+                                }
+                            }
+                        });
+                    }
+
+                    // Hàm hiển thị thông báo đẹp
+                    function showNotification(message, type = 'info') {
+                        // Remove existing notifications
+                        $('.search-notification').remove();
+
+                        var iconClass, bgClass;
+                        switch (type) {
+                            case 'success': iconClass = 'fa-check-circle'; bgClass = 'alert-success'; break;
+                            case 'warning': iconClass = 'fa-exclamation-triangle'; bgClass = 'alert-warning'; break;
+                            case 'error': iconClass = 'fa-times-circle'; bgClass = 'alert-danger'; break;
+                            default: iconClass = 'fa-info-circle'; bgClass = 'alert-info';
+                        }
+
+                        var notification = $('<div class="alert ' + bgClass + ' alert-dismissible fade show search-notification" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">' +
+                            '<i class="fas ' + iconClass + ' mr-2"></i>' + message +
+                            '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>' +
+                            '</div>');
+
+                        $('body').append(notification);
+
+                        // Auto hide after 4 seconds
+                        setTimeout(function () {
+                            notification.fadeOut(function () { $(this).remove(); });
+                        }, 4000);
+                    }
+
+                    // Cập nhật setupSearch với thời gian chờ mới
+                    function setupSearch() {
+                        $('#search-input').off('keyup').on('keyup', function (e) {
+                            try {
+                                if (e.key === 'Enter') {
+                                    performSearch();
+                                    return;
+                                }
+
+                                clearTimeout(searchTimeout);
+                                var query = $(this).val().trim();
+                                if (query.length === 0) {
+                                    clearSearch();
+                                    return;
+                                }
+
+                                // Hiển thị hint khi đang nhập
+                                if (query.length > 0 && query.length < 10) {
+                                    $('.search-hints').html(
+                                        '<div class="hint-item text-muted">' +
+                                        '<i class="fas fa-edit"></i>' +
+                                        'Còn ' + (10 - query.length) + ' ký tự nữa để bắt đầu tìm kiếm...' +
+                                        '</div>'
+                                    );
+                                } else if (query.length >= 3) {
+                                    $('.search-hints').html(
+                                        '<div class="hint-item text-primary">' +
+                                        '<i class="fas fa-hourglass-half"></i>' +
+                                        'Sẽ tìm kiếm sau 1.2 giây nếu bạn dừng nhập...' +
+                                        '</div>'
+                                    );
+                                }
+
+                                // Chỉ tìm khi dừng nhập và đủ ký tự
+                                searchTimeout = setTimeout(function () {
+                                    if (query.length >= 3) {
+                                        // Reset hints
+                                        $('.search-hints').html(
+                                            '<div class="hint-item"><i class="fas fa-info-circle"></i>Nhập ít nhất 3 ký tự và dừng để tìm kiếm tự động</div>' +
+                                            '<div class="hint-item"><i class="fas fa-keyboard"></i>Hoặc nhấn Enter để tìm ngay</div>' +
+                                            '<div class="hint-item"><i class="fas fa-clock"></i>Hệ thống sẽ chờ 1.2 giây sau khi bạn dừng nhập</div>'
+                                        );
+                                        performSearch();
+                                    }
+                                }, 2000); // 1.2 giây
+
+                            } catch (error) {
+                                console.error('Search error:', error);
+                            }
+                        });
+
+                        // Focus event
+                        $('#search-input').focus(function () {
+                            $(this).parent().addClass('shadow-sm');
+                        }).blur(function () {
+                            $(this).parent().removeClass('shadow-sm');
+                        });
+                    }
+
+                    console.log('✅ Enhanced search system loaded - Wait 1.2s after stop typing');
+                </script>
 
                 <!-- Content display -->
                 <div class="card content-card">

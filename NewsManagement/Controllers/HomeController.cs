@@ -16,7 +16,6 @@ namespace NewsManagement.Controllers
             return View();
         }
 
-        // API: Lấy danh mục cấp 1 - Tối ưu cho 5000 danh mục
         [HttpGet]
         public ActionResult GetCategoriesTree()
         {
@@ -26,14 +25,14 @@ namespace NewsManagement.Controllers
                     .Where(c => c.ParentId == null && c.Status)
                     .OrderBy(c => c.Ordering)
                     .ThenBy(c => c.Name)
-                    .Take(100) // Giới hạn để tăng tốc
+                    .Take(100)
                     .ToList();
 
                 var categoryTree = rootCategories.Select(c => new
                 {
                     Id = c.Id,
                     Name = c.Name ?? "",
-                    NewsCount = GetDirectNewsCount(c.Id),
+                    NewsCount = GetTotalNewsCount(c.Id), // ✅ Sử dụng hàm mới
                     HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
                 }).ToList();
 
@@ -46,7 +45,6 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // API: Load danh mục con khi click expand (Lazy Loading)
         [HttpGet]
         public ActionResult GetSubcategories(int parentId)
         {
@@ -58,13 +56,13 @@ namespace NewsManagement.Controllers
                     .Where(c => c.ParentId == parentId && c.Status)
                     .OrderBy(c => c.Ordering)
                     .ThenBy(c => c.Name)
-                    .Take(50) // Giới hạn để tăng tốc
+                    .Take(50)
                     .ToList()
                     .Select(c => new
                     {
                         Id = c.Id,
                         Name = c.Name ?? "",
-                        NewsCount = GetDirectNewsCount(c.Id),
+                        NewsCount = GetTotalNewsCount(c.Id), // ✅ Sử dụng hàm mới
                         HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
                     })
                     .ToList();
@@ -78,25 +76,36 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // API: Lấy tin tức theo danh mục - Tối ưu cho 50000 tin tức
         [HttpGet]
-        public ActionResult GetNewsByCategory(int categoryId, int page = 1, int pageSize = 20)
+        public ActionResult GetNewsByCategory(int categoryId, int page = 1, int pageSize = 20, bool includeSubcategories = true)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"GetNewsByCategory: categoryId={categoryId}, page={page}");
+                System.Diagnostics.Debug.WriteLine($"GetNewsByCategory: categoryId={categoryId}, page={page}, includeSubcategories={includeSubcategories}");
 
-                // Kiểm tra danh mục có tồn tại
                 var category = db.Categories.Find(categoryId);
                 if (category == null)
                 {
                     return Json(new { success = false, message = "Danh mục không tồn tại" }, JsonRequestBehavior.AllowGet);
                 }
 
-                // Lấy tin tức trực tiếp trong danh mục (không bao gồm danh mục con để tăng tốc)
-                var newsQuery = db.News
-                    .Where(n => n.Status && n.Categories.Any(c => c.Id == categoryId))
-                    .OrderByDescending(n => n.CreatedDate);
+                IQueryable<News> newsQuery;
+
+                if (includeSubcategories)
+                {
+                    // ✅ Lấy tin từ danh mục hiện tại và tất cả danh mục con
+                    var allCategoryIds = GetAllSubcategoryIds(categoryId);
+                    newsQuery = db.News
+                        .Where(n => n.Status && n.Categories.Any(c => allCategoryIds.Contains(c.Id)))
+                        .OrderByDescending(n => n.CreatedDate);
+                }
+                else
+                {
+                    // Chỉ lấy tin trực tiếp trong danh mục
+                    newsQuery = db.News
+                        .Where(n => n.Status && n.Categories.Any(c => c.Id == categoryId))
+                        .OrderByDescending(n => n.CreatedDate);
+                }
 
                 var totalCount = newsQuery.Count();
 
@@ -111,7 +120,8 @@ namespace NewsManagement.Controllers
                         Summary = n.Summary != null && n.Summary.Length > 200
                                  ? n.Summary.Substring(0, 200) + "..."
                                  : (n.Summary ?? ""),
-                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy")
+                        CreatedDate = n.CreatedDate.ToString("dd/MM/yyyy"),
+                        Categories = n.Categories.Select(c => c.Name).ToList() // ✅ Thêm thông tin danh mục
                     })
                     .ToList();
 
@@ -124,7 +134,9 @@ namespace NewsManagement.Controllers
                     totalCount = totalCount,
                     totalPages = (int)Math.Ceiling((double)totalCount / pageSize),
                     currentPage = page,
-                    categoryName = category.Name
+                    categoryName = category.Name,
+                    includeSubcategories = includeSubcategories,
+                    subcategoryCount = includeSubcategories ? GetSubcategoryCount(categoryId) : 0
                 }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -133,6 +145,7 @@ namespace NewsManagement.Controllers
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
         // API: Tìm kiếm tin tức - Tối ưu với phân trang
         [HttpGet]
@@ -207,6 +220,62 @@ namespace NewsManagement.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        private int GetTotalNewsCount(int categoryId)
+        {
+            try
+            {
+                // Lấy tất cả ID danh mục con
+                var allCategoryIds = GetAllSubcategoryIds(categoryId);
+
+                // Đếm tin từ tất cả danh mục (bao gồm danh mục gốc và con)
+                return db.News.Count(n => n.Status && n.Categories.Any(c => allCategoryIds.Contains(c.Id)));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetTotalNewsCount for category {categoryId}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        // ✅ HÀM MỚI: Lấy tất cả ID danh mục con (đệ quy)
+        private List<int> GetAllSubcategoryIds(int categoryId)
+        {
+            var result = new List<int> { categoryId }; // Bao gồm chính nó
+
+            try
+            {
+                var subcategories = db.Categories
+                    .Where(c => c.ParentId == categoryId && c.Status)
+                    .Select(c => c.Id)
+                    .ToList();
+
+                foreach (var subcategoryId in subcategories)
+                {
+                    // Đệ quy để lấy danh mục con của danh mục con
+                    result.AddRange(GetAllSubcategoryIds(subcategoryId));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetAllSubcategoryIds for category {categoryId}: {ex.Message}");
+            }
+
+            return result.Distinct().ToList(); // Loại bỏ trùng lặp
+        }
+
+        // ✅ HÀM MỚI: Đếm số danh mục con
+        private int GetSubcategoryCount(int categoryId)
+        {
+            try
+            {
+                var allIds = GetAllSubcategoryIds(categoryId);
+                return allIds.Count - 1; // Trừ đi chính nó
+            }
+            catch
+            {
+                return 0;
             }
         }
 
