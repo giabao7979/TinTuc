@@ -27,5 +27,6 @@ namespace NewsManagement.Models
     
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<News> News { get; set; }
+        public virtual DbSet<CategoryNewsCount> CategoryNewsCounts { get; set; }
     }
 }

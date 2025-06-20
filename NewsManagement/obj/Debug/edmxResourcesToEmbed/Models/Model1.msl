@@ -34,5 +34,15 @@
         <ScalarProperty Name="Id" ColumnName="NewsId" />
       </EndProperty>
     </AssociationSetMapping>
+    <EntitySetMapping Name="CategoryNewsCounts">
+      <EntityTypeMapping TypeName="TinTucModel.CategoryNewsCount">
+        <MappingFragment StoreEntitySet="CategoryNewsCount">
+          <ScalarProperty Name="LastUpdated" ColumnName="LastUpdated" />
+          <ScalarProperty Name="TotalNewsCount" ColumnName="TotalNewsCount" />
+          <ScalarProperty Name="DirectNewsCount" ColumnName="DirectNewsCount" />
+          <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

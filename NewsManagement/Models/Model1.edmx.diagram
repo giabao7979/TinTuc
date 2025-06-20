@@ -9,6 +9,8 @@
         <EntityTypeShape EntityType="TinTucModel.News" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
         <AssociationConnector Association="TinTucModel.FK_Category_Parent" ManuallyRouted="false" />
         <AssociationConnector Association="TinTucModel.NewsCategory" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="TinTucModel.CategoryNewsCount" Width="1.5" PointX="3" PointY="4.5" />
+        <AssociationConnector Association="TinTucModel.FK_CategoryNewsCount_Category" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

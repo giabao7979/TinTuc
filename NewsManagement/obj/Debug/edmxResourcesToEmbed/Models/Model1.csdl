@@ -13,6 +13,7 @@
     <NavigationProperty Name="Category1" Relationship="Self.FK_Category_Parent" FromRole="Category" ToRole="Category1" />
     <NavigationProperty Name="Category2" Relationship="Self.FK_Category_Parent" FromRole="Category1" ToRole="Category" />
     <NavigationProperty Name="News" Relationship="Self.NewsCategory" FromRole="Category" ToRole="News" />
+    <NavigationProperty Name="CategoryNewsCount" Relationship="TinTucModel.FK_CategoryNewsCount_Category" FromRole="Category" ToRole="CategoryNewsCount" />
   </EntityType>
   <EntityType Name="News">
     <Key>
@@ -54,5 +55,34 @@
       <End Role="Category" EntitySet="Categories" />
       <End Role="News" EntitySet="News" />
     </AssociationSet>
+    <EntitySet Name="CategoryNewsCounts" EntityType="TinTucModel.CategoryNewsCount" />
+    <AssociationSet Name="FK_CategoryNewsCount_Category" Association="TinTucModel.FK_CategoryNewsCount_Category">
+      <End Role="Category" EntitySet="Categories" />
+      <End Role="CategoryNewsCount" EntitySet="CategoryNewsCounts" />
+    </AssociationSet>
   </EntityContainer>
+  <EntityType Name="CategoryNewsCount">
+    <Key>
+      <PropertyRef Name="CategoryId" />
+    </Key>
+    <Property Name="CategoryId" Type="Int32" Nullable="false" />
+    <Property Name="DirectNewsCount" Type="Int32" Nullable="false" />
+    <Property Name="TotalNewsCount" Type="Int32" Nullable="false" />
+    <Property Name="LastUpdated" Type="DateTime" Nullable="false" Precision="7" />
+    <NavigationProperty Name="Category" Relationship="TinTucModel.FK_CategoryNewsCount_Category" FromRole="CategoryNewsCount" ToRole="Category" />
+  </EntityType>
+  <Association Name="FK_CategoryNewsCount_Category">
+    <End Type="TinTucModel.Category" Role="Category" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Type="TinTucModel.CategoryNewsCount" Role="CategoryNewsCount" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="Category">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="CategoryNewsCount">
+        <PropertyRef Name="CategoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
 </Schema>

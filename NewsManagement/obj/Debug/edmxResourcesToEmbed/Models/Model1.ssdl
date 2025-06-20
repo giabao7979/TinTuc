@@ -11,6 +11,15 @@
     <Property Name="Ordering" Type="int" Nullable="false" />
     <Property Name="Status" Type="bit" Nullable="false" />
   </EntityType>
+  <EntityType Name="CategoryNewsCount">
+    <Key>
+      <PropertyRef Name="CategoryId" />
+    </Key>
+    <Property Name="CategoryId" Type="int" Nullable="false" />
+    <Property Name="DirectNewsCount" Type="int" Nullable="false" />
+    <Property Name="TotalNewsCount" Type="int" Nullable="false" />
+    <Property Name="LastUpdated" Type="datetime2" Precision="7" Nullable="false" />
+  </EntityType>
   <EntityType Name="News">
     <Key>
       <PropertyRef Name="Id" />
@@ -43,6 +52,20 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_CategoryNewsCount_Category">
+    <End Role="Category" Type="Self.Category" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="CategoryNewsCount" Type="Self.CategoryNewsCount" Multiplicity="0..1" />
+    <ReferentialConstraint>
+      <Principal Role="Category">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="CategoryNewsCount">
+        <PropertyRef Name="CategoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_NewsCategory_Category">
     <End Role="Category" Type="Self.Category" Multiplicity="1" />
     <End Role="NewsCategory" Type="Self.NewsCategory" Multiplicity="*" />
@@ -69,11 +92,16 @@
   </Association>
   <EntityContainer Name="TinTucModelStoreContainer">
     <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="CategoryNewsCount" EntityType="Self.CategoryNewsCount" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="News" EntityType="Self.News" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="NewsCategory" EntityType="Self.NewsCategory" Schema="dbo" store:Type="Tables" />
     <AssociationSet Name="FK_Category_Parent" Association="Self.FK_Category_Parent">
       <End Role="Category" EntitySet="Category" />
       <End Role="Category1" EntitySet="Category" />
+    </AssociationSet>
+    <AssociationSet Name="FK_CategoryNewsCount_Category" Association="Self.FK_CategoryNewsCount_Category">
+      <End Role="Category" EntitySet="Category" />
+      <End Role="CategoryNewsCount" EntitySet="CategoryNewsCount" />
     </AssociationSet>
     <AssociationSet Name="FK_NewsCategory_Category" Association="Self.FK_NewsCategory_Category">
       <End Role="Category" EntitySet="Category" />

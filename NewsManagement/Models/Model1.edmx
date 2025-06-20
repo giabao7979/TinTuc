@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="TinTucModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="TinTucModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Category">
           <Key>
             <PropertyRef Name="Id" />
@@ -15,6 +15,15 @@
           <Property Name="ParentId" Type="int" />
           <Property Name="Ordering" Type="int" Nullable="false" />
           <Property Name="Status" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CategoryNewsCount">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="int" Nullable="false" />
+          <Property Name="DirectNewsCount" Type="int" Nullable="false" />
+          <Property Name="TotalNewsCount" Type="int" Nullable="false" />
+          <Property Name="LastUpdated" Type="datetime2" Precision="7" Nullable="false" />
         </EntityType>
         <EntityType Name="News">
           <Key>
@@ -48,6 +57,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_CategoryNewsCount_Category">
+          <End Role="Category" Type="Self.Category" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CategoryNewsCount" Type="Self.CategoryNewsCount" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="CategoryNewsCount">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_NewsCategory_Category">
           <End Role="Category" Type="Self.Category" Multiplicity="1" />
           <End Role="NewsCategory" Type="Self.NewsCategory" Multiplicity="*" />
@@ -74,11 +97,16 @@
         </Association>
         <EntityContainer Name="TinTucModelStoreContainer">
           <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CategoryNewsCount" EntityType="Self.CategoryNewsCount" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="News" EntityType="Self.News" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="NewsCategory" EntityType="Self.NewsCategory" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_Category_Parent" Association="Self.FK_Category_Parent">
             <End Role="Category" EntitySet="Category" />
             <End Role="Category1" EntitySet="Category" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CategoryNewsCount_Category" Association="Self.FK_CategoryNewsCount_Category">
+            <End Role="Category" EntitySet="Category" />
+            <End Role="CategoryNewsCount" EntitySet="CategoryNewsCount" />
           </AssociationSet>
           <AssociationSet Name="FK_NewsCategory_Category" Association="Self.FK_NewsCategory_Category">
             <End Role="Category" EntitySet="Category" />
@@ -89,8 +117,7 @@
             <End Role="NewsCategory" EntitySet="NewsCategory" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="TinTucModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -107,6 +134,7 @@
           <NavigationProperty Name="Category1" Relationship="Self.FK_Category_Parent" FromRole="Category" ToRole="Category1" />
           <NavigationProperty Name="Category2" Relationship="Self.FK_Category_Parent" FromRole="Category1" ToRole="Category" />
           <NavigationProperty Name="News" Relationship="Self.NewsCategory" FromRole="Category" ToRole="News" />
+          <NavigationProperty Name="CategoryNewsCount" Relationship="TinTucModel.FK_CategoryNewsCount_Category" FromRole="Category" ToRole="CategoryNewsCount" />
         </EntityType>
         <EntityType Name="News">
           <Key>
@@ -148,7 +176,36 @@
             <End Role="Category" EntitySet="Categories" />
             <End Role="News" EntitySet="News" />
           </AssociationSet>
+          <EntitySet Name="CategoryNewsCounts" EntityType="TinTucModel.CategoryNewsCount" />
+          <AssociationSet Name="FK_CategoryNewsCount_Category" Association="TinTucModel.FK_CategoryNewsCount_Category">
+            <End Role="Category" EntitySet="Categories" />
+            <End Role="CategoryNewsCount" EntitySet="CategoryNewsCounts" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="CategoryNewsCount">
+          <Key>
+            <PropertyRef Name="CategoryId" />
+          </Key>
+          <Property Name="CategoryId" Type="Int32" Nullable="false" />
+          <Property Name="DirectNewsCount" Type="Int32" Nullable="false" />
+          <Property Name="TotalNewsCount" Type="Int32" Nullable="false" />
+          <Property Name="LastUpdated" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="Category" Relationship="TinTucModel.FK_CategoryNewsCount_Category" FromRole="CategoryNewsCount" ToRole="Category" />
+        </EntityType>
+        <Association Name="FK_CategoryNewsCount_Category">
+          <End Type="TinTucModel.Category" Role="Category" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="TinTucModel.CategoryNewsCount" Role="CategoryNewsCount" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="CategoryNewsCount">
+              <PropertyRef Name="CategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -188,6 +245,16 @@
               <ScalarProperty Name="Id" ColumnName="NewsId" />
             </EndProperty>
           </AssociationSetMapping>
+          <EntitySetMapping Name="CategoryNewsCounts">
+            <EntityTypeMapping TypeName="TinTucModel.CategoryNewsCount">
+              <MappingFragment StoreEntitySet="CategoryNewsCount">
+                <ScalarProperty Name="LastUpdated" ColumnName="LastUpdated" />
+                <ScalarProperty Name="TotalNewsCount" ColumnName="TotalNewsCount" />
+                <ScalarProperty Name="DirectNewsCount" ColumnName="DirectNewsCount" />
+                <ScalarProperty Name="CategoryId" ColumnName="CategoryId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

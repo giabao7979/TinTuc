@@ -32,7 +32,7 @@ namespace NewsManagement.Controllers
                 {
                     Id = c.Id,
                     Name = c.Name ?? "",
-                    NewsCount = GetTotalNewsCount(c.Id), // ✅ Sử dụng hàm mới
+                    NewsCount = GetTotalNewsCount(c.Id), 
                     HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
                 }).ToList();
 
@@ -62,7 +62,7 @@ namespace NewsManagement.Controllers
                     {
                         Id = c.Id,
                         Name = c.Name ?? "",
-                        NewsCount = GetTotalNewsCount(c.Id), // ✅ Sử dụng hàm mới
+                        NewsCount = GetTotalNewsCount(c.Id), 
                         HasChildren = db.Categories.Any(child => child.ParentId == c.Id && child.Status)
                     })
                     .ToList();
@@ -93,7 +93,6 @@ namespace NewsManagement.Controllers
 
                 if (includeSubcategories)
                 {
-                    // ✅ Lấy tin từ danh mục hiện tại và tất cả danh mục con
                     var allCategoryIds = GetAllSubcategoryIds(categoryId);
                     newsQuery = db.News
                         .Where(n => n.Status && n.Categories.Any(c => allCategoryIds.Contains(c.Id)))
@@ -229,7 +228,6 @@ namespace NewsManagement.Controllers
                 // Lấy tất cả ID danh mục con
                 var allCategoryIds = GetAllSubcategoryIds(categoryId);
 
-                // Đếm tin từ tất cả danh mục (bao gồm danh mục gốc và con)
                 return db.News.Count(n => n.Status && n.Categories.Any(c => allCategoryIds.Contains(c.Id)));
             }
             catch (Exception ex)
@@ -239,10 +237,9 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // ✅ HÀM MỚI: Lấy tất cả ID danh mục con (đệ quy)
         private List<int> GetAllSubcategoryIds(int categoryId)
         {
-            var result = new List<int> { categoryId }; // Bao gồm chính nó
+            var result = new List<int> { categoryId }; 
 
             try
             {
@@ -253,7 +250,6 @@ namespace NewsManagement.Controllers
 
                 foreach (var subcategoryId in subcategories)
                 {
-                    // Đệ quy để lấy danh mục con của danh mục con
                     result.AddRange(GetAllSubcategoryIds(subcategoryId));
                 }
             }
@@ -265,7 +261,7 @@ namespace NewsManagement.Controllers
             return result.Distinct().ToList(); // Loại bỏ trùng lặp
         }
 
-        // ✅ HÀM MỚI: Đếm số danh mục con
+
         private int GetSubcategoryCount(int categoryId)
         {
             try
@@ -323,7 +319,6 @@ namespace NewsManagement.Controllers
             }
         }
 
-        // API: Lấy thống kê tổng quan
         [HttpGet]
         public ActionResult GetStats()
         {

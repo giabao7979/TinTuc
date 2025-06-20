@@ -33,5 +33,6 @@ namespace NewsManagement.Models
         public virtual Category Category2 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<News> News { get; set; }
+        public virtual CategoryNewsCount CategoryNewsCount { get; set; }
     }
 }
